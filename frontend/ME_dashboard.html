@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DRUMS - ME Dashboard</title>
+    <link rel="icon" type="image/png" href="./Asset/DRUMS_logo_small.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./app.css">
+</head>
+<body class="p-4">
+
+    <div class="max-w-[1200px] mx-auto bg-[#e5e7eb] border-2 border-gray-400 p-4 shadow-xl rounded-sm">
+        <div class="flex justify-between items-start mb-6">
+            <div class="flex items-center gap-4">
+                <div class="header-clickable">
+                    <img id="drums-logo-link" src="./Asset/DRUMS_LOGO.png" alt="DRUMS logo" class="h-14 w-auto cursor-pointer">
+                </div>
+                <div class="flex items-center">
+                    <select
+                        id="me-selector"
+                        class="header-clickable me-selector text-4xl font-bold text-red-600/70 text-blue-600/70 drop-shadow-sm bg-transparent border border-red-300 border-blue-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-blue-300"
+                        aria-label="Select ME"
+                    >
+                        <option value="DG#1">DG#1</option>
+                        <option value="DG#2">DG#2</option>
+                        <option value="DG#3">DG#3</option>
+                        <option value="ME-PORT">ME-PORT</option>
+                        <option value="ME-STBD">ME-STBD</option>
+                    </select>
+                </div>
+                <div class="flex gap-4 ml-9">
+                    <div class="header-status-item">
+                        <div id="light-ready" class="status-light light-ready"></div>
+                        <span class="header-status-label">Ready To Start</span>
+                    </div>
+                    <div class="header-status-item">
+                        <div id="light-run" class="status-light light-run"></div>
+                        <span class="header-status-label">Running</span>
+                    </div>
+                    <div class="header-status-item">
+                        <div id="light-alarm" class="status-light light-alarm"></div>
+                        <span class="header-status-label">Alarm</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-box min-w-[220px] h-10 flex items-center px-3 py-1">
+                <div class="w-full">
+                    <div class="text-[10px] font-extrabold border-b border-gray-100 mb-0.5 text-center text-gray-600 leading-none">DATE & TIME</div>
+                    <div class="text-base font-bold text-center tracking-tight leading-none" id="current-datetime">--/--/-- &nbsp;&nbsp; --:--:--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="relative engine-container border border-gray-300 rounded overflow-hidden mb-4" style="min-height: 650px;">
+            <div class="absolute inset-0 flex items-center justify-center p-4">
+                <img id="engine-background-image" src="Asset/Engine.png" alt="Engine Layout" class="w-full h-full object-contain opacity-90 pointer-events-none">
+            </div>
+
+            <div class="cylinder-layer">
+                <template id="cyl-temp-template">
+                    <div class="cyl-item">
+                        <div class="cyl-label">NO.<span class="cyl-num">1</span>(°C)</div>
+                        <div class="digital-value text-green-600 cyl-val font-bold">---</div>
+                    </div>
+                </template>
+                <div id="cylinders-container"></div>
+            </div>
+
+            <div id="panel-me-rev" class="absolute z-10" style="left: 6%; top: 58%; transform: translateY(-50%);">
+                <div class="metric-card">
+                    <div class="metric-label">M/E REVOLUTION</div>
+                    <div class="metric-value" id="val-me-rev">-----</div>
+                </div>
+            </div>
+
+            <div id="panel-tc-rev" class="absolute z-10" style="right: 6%; top: 70%; transform: translateY(-50%);">
+                <div class="metric-card">
+                    <div class="metric-label">T/C REVOLUTION</div>
+                    <div class="metric-value" id="val-tc-rev">-----</div>
+                </div>
+            </div>
+
+            <div class="data-tag" data-tag-key="boost-air-press">
+                <div class="label-box">BOOST AIR PRESS.</div>
+                <div class="digital-value" id="val-boost-air-press">--.--</div>
+            </div>
+            <div class="data-tag" data-tag-key="fuel-oil-press">
+                <div class="label-box">FUEL OIL PRESS.</div>
+                <div class="digital-value" id="val-fuel-oil-press">--.--</div>
+            </div>
+            <div class="data-tag" data-tag-key="lub-oil-press">
+                <div class="label-box">LUB. OIL PRESS.</div>
+                <div class="digital-value" id="val-lub-oil-press">--.--</div>
+            </div>
+            <div class="data-tag" data-tag-key="ht-fw-press">
+                <div class="label-box">H.T. F.W. PRESS.</div>
+                <div class="digital-value" id="val-ht-fw-press">--.--</div>
+            </div>
+            <div class="data-tag" data-tag-key="tc-lub-oil-press">
+                <div class="label-box">T/C LUB. OIL PRESS.</div>
+                <div class="digital-value" id="val-tc-lub-oil-press">--.--</div>
+            </div>
+            <div class="data-tag" data-tag-key="fo-rack">
+                <div class="label-box">F.O. RACK</div>
+                <div class="digital-value" id="val-fo-rack">-----</div>
+            </div>
+            <div class="data-tag" data-tag-key="exh-inlet-1">
+                <div class="label-box">EX Gas T/C IN1 (°C)</div>
+                <div class="digital-value" id="val-exh-inlet-1">-----</div>
+            </div>
+            <div class="data-tag" data-tag-key="exh-inlet-2">
+                <div class="label-box">EX Gas T/C IN2 (°C)</div>
+                <div class="digital-value" id="val-exh-inlet-2">-----</div>
+            </div>
+            <div class="data-tag" data-tag-key="exh-outlet">
+                <div class="label-box">EX Gas T/C OUT (°C)</div>
+                <div class="digital-value" id="val-exh-outlet">-----</div>
+            </div>
+            <div class="data-tag" data-tag-key="rg-oil-temp">
+                <div class="label-box">R/G OIL TEMP.</div>
+                <div class="digital-value" id="val-rg-oil-temp">-----</div>
+            </div>
+            <div class="data-tag" data-tag-key="rg-thrust-temp">
+                <div class="label-box">R/G BEAR. TEMP.</div>
+                <div class="digital-value" id="val-rg-thrust-temp">-----</div>
+            </div>
+            <div class="data-tag" data-tag-key="rg-lub-press">
+                <div class="label-box">R/G LUB. OIL PRESS.</div>
+                <div class="digital-value" id="val-rg-lub-press">--.--</div>
+            </div>
+        </div>
+
+        <div class="digital-table-wrap mb-4">
+            <div class="px-3 py-2 font-bold bg-gray-200 border-b border-gray-300">
+                ANALOG VALUE
+            </div>
+            <div class="digital-columns">
+                <table class="digital-table">
+                    <thead>
+                        <tr>
+                            <th>LABEL</th>
+                            <th>VALUE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="analog-tbody-left"></tbody>
+                </table>
+                <table class="digital-table">
+                    <thead>
+                        <tr>
+                            <th>LABEL</th>
+                            <th>VALUE</th>
+                        </tr>
+                    </thead>
+                    <tbody id="analog-tbody-right"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="digital-table-wrap">
+            <div class="px-3 py-2 font-bold bg-gray-200 border-b border-gray-300">
+                DIGITAL VALUE (ON/OFF)
+            </div>
+            <div class="digital-columns">
+                <table class="digital-table">
+                    <thead>
+                        <tr>
+                            <th>CHANNEL DESCRIPTION</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="digital-tbody-left"></tbody>
+                </table>
+                <table class="digital-table">
+                    <thead>
+                        <tr>
+                            <th>CHANNEL DESCRIPTION</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="digital-tbody-right"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="./dashboard_shared.js"></script>
+    <script>
+        const ME_OPTIONS = ["DG#1", "DG#2", "DG#3", "ME-PORT", "ME-STBD"];
+        const dgParam = new URLSearchParams(window.location.search).get("dg");
+        const {
+            getById,
+            normalizeDgName,
+            filterByTarget,
+            isOnValue,
+            applyLayoutToElement,
+            fetchWithTimeout,
+            resolveApiOrigin
+        } = window.DashboardShared;
+        const API_BASE = `${resolveApiOrigin()}/api/check_all_status_lable`;
+        const ANALOG_FIXED_POINTS = [
+            "BOOST AIR PRESS.",
+            "FUEL OIL PRESS.",
+            "LUB. OIL PRESS.",
+            "H.T. F.W. PRESS.",
+            "T/C LUB. OIL PRESS.",
+            "L.O. AUTO. BACKWASH FILTER DIFF. P.",
+            "LUB. OIL TEMP.",
+            "H.T. F.W. TEMP.",
+            "BOOST AIR TEMP.",
+            "FUEL OIL TEMP.",
+            "NO.1 CYL. EXH. GAS OUTLET TEMP.",
+            "NO.2 CYL. EXH. GAS OUTLET TEMP.",
+            "NO.3 CYL. EXH. GAS OUTLET TEMP.",
+            "NO.4 CYL. EXH. GAS OUTLET TEMP.",
+            "NO.5 CYL. EXH. GAS OUTLET TEMP.",
+            "NO.6 CYL. EXH. GAS OUTLET TEMP.",
+            "EXH. GAS T/C INLET NO.1 TEMP.",
+            "EXH. GAS T/C INLET NO.2 TEMP.",
+            "EXH. GAS T/C OUTLET TEMP",
+            "R/G OIL TEMP.",
+            "R/G THRUST BEAR. TEMP.",
+            "NO.1 START AIR PRESS",
+            "NO.2 START AIR PRESS",
+            "CONTROL AIR PRESS.",
+            "R/G LUB. OIL PRESS.",
+            "M/E REVOLUTION",
+            "T/C REVOLUTION",
+            "F.O. RACK"
+        ];
+
+        const DATA_MAPPING = {
+            "BOOST AIR PRESS.": "val-boost-air-press",
+            "FUEL OIL PRESS.": "val-fuel-oil-press",
+            "LUB. OIL PRESS.": "val-lub-oil-press",
+            "H.T. F.W. PRESS.": "val-ht-fw-press",
+            "T/C LUB. OIL PRESS.": "val-tc-lub-oil-press",
+            "EXH. GAS T/C INLET NO.1 TEMP.": "val-exh-inlet-1",
+            "EXH. GAS T/C INLET NO.2 TEMP.": "val-exh-inlet-2",
+            "EXH. GAS T/C OUTLET TEMP": "val-exh-outlet",
+            "R/G OIL TEMP.": "val-rg-oil-temp",
+            "R/G THRUST BEAR. TEMP.": "val-rg-thrust-temp",
+            "R/G LUB. OIL PRESS.": "val-rg-lub-press",
+            "M/E REVOLUTION": "val-me-rev",
+            "T/C REVOLUTION": "val-tc-rev",
+            "F.O. RACK": "val-fo-rack"
+        };
+
+        const UI_LAYOUT = {
+            cylinders: {
+                count: 6,
+                startX: 37.5,
+                stepX: 9,
+                y: "20%",
+                scale: 1.0
+            },
+            panels: {
+                meRev: { x: "12%", y: "55%", scale: 1.0 },
+                tcRev: { x: "29%", y: "42%", scale: 1.0, anchor: "right" }
+            },
+            tags: {
+                "boost-air-press": { x: "35%", y: "30%", scale: 1.0, labelWidth: "200px", valueWidth: "60px" },
+                "fuel-oil-press": { x: "35%", y: "38%", scale: 1.0, labelWidth: "200px", valueWidth: "60px" },
+                "lub-oil-press": { x: "35%", y: "46%", scale: 1.0, labelWidth: "200px", valueWidth: "60px" },
+                "ht-fw-press": { x: "35%", y: "54%", scale: 1.0, labelWidth: "200px", valueWidth: "60px" },
+                "tc-lub-oil-press": { x: "35%", y: "62%", scale: 1.0, labelWidth: "200px", valueWidth: "60px" },
+                "fo-rack": { x: "35%", y: "70%", scale: 1.0, labelWidth: "200px", valueWidth: "60px" },
+                "exh-inlet-1": { x: "63%", y: "30%", scale: 1.0, labelWidth: "200px", valueWidth: "60px" },
+                "exh-inlet-2": { x: "63%", y: "38%", scale: 1.0, labelWidth: "200px", valueWidth: "60px" },
+                "exh-outlet": { x: "63%", y: "46%", scale: 1.0, labelWidth: "200px", valueWidth: "60px" },
+                "rg-oil-temp": { x: "63%", y: "54%", scale: 1.0, labelWidth: "200px", valueWidth: "60px" },
+                "rg-thrust-temp": { x: "63%", y: "62%", scale: 1.0, labelWidth: "200px", valueWidth: "60px" },
+                "rg-lub-press": { x: "63%", y: "70%", scale: 1.0, labelWidth: "200px", valueWidth: "60px" }
+            }
+        };
+
+        const DIGITAL_FIXED_POINTS = [
+            { addr: 1, label: "MAIN (AC) SOURCE", unit: "On/Off" },
+            { addr: 2, label: "EMERG. (DC) SOURCE", unit: "On/Off" },
+            { addr: 3, label: "TELEGRAPH SYSTEM SOURCE", unit: "On/Off" },
+            { addr: 4, label: "GOVERNOR SOURCE", unit: "On/Off" },
+            { addr: 5, label: "BATTERY SOURCE", unit: "On/Off" },
+            { addr: 7, label: "CONTROL SYSTEM", unit: "On/Off" },
+            { addr: 8, label: "SAFETY SYSTEM", unit: "On/Off" },
+            { addr: 9, label: "GOVERNOR MAJOR FAILURE", unit: "On/Off" },
+            { addr: 10, label: "GOVERNOR MINOR FAILURE", unit: "On/Off" },
+            { addr: 11, label: "SPEED SW. UNIT FOR CONT. CPU", unit: "On/Off" },
+            { addr: 12, label: "SENSOR FOR CONTROL", unit: "On/Off" },
+            { addr: 13, label: "SPEED SW. UNIT FOR SAFETY CPU", unit: "On/Off" },
+            { addr: 14, label: "SENSOR FOR SAFETY", unit: "On/Off" },
+            { addr: 15, label: "HANDLE SWITCH", unit: "On/Off" },
+            { addr: 18, label: "M/E MANUAL EMERG. SHUT DOWN", unit: "On/Off" },
+            { addr: 19, label: "M/E OVER SPEED SHUT DOWN", unit: "On/Off" },
+            { addr: 20, label: "M/E L.O. LOW PRESS. SHD", unit: "On/Off" },
+            { addr: 21, label: "OIL MIST HIGH HIGH DENSITY SHD", unit: "On/Off" },
+            { addr: 22, label: "R/G OPERATING OIL LOW PRESS. SHD", unit: "On/Off" },
+            { addr: 23, label: "M/E EMERG. SHUT DOWN PREWARNING", unit: "On/Off" },
+            { addr: 24, label: "M/E EMERG. SHUT DOWN CANCEL", unit: "On/Off" },
+            { addr: 26, label: "R/G OPERATING OIL LOW PRESS. SLD", unit: "On/Off" },
+            { addr: 27, label: "R/G OIL HIGH TEMP. SLD", unit: "On/Off" },
+            { addr: 28, label: "R/G THRUST BEAR. HIGH TEMP. SLD", unit: "On/Off" },
+            { addr: 29, label: "M/E SLOW DOWN PREWARNING", unit: "On/Off" },
+            { addr: 30, label: "M/E SLOW DOWN CANCEL", unit: "On/Off" },
+            { addr: 32, label: "M/E FUEL OIL PRESS.", unit: "On/Off" },
+            { addr: 33, label: "M/E LUB. OIL PRESS.", unit: "On/Off" },
+            { addr: 34, label: "M/E H.T. F.W. PRESS.", unit: "On/Off" },
+            { addr: 35, label: "M/E T/C LUB. OIL PRESS.", unit: "On/Off" },
+            { addr: 36, label: "M/E FUEL OIL LEAKED TANK LEVEL", unit: "On/Off" },
+            { addr: 37, label: "M/E L.O. AUTO. BACKWASH FILTER DIFF", unit: "On/Off" },
+            { addr: 39, label: "M/E LUB. OIL TEMP.", unit: "On/Off" },
+            { addr: 40, label: "M/E H.T. F.W. TEMP.", unit: "On/Off" },
+            { addr: 42, label: "M/E FUEL OIL TEMP.", unit: "On/Off" },
+            { addr: 44, label: "OIL MIST DETECTOR FAILURE", unit: "On/Off" },
+            { addr: 45, label: "OIL MIST HIGH DENSITY", unit: "On/Off" },
+            { addr: 46, label: "M/E NO.1 CYL. EXH. GAS OUTLET TEMP", unit: "On/Off" },
+            { addr: 47, label: "M/E NO.2 CYL. EXH. GAS OUTLET TEMP", unit: "On/Off" },
+            { addr: 48, label: "M/E NO.3 CYL. EXH. GAS OUTLET TEMP", unit: "On/Off" },
+            { addr: 49, label: "M/E NO.4 CYL. EXH. GAS OUTLET TEMP", unit: "On/Off" },
+            { addr: 50, label: "M/E NO.5 CYL. EXH. GAS OUTLET TEMP", unit: "On/Off" },
+            { addr: 51, label: "M/E NO.6 CYL. EXH. GAS OUTLET TEMP", unit: "On/Off" },
+            { addr: 55, label: "M/E NO.1 CYL. EXH. GAS OUT. TEMP. DI", unit: "On/Off" },
+            { addr: 56, label: "M/E NO.2 CYL. EXH. GAS OUT. TEMP. DI", unit: "On/Off" },
+            { addr: 57, label: "M/E NO.3 CYL. EXH. GAS OUT. TEMP. DI", unit: "On/Off" },
+            { addr: 58, label: "M/E NO.4 CYL. EXH. GAS OUT. TEMP. DI", unit: "On/Off" },
+            { addr: 59, label: "M/E NO.5 CYL. EXH. GAS OUT. TEMP. DI", unit: "On/Off" },
+            { addr: 60, label: "M/E NO.6 CYL. EXH. GAS OUT. TEMP. DI", unit: "On/Off" },
+            { addr: 61, label: "NO.1 START AIR PRESS.", unit: "On/Off" },
+            { addr: 62, label: "NO.2 START AIR PRESS.", unit: "On/Off" },
+            { addr: 63, label: "CONTROL AIR PRESS.", unit: "On/Off" },
+            { addr: 76, label: "R/G LUB. OIL PRESS.", unit: "On/Off" },
+            { addr: 78, label: "R/G OIL TEMP.", unit: "On/Off" },
+            { addr: 79, label: "R/G THRUST BEAR. TEMP.", unit: "On/Off" },
+            { addr: 81, label: "R/G OPERATING OIL LOW PRESS.", unit: "On/Off" },
+            { addr: 82, label: "R/G L.O. FILTER HIGH DIFF. PRESS.", unit: "On/Off" },
+            { addr: 83, label: "R/G OIL LEVEL TOO LOW", unit: "On/Off" },
+            { addr: 84, label: "R/G CONTROL VOLTAGE", unit: "On/Off" }
+        ];
+
+        const TARGET_ME = ME_OPTIONS.includes(normalizeDgName(dgParam)) ? normalizeDgName(dgParam) : "ME-PORT";
+
+        const filterRowsByTarget = (rows) => {
+            if (!Array.isArray(rows)) return [];
+            const hasDgName = rows.some((item) => item && item.dg_name != null);
+            return hasDgName ? filterByTarget(rows, TARGET_ME) : rows;
+        };
+
+        function applyUILayout() {
+            applyLayoutToElement(getById("panel-me-rev"), {
+                ...UI_LAYOUT.panels.meRev,
+                translateYCenter: true
+            });
+            applyLayoutToElement(getById("panel-tc-rev"), {
+                ...UI_LAYOUT.panels.tcRev,
+                translateYCenter: true
+            });
+
+            document.querySelectorAll(".data-tag").forEach((tag) => {
+                const key = tag.getAttribute("data-tag-key");
+                const cfg = UI_LAYOUT.tags[key];
+                if (!cfg) return;
+                if (cfg.x) tag.style.setProperty("--x", cfg.x);
+                if (cfg.y) tag.style.setProperty("--y", cfg.y);
+                const scale = cfg.scale == null ? 1 : Number(cfg.scale);
+                tag.style.transform = Number.isNaN(scale) ? "" : `scale(${scale})`;
+                tag.style.transformOrigin = "top left";
+                const label = tag.querySelector(".label-box");
+                const value = tag.querySelector(".digital-value");
+                if (label && cfg.labelWidth) label.style.minWidth = cfg.labelWidth;
+                if (value && cfg.valueWidth) value.style.minWidth = cfg.valueWidth;
+            });
+        }
+
+        function initCylinders() {
+            const container = getById("cylinders-container");
+            const template = getById("cyl-temp-template");
+            if (!container || !template) return;
+            container.innerHTML = "";
+            const cylCfg = UI_LAYOUT.cylinders || {};
+            const count = Number(cylCfg.count) || 6;
+            const startX = Number(cylCfg.startX);
+            const stepX = Number(cylCfg.stepX);
+            const y = cylCfg.y || "20%";
+            const scale = cylCfg.scale == null ? 1 : Number(cylCfg.scale);
+
+            for (let i = 1; i <= count; i++) {
+                const clone = template.content.cloneNode(true);
+                clone.querySelector(".cyl-num").textContent = i;
+                clone.querySelector(".cyl-val").id = `val-cyl-${i}`;
+                const item = clone.querySelector(".cyl-item");
+                const x = Number.isNaN(startX) || Number.isNaN(stepX) ? "50%" : `${startX + (i - 1) * stepX}%`;
+                item.style.setProperty("--x", x);
+                item.style.setProperty("--y", y);
+                item.style.transform = `translate(-50%, -50%) scale(${Number.isNaN(scale) ? 1 : scale})`;
+                container.appendChild(clone);
+            }
+        }
+
+        function applyMEHeader() {
+            const selectorEl = getById("me-selector");
+            if (selectorEl) selectorEl.value = TARGET_ME;
+        }
+
+        function updateSelectorColor(value) {
+            const selectorEl = getById("me-selector");
+            if (!selectorEl) return;
+            selectorEl.classList.remove(
+                "text-red-600/70",
+                "text-blue-600/70",
+                "border-red-300",
+                "border-blue-300",
+                "focus:ring-red-300",
+                "focus:ring-blue-300"
+            );
+            if (value === "ME-PORT" || value === "ME-STBD") {
+                selectorEl.classList.add("text-blue-600/70");
+                selectorEl.classList.add("border-blue-300", "focus:ring-blue-300");
+            } else {
+                selectorEl.classList.add("text-red-600/70");
+                selectorEl.classList.add("border-red-300", "focus:ring-red-300");
+            }
+        }
+
+        function bindMESelector() {
+            const selectorEl = getById("me-selector");
+            if (!selectorEl) return;
+            selectorEl.addEventListener("change", () => {
+                const next = selectorEl.value;
+                if (!ME_OPTIONS.includes(next)) return;
+                updateSelectorColor(next);
+                if (next === "DG#1" || next === "DG#2" || next === "DG#3") {
+                    window.location.href = `./Engine_graph.html?dg=${encodeURIComponent(next)}`;
+                    return;
+                }
+                const url = new URL(window.location.href);
+                url.searchParams.set("dg", next);
+                window.location.href = url.toString();
+            });
+        }
+
+        function updateHeaderLights(digitalRows) {
+            const rows = filterRowsByTarget(digitalRows);
+            const readyRow = rows.find(item => String(item.label || "").trim().toUpperCase() === "READY TO START");
+            const runRow = rows.find(item => String(item.label || "").trim().toUpperCase() === "ENGINE RUN");
+            const meRevNum = Number(latestMeRevolution);
+            const isRunningByMeRev = Number.isFinite(meRevNum) && meRevNum !== 0;
+            const isEngineRunning = isOnValue(runRow?.value) || isRunningByMeRev;
+
+            const readyLight = getById("light-ready");
+            const runLight = getById("light-run");
+            const engineBackgroundImage = getById("engine-background-image");
+
+            if (readyLight) readyLight.classList.toggle("active", isOnValue(readyRow?.value));
+            if (runLight) runLight.classList.toggle("active", isEngineRunning);
+            if (engineBackgroundImage) {
+                engineBackgroundImage.src = isEngineRunning ? "Asset/Engine_Runing.gif" : "Asset/Engine.png";
+            }
+        }
+
+        function updateAlarmLight(machineData) {
+            const alarmLight = getById("light-alarm");
+            if (!alarmLight) return;
+            const analogRows = Array.isArray(machineData?.analog) ? machineData.analog : [];
+            const digitalRows = Array.isArray(machineData?.digital) ? machineData.digital : [];
+            const analogCritical = analogRows.some((item) => String(item?.status || "").trim().toLowerCase() === "critical");
+            const digitalAlarm = digitalRows.some((item) => String(item?.status || "").trim().toLowerCase() === "alarm");
+            alarmLight.classList.toggle("active", analogCritical || digitalAlarm);
+        }
+
+        function updateOverlayAnalog(data) {
+            if (!data || data.length === 0) return;
+            const rows = filterRowsByTarget(data);
+            let nextMeRevolution = 0;
+            let hasMeRevolution = false;
+            rows.forEach((item) => {
+                if (item.value == null || item.label == null) return;
+                const label = String(item.label).trim();
+                if (label === "M/E REVOLUTION") {
+                    const parsed = Number(item.value);
+                    nextMeRevolution = Number.isFinite(parsed) ? parsed : 0;
+                    hasMeRevolution = true;
+                }
+                const match = label.match(/NO\.(\d+)\s+CYL\.\s+EXH\.\s+GAS\s+OUTLET\s+TEMP\./i);
+                if (match) {
+                    const el = getById(`val-cyl-${match[1]}`);
+                    if (el) el.textContent = String(Math.round(item.value));
+                    return;
+                }
+                const elementId = DATA_MAPPING[label];
+                if (!elementId) return;
+                const el = getById(elementId);
+                if (!el) return;
+                const isPress = label.includes("PRESS.");
+                const next = isPress ? Number(item.value).toFixed(2) : String(Math.round(item.value));
+                el.textContent = next;
+            });
+            latestMeRevolution = hasMeRevolution ? nextMeRevolution : 0;
+        }
+
+        function updateAnalogTable(data) {
+            const leftTbody = getById("analog-tbody-left");
+            const rightTbody = getById("analog-tbody-right");
+            if (!leftTbody || !rightTbody) return;
+            leftTbody.innerHTML = "";
+            rightTbody.innerHTML = "";
+            const rows = filterRowsByTarget(data);
+            const valueByLabel = new Map();
+            rows.forEach((item) => {
+                const key = String(item.label || "").trim();
+                if (!key) return;
+                valueByLabel.set(key, { value: item.value, unit: item.unit });
+            });
+
+            const half = Math.ceil(ANALOG_FIXED_POINTS.length / 2);
+            const leftPoints = ANALOG_FIXED_POINTS.slice(0, half);
+            const rightPoints = ANALOG_FIXED_POINTS.slice(half);
+
+            function render(points, tbody) {
+                points.forEach((label) => {
+                    const tr = document.createElement("tr");
+                    const labelTd = document.createElement("td");
+                    labelTd.textContent = label;
+                    tr.appendChild(labelTd);
+
+                    const valueTd = document.createElement("td");
+                    const payload = valueByLabel.get(label);
+                    if (payload && payload.value != null) {
+                        const val = payload.value;
+                        valueTd.textContent = payload.unit ? `${val} ${payload.unit}` : String(val);
+                    } else {
+                        valueTd.textContent = "";
+                    }
+                    tr.appendChild(valueTd);
+                    tbody.appendChild(tr);
+                });
+            }
+
+            render(leftPoints, leftTbody);
+            render(rightPoints, rightTbody);
+        }
+
+        function updateDigitalTable(data) {
+            const leftTbody = getById("digital-tbody-left");
+            const rightTbody = getById("digital-tbody-right");
+            if (!leftTbody || !rightTbody) return;
+            leftTbody.innerHTML = "";
+            rightTbody.innerHTML = "";
+            const rows = filterRowsByTarget(data);
+            const greenStatusLabels = new Set(["ENGINE RUN", "READY TO START"]);
+            const valueByLabel = new Map();
+            rows.forEach((item) => {
+                const key = String(item.label || "").trim();
+                if (!key) return;
+                valueByLabel.set(key, item.value);
+            });
+
+            const half = Math.ceil(DIGITAL_FIXED_POINTS.length / 2);
+            const leftPoints = DIGITAL_FIXED_POINTS.slice(0, half);
+            const rightPoints = DIGITAL_FIXED_POINTS.slice(half);
+
+            function render(points, tbody) {
+                points.forEach((point) => {
+                    const tr = document.createElement("tr");
+                    const labelTd = document.createElement("td");
+                    labelTd.textContent = point.label;
+                    tr.appendChild(labelTd);
+
+                    const valueTd = document.createElement("td");
+                    const rawValue = valueByLabel.get(point.label);
+                    let value = rawValue == null ? "" : String(rawValue);
+                    if (rawValue != null) {
+                        if (isOnValue(rawValue)) {
+                            value = "ON";
+                        } else if (String(rawValue).trim() === "0" || Number(rawValue) === 0) {
+                            value = "OFF";
+                        }
+                    }
+                    valueTd.textContent = value;
+                    if (rawValue != null && isOnValue(rawValue)) {
+                        valueTd.classList.add(
+                            greenStatusLabels.has(String(point.label || "").trim().toUpperCase())
+                                ? "digital-status-on"
+                                : "digital-on"
+                        );
+                    }
+                    tr.appendChild(valueTd);
+                    tbody.appendChild(tr);
+                });
+            }
+
+            render(leftPoints, leftTbody);
+            render(rightPoints, rightTbody);
+        }
+
+        function updateTimestampHeader(timestampValue) {
+            const el = getById('current-datetime');
+            if (!el) return;
+            const next = String(timestampValue || '').trim();
+            el.textContent = next || '---- -- -- --:--:--';
+        }
+
+        function normalizeTimestampText(value) {
+            const raw = String(value || '').trim();
+            if (!raw) return '';
+            const compact = raw.replace('T', ' ').replace('Z', '').trim();
+            const m = compact.match(/^(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})/);
+            if (m) return `${m[1]} ${m[2]}`;
+            return compact;
+        }
+
+        function formatTimestampDisplay(timestampPayload, fallbackValue) {
+            const datePart = String(timestampPayload?.date || '').trim();
+            const timePart = String(timestampPayload?.time || '').trim();
+            if (datePart && timePart) return normalizeTimestampText(`${datePart} ${timePart}`);
+            const timestampPart = String(timestampPayload?.timestamp || '').trim();
+            if (timestampPart) return normalizeTimestampText(timestampPart);
+            return normalizeTimestampText(fallbackValue);
+        }
+
+        function extractTimestamp(machineData, payload) {
+            const directValue =
+                machineData?.TimeStamp ??
+                machineData?.timestamp ??
+                machineData?.timeStamp ??
+                machineData?.time_stamp ??
+                payload?.TimeStamp ??
+                payload?.timestamp ??
+                payload?.timeStamp ??
+                payload?.time_stamp;
+            if (directValue != null && String(directValue).trim() !== '') return directValue;
+
+            const analogRows = Array.isArray(machineData?.analog) ? machineData.analog : [];
+            const tsRow = analogRows.find((item) => {
+                const label = String(item?.label || '').trim().toUpperCase();
+                return label === 'TIMESTAMP' || label === 'TIME STAMP' || label === 'DATE & TIME';
+            });
+            if (tsRow?.value != null && String(tsRow.value).trim() !== '') return tsRow.value;
+
+            const digitalRows = Array.isArray(machineData?.digital) ? machineData.digital : [];
+            const point = analogRows.find((item) => item?.timestamp) || digitalRows.find((item) => item?.timestamp);
+            if (point?.timestamp != null && String(point.timestamp).trim() !== '') return point.timestamp;
+            return '';
+        }
+
+        function bindHomeNavigation() {
+            const goHome = () => { window.location.href = "./index.html"; };
+            const logo = getById("drums-logo-link");
+            if (logo) logo.addEventListener("click", goHome);
+        }
+
+        let isFetching = false;
+        let consecutiveFailures = 0;
+        let latestMeRevolution = 0;
+        const POLL_INTERVAL_MS = 5000;
+        const FETCH_TIMEOUT_MS = 4000;
+
+        async function fetchData() {
+            if (isFetching) return;
+            isFetching = true;
+            try {
+                const response = await fetchWithTimeout(`${API_BASE}/all`, FETCH_TIMEOUT_MS, { cache: "no-store" });
+                if (!response.ok) throw new Error(`Status API error: ${response.status}`);
+
+                const payload = await response.json();
+                const machineData = Array.isArray(payload)
+                    ? payload.find((item) => normalizeDgName(item?.dg_name) === TARGET_ME)
+                    : null;
+                const analogData = Array.isArray(machineData?.analog) ? machineData.analog : [];
+                const digitalData = Array.isArray(machineData?.digital) ? machineData.digital : [];
+
+                updateOverlayAnalog(analogData);
+                updateAnalogTable(analogData);
+                updateDigitalTable(digitalData);
+                updateHeaderLights(digitalData);
+                updateAlarmLight(machineData);
+                updateTimestampHeader(formatTimestampDisplay(null, extractTimestamp(machineData, payload)));
+                consecutiveFailures = 0;
+            } catch (error) {
+                console.error("Fetch error:", error);
+                consecutiveFailures += 1;
+                latestMeRevolution = 0;
+                if (consecutiveFailures >= 2) {
+                    updateHeaderLights([]);
+                    updateAlarmLight(null);
+                }
+            } finally {
+                isFetching = false;
+            }
+        }
+
+        window.onload = () => {
+            applyMEHeader();
+            bindMESelector();
+            bindHomeNavigation();
+            applyUILayout();
+            initCylinders();
+            updateSelectorColor(TARGET_ME);
+            updateAnalogTable([]);
+            updateDigitalTable([]);
+            updateTimestampHeader('');
+            fetchData();
+            setInterval(fetchData, POLL_INTERVAL_MS);
+        };
+    </script>
+</body>
+</html>

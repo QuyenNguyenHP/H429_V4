@@ -1,0 +1,9 @@
+*.db
+*.db-shm
+*.db-wal
+backend/h429_data.db
+backend/h429_data.db-shm
+backend/h429_data.db-wal
+!h429_date.examble.db
+__pycache__/
+*.pyc

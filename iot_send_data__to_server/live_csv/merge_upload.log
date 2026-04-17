@@ -1,0 +1,326 @@
+[2026-04-11 11:55:55] [INFO] Start merge for 11 source CSV files into H429_merged_20260411_115555.csv
+[2026-04-11 11:55:55] [INFO] Merged 11 files with 361 rows into H429_merged_20260411_115555.csv
+[2026-04-11 11:55:55] [ERROR] Merge/upload failed: scp: dest open "H429/data/csv_received/": No such file or directory
+scp: failed to upload file /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/live_csv/H429_merged_20260411_115555.csv to ~/H429/data/csv_received/
+[2026-04-11 11:56:36] [INFO] Start merge for 17 source CSV files into H429_merged_20260411_115636.csv
+[2026-04-11 11:56:36] [INFO] Merged 17 files with 722 rows into H429_merged_20260411_115636.csv
+[2026-04-11 11:56:37] [INFO] Uploaded H429_merged_20260411_115636.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:56:37] [INFO] Archived 18 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:57:07] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115707.csv
+[2026-04-11 11:57:07] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115707.csv
+[2026-04-11 11:57:08] [INFO] Uploaded H429_merged_20260411_115707.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:57:08] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:57:38] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115738.csv
+[2026-04-11 11:57:38] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115738.csv
+[2026-04-11 11:57:39] [INFO] Uploaded H429_merged_20260411_115738.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:57:39] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:58:09] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115809.csv
+[2026-04-11 11:58:09] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115809.csv
+[2026-04-11 11:58:10] [INFO] Uploaded H429_merged_20260411_115809.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:58:10] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:58:40] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115840.csv
+[2026-04-11 11:58:40] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115840.csv
+[2026-04-11 11:58:41] [INFO] Uploaded H429_merged_20260411_115840.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:58:41] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:08] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115908.csv
+[2026-04-11 11:59:08] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115908.csv
+[2026-04-11 11:59:09] [INFO] Uploaded H429_merged_20260411_115908.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:09] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:11] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115911.csv
+[2026-04-11 11:59:11] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115911.csv
+[2026-04-11 11:59:12] [INFO] Uploaded H429_merged_20260411_115911.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:12] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:14] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115914.csv
+[2026-04-11 11:59:14] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115914.csv
+[2026-04-11 11:59:15] [INFO] Uploaded H429_merged_20260411_115914.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:15] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:17] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115917.csv
+[2026-04-11 11:59:17] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115917.csv
+[2026-04-11 11:59:18] [INFO] Uploaded H429_merged_20260411_115917.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:18] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:20] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115920.csv
+[2026-04-11 11:59:20] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115920.csv
+[2026-04-11 11:59:21] [INFO] Uploaded H429_merged_20260411_115920.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:21] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:23] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115923.csv
+[2026-04-11 11:59:23] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115923.csv
+[2026-04-11 11:59:24] [INFO] Uploaded H429_merged_20260411_115923.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:24] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:26] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115926.csv
+[2026-04-11 11:59:26] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115926.csv
+[2026-04-11 11:59:27] [INFO] Uploaded H429_merged_20260411_115926.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:27] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:29] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115929.csv
+[2026-04-11 11:59:29] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115929.csv
+[2026-04-11 11:59:29] [INFO] Uploaded H429_merged_20260411_115929.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:30] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:32] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115932.csv
+[2026-04-11 11:59:32] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115932.csv
+[2026-04-11 11:59:32] [INFO] Uploaded H429_merged_20260411_115932.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:33] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:35] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115935.csv
+[2026-04-11 11:59:35] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115935.csv
+[2026-04-11 11:59:35] [INFO] Uploaded H429_merged_20260411_115935.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:35] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:38] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115938.csv
+[2026-04-11 11:59:38] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115938.csv
+[2026-04-11 11:59:38] [INFO] Uploaded H429_merged_20260411_115938.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:38] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:41] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115941.csv
+[2026-04-11 11:59:41] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115941.csv
+[2026-04-11 11:59:41] [INFO] Uploaded H429_merged_20260411_115941.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:41] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:44] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115944.csv
+[2026-04-11 11:59:44] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115944.csv
+[2026-04-11 11:59:44] [INFO] Uploaded H429_merged_20260411_115944.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:44] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:47] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115947.csv
+[2026-04-11 11:59:47] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115947.csv
+[2026-04-11 11:59:47] [INFO] Uploaded H429_merged_20260411_115947.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:47] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:50] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115950.csv
+[2026-04-11 11:59:50] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115950.csv
+[2026-04-11 11:59:50] [INFO] Uploaded H429_merged_20260411_115950.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:50] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:53] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115953.csv
+[2026-04-11 11:59:53] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115953.csv
+[2026-04-11 11:59:53] [INFO] Uploaded H429_merged_20260411_115953.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:53] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:55] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115955.csv
+[2026-04-11 11:59:55] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115955.csv
+[2026-04-11 11:59:56] [INFO] Uploaded H429_merged_20260411_115955.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:56] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 11:59:58] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_115958.csv
+[2026-04-11 11:59:58] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_115958.csv
+[2026-04-11 11:59:59] [INFO] Uploaded H429_merged_20260411_115958.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 11:59:59] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:01] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120001.csv
+[2026-04-11 12:00:01] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120001.csv
+[2026-04-11 12:00:02] [INFO] Uploaded H429_merged_20260411_120001.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:02] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:04] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120004.csv
+[2026-04-11 12:00:04] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120004.csv
+[2026-04-11 12:00:05] [INFO] Uploaded H429_merged_20260411_120004.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:05] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:07] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120007.csv
+[2026-04-11 12:00:07] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120007.csv
+[2026-04-11 12:00:08] [INFO] Uploaded H429_merged_20260411_120007.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:08] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:10] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120010.csv
+[2026-04-11 12:00:10] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120010.csv
+[2026-04-11 12:00:11] [INFO] Uploaded H429_merged_20260411_120010.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:11] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:13] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120013.csv
+[2026-04-11 12:00:13] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120013.csv
+[2026-04-11 12:00:13] [INFO] Uploaded H429_merged_20260411_120013.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:13] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:16] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120016.csv
+[2026-04-11 12:00:16] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120016.csv
+[2026-04-11 12:00:16] [INFO] Uploaded H429_merged_20260411_120016.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:16] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:19] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120019.csv
+[2026-04-11 12:00:19] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120019.csv
+[2026-04-11 12:00:19] [INFO] Uploaded H429_merged_20260411_120019.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:19] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:22] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120022.csv
+[2026-04-11 12:00:22] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120022.csv
+[2026-04-11 12:00:22] [INFO] Uploaded H429_merged_20260411_120022.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:22] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:24] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120024.csv
+[2026-04-11 12:00:25] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120024.csv
+[2026-04-11 12:00:25] [INFO] Uploaded H429_merged_20260411_120024.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:25] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:27] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120027.csv
+[2026-04-11 12:00:27] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120027.csv
+[2026-04-11 12:00:28] [INFO] Uploaded H429_merged_20260411_120027.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:28] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:30] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120030.csv
+[2026-04-11 12:00:30] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120030.csv
+[2026-04-11 12:00:31] [INFO] Uploaded H429_merged_20260411_120030.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:31] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:33] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120033.csv
+[2026-04-11 12:00:33] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120033.csv
+[2026-04-11 12:00:34] [INFO] Uploaded H429_merged_20260411_120033.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:34] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:36] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120036.csv
+[2026-04-11 12:00:36] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120036.csv
+[2026-04-11 12:00:37] [INFO] Uploaded H429_merged_20260411_120036.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:37] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:39] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120039.csv
+[2026-04-11 12:00:39] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120039.csv
+[2026-04-11 12:00:40] [INFO] Uploaded H429_merged_20260411_120039.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:40] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:42] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120042.csv
+[2026-04-11 12:00:42] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120042.csv
+[2026-04-11 12:00:43] [INFO] Uploaded H429_merged_20260411_120042.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:43] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:45] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120045.csv
+[2026-04-11 12:00:45] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120045.csv
+[2026-04-11 12:00:46] [INFO] Uploaded H429_merged_20260411_120045.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:46] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:48] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120048.csv
+[2026-04-11 12:00:48] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120048.csv
+[2026-04-11 12:00:49] [INFO] Uploaded H429_merged_20260411_120048.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:49] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:51] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120051.csv
+[2026-04-11 12:00:51] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120051.csv
+[2026-04-11 12:00:52] [INFO] Uploaded H429_merged_20260411_120051.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:52] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:54] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120054.csv
+[2026-04-11 12:00:54] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120054.csv
+[2026-04-11 12:00:55] [INFO] Uploaded H429_merged_20260411_120054.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:55] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:00:57] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120057.csv
+[2026-04-11 12:00:57] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120057.csv
+[2026-04-11 12:00:57] [INFO] Uploaded H429_merged_20260411_120057.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:00:58] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:00] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120100.csv
+[2026-04-11 12:01:00] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120100.csv
+[2026-04-11 12:01:00] [INFO] Uploaded H429_merged_20260411_120100.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:00] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:03] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120103.csv
+[2026-04-11 12:01:03] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120103.csv
+[2026-04-11 12:01:03] [INFO] Uploaded H429_merged_20260411_120103.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:03] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:06] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120106.csv
+[2026-04-11 12:01:06] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120106.csv
+[2026-04-11 12:01:06] [INFO] Uploaded H429_merged_20260411_120106.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:06] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:09] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120109.csv
+[2026-04-11 12:01:09] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120109.csv
+[2026-04-11 12:01:09] [INFO] Uploaded H429_merged_20260411_120109.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:09] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:11] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120111.csv
+[2026-04-11 12:01:11] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120111.csv
+[2026-04-11 12:01:12] [INFO] Uploaded H429_merged_20260411_120111.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:12] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:14] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120114.csv
+[2026-04-11 12:01:14] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120114.csv
+[2026-04-11 12:01:15] [INFO] Uploaded H429_merged_20260411_120114.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:15] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:17] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120117.csv
+[2026-04-11 12:01:17] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120117.csv
+[2026-04-11 12:01:18] [INFO] Uploaded H429_merged_20260411_120117.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:18] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:20] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120120.csv
+[2026-04-11 12:01:20] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120120.csv
+[2026-04-11 12:01:21] [INFO] Uploaded H429_merged_20260411_120120.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:21] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:23] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120123.csv
+[2026-04-11 12:01:23] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120123.csv
+[2026-04-11 12:01:23] [INFO] Uploaded H429_merged_20260411_120123.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:23] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:26] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120126.csv
+[2026-04-11 12:01:26] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120126.csv
+[2026-04-11 12:01:26] [INFO] Uploaded H429_merged_20260411_120126.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:26] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:29] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120129.csv
+[2026-04-11 12:01:29] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120129.csv
+[2026-04-11 12:01:29] [INFO] Uploaded H429_merged_20260411_120129.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:29] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:32] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120132.csv
+[2026-04-11 12:01:32] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120132.csv
+[2026-04-11 12:01:32] [INFO] Uploaded H429_merged_20260411_120132.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:32] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:34] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120134.csv
+[2026-04-11 12:01:34] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120134.csv
+[2026-04-11 12:01:35] [INFO] Uploaded H429_merged_20260411_120134.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:35] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:37] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120137.csv
+[2026-04-11 12:01:37] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120137.csv
+[2026-04-11 12:01:38] [INFO] Uploaded H429_merged_20260411_120137.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:38] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:40] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120140.csv
+[2026-04-11 12:01:40] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120140.csv
+[2026-04-11 12:01:41] [INFO] Uploaded H429_merged_20260411_120140.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:41] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:43] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120143.csv
+[2026-04-11 12:01:43] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120143.csv
+[2026-04-11 12:01:44] [INFO] Uploaded H429_merged_20260411_120143.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:44] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:46] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120146.csv
+[2026-04-11 12:01:46] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120146.csv
+[2026-04-11 12:01:47] [INFO] Uploaded H429_merged_20260411_120146.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:47] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:49] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120149.csv
+[2026-04-11 12:01:49] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120149.csv
+[2026-04-11 12:01:50] [INFO] Uploaded H429_merged_20260411_120149.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:50] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:52] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120152.csv
+[2026-04-11 12:01:52] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120152.csv
+[2026-04-11 12:01:52] [INFO] Uploaded H429_merged_20260411_120152.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:53] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:55] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120155.csv
+[2026-04-11 12:01:55] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120155.csv
+[2026-04-11 12:01:55] [INFO] Uploaded H429_merged_20260411_120155.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:55] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:01:58] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120158.csv
+[2026-04-11 12:01:58] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120158.csv
+[2026-04-11 12:01:58] [INFO] Uploaded H429_merged_20260411_120158.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:01:58] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:02:01] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120201.csv
+[2026-04-11 12:02:01] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120201.csv
+[2026-04-11 12:02:01] [INFO] Uploaded H429_merged_20260411_120201.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:02:01] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:02:04] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120204.csv
+[2026-04-11 12:02:04] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120204.csv
+[2026-04-11 12:02:04] [INFO] Uploaded H429_merged_20260411_120204.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:02:04] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:02:07] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120207.csv
+[2026-04-11 12:02:07] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120207.csv
+[2026-04-11 12:02:07] [INFO] Uploaded H429_merged_20260411_120207.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:02:07] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:02:09] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120209.csv
+[2026-04-11 12:02:09] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120209.csv
+[2026-04-11 12:02:10] [INFO] Uploaded H429_merged_20260411_120209.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:02:10] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:02:12] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120212.csv
+[2026-04-11 12:02:12] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120212.csv
+[2026-04-11 12:02:13] [INFO] Uploaded H429_merged_20260411_120212.csv to nguyen@192.168.18.109:~/H429/collector/csv_received/
+[2026-04-11 12:02:13] [INFO] Archived 7 CSV files to /mnt/c/Users/Quyen PC/Desktop/My Repo/H429/iot_send_data__to_server/csv_uploaded
+[2026-04-11 12:07:46] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120746.csv
+[2026-04-11 12:07:46] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120746.csv
+[2026-04-11 12:07:46] [INFO] Uploaded H429_merged_20260411_120746.csv to nguyen@218.212.167.168:~/H429/collector/csv_received/
+[2026-04-11 12:07:46] [INFO] Deleted 7 local CSV files after successful upload
+[2026-04-11 12:07:49] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_120749.csv
+[2026-04-11 12:07:49] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_120749.csv
+[2026-04-11 12:07:49] [INFO] Uploaded H429_merged_20260411_120749.csv to nguyen@218.212.167.168:~/H429/collector/csv_received/
+[2026-04-11 12:07:49] [INFO] Deleted 7 local CSV files after successful upload
+[2026-04-11 12:19:36] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_121936.csv
+[2026-04-11 12:19:37] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_121936.csv
+[2026-04-11 12:19:37] [INFO] Uploaded H429_merged_20260411_121936.csv to nguyen@218.212.167.168:~/H429/collector/csv_received/
+[2026-04-11 12:19:37] [INFO] Deleted 7 local CSV files after successful upload
+[2026-04-11 12:25:48] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_122548.csv
+[2026-04-11 12:25:48] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_122548.csv
+[2026-04-11 12:25:48] [INFO] Upload success: H429_merged_20260411_122548.csv -> nguyen@218.212.167.168:~/H429/collector/csv_received/
+[2026-04-11 12:25:48] [INFO] Delete success after upload: removed 7 local CSV files
+[2026-04-11 12:25:51] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_122551.csv
+[2026-04-11 12:25:51] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_122551.csv
+[2026-04-11 12:25:51] [INFO] Upload success: H429_merged_20260411_122551.csv -> nguyen@218.212.167.168:~/H429/collector/csv_received/
+[2026-04-11 12:25:51] [INFO] Delete success after upload: removed 7 local CSV files
+[2026-04-11 12:27:11] [INFO] Start merge for 6 source CSV files into H429_merged_20260411_122711.csv
+[2026-04-11 12:27:11] [INFO] Merged 6 files with 361 rows into H429_merged_20260411_122711.csv
+[2026-04-11 12:27:12] [INFO] Upload success: H429_merged_20260411_122711.csv -> nguyen@218.212.167.168:~/H429/collector/csv_received/
+[2026-04-11 12:27:12] [INFO] Delete success after upload: removed 7 local CSV files
+[2026-04-11 12:28:44] [INFO] ℹ️ Start merge for 6 source CSV files into H429_merged_20260411_122844.csv
+[2026-04-11 12:28:44] [INFO] ℹ️ Merged 6 files with 361 rows into H429_merged_20260411_122844.csv
+[2026-04-11 12:28:44] [INFO] ℹ️ Upload success: H429_merged_20260411_122844.csv -> nguyen@218.212.167.168:~/H429/collector/csv_received/
+[2026-04-11 12:28:44] [INFO] ℹ️ Delete success after upload: removed 7 local CSV files
+[2026-04-11 12:29:35] [INFO] ℹ️ Start merge for 6 source CSV files into H429_merged_20260411_122935.csv
+[2026-04-11 12:29:35] [INFO] ℹ️ Merged 6 files with 361 rows into H429_merged_20260411_122935.csv
+[2026-04-11 12:29:35] [INFO] ℹ️ Upload success: H429_merged_20260411_122935.csv -> nguyen@218.212.167.168:~/H429/collector/csv_received/
+[2026-04-11 12:29:35] [INFO] ℹ️ Delete success after upload: removed 7 local CSV files
+[2026-04-11 12:30:29] [INFO] ℹ️ Start merge for 6 source CSV files into H429_merged_20260411_123029.csv
+[2026-04-11 12:30:29] [INFO] ℹ️ Merged 6 files with 361 rows into H429_merged_20260411_123029.csv
+[2026-04-11 12:30:30] [INFO] ℹ️ Upload success: H429_merged_20260411_123029.csv -> nguyen@218.212.167.168:~/H429/collector/csv_received/
+[2026-04-11 12:30:30] [INFO] ℹ️ Delete success after upload: removed 7 local CSV files
+[2026-04-11 12:31:14] [INFO] ℹ️ Start merge for 6 source CSV files into H429_merged_20260411_123114.csv
+[2026-04-11 12:31:14] [INFO] ℹ️ Merged 6 files with 361 rows into H429_merged_20260411_123114.csv
+[2026-04-11 12:31:14] [INFO] ℹ️ Upload success: H429_merged_20260411_123114.csv -> nguyen@218.212.167.168:~/H429/collector/csv_received/
+[2026-04-11 12:31:14] [INFO] ℹ️ Delete success after upload: removed 7 local CSV files
+[2026-04-11 13:50:07] [INFO] ℹ️ Start merge for 6 source CSV files into H429_merged_20260411_135007.csv
+[2026-04-11 13:50:07] [INFO] ℹ️ Merged 6 files with 361 rows into H429_merged_20260411_135007.csv
+[2026-04-11 13:50:07] [INFO] ℹ️ Create zip archive from H429_merged_20260411_135007.csv
+[2026-04-11 13:50:07] [INFO] ℹ️ Zip created: H429_merged_20260411_135007.zip
+[2026-04-11 13:50:07] [INFO] ℹ️ Upload success: H429_merged_20260411_135007.zip -> nguyen@218.212.167.168:~/H429/collector/csv_received/
+[2026-04-11 13:50:07] [INFO] ℹ️ Delete success after upload: removed 8 local CSV files
