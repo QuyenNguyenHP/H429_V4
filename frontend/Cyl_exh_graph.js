@@ -20,7 +20,7 @@
         rangeMs: 24 * 60 * 60 * 1000,
         maxGapMs: 15 * 60 * 1000,
         minZoomRangeMs: 5 * 60 * 1000,
-        requestTimeoutMs: 20000,
+        requestTimeoutMs: 60000,
         requestMaxPoints: 720,
         cacheTtlMs: 60 * 1000,
         cachePrefix: "cyl-exh-graph-trend::",
@@ -359,7 +359,7 @@
         } catch (error) {
             console.error("Cylinder exhaust fetch error:", error);
             if (cachedPayload) { setStatus("Network refresh failed. Showing recent cached trend.", false); return; }
-            setStatus("Failed to load cylinder exhaust data.", true);
+            setStatus(error?.message || "Failed to load cylinder exhaust data.", true);
         }
     }
     function bindEvents() {

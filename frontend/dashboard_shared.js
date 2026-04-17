@@ -52,15 +52,28 @@
 
     async function fetchWithTimeout(url, timeoutMs, options) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        const resolvedTimeoutMs = Number.isFinite(Number(timeoutMs)) ? Number(timeoutMs) : 0;
+        const timeoutMessage = `Request timed out after ${resolvedTimeoutMs}ms`;
+        const timeoutId = resolvedTimeoutMs > 0
+            ? setTimeout(() => controller.abort(new Error(timeoutMessage)), resolvedTimeoutMs)
+            : null;
         try {
             const response = await fetch(url, {
                 ...(options || {}),
                 signal: controller.signal,
             });
             return response;
+        } catch (error) {
+            if (error?.name === "AbortError" || controller.signal.aborted) {
+                const reasonMessage =
+                    typeof controller.signal.reason === "string"
+                        ? controller.signal.reason
+                        : controller.signal.reason?.message;
+                throw new Error(reasonMessage || timeoutMessage);
+            }
+            throw error;
         } finally {
-            clearTimeout(timeoutId);
+            if (timeoutId != null) clearTimeout(timeoutId);
         }
     }
 

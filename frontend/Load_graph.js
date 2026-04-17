@@ -1,14 +1,44 @@
 (function () {
     "use strict";
 
+    const runningHoursValueLabelPlugin = {
+        id: "runningHoursValueLabel",
+        afterDatasetsDraw(chart) {
+            if (chart?.canvas?.id !== "running-hours-chart") return;
+            const datasetMeta = chart.getDatasetMeta(0);
+            const dataset = chart.data?.datasets?.[0];
+            if (!datasetMeta || !dataset) return;
+
+            const { ctx } = chart;
+            ctx.save();
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.font = "700 13px sans-serif";
+
+            datasetMeta.data.forEach((bar, index) => {
+                const value = Number(dataset.data[index]);
+                if (!Number.isFinite(value)) return;
+
+                const x = bar.x;
+                const y = (bar.y + bar.base) / 2;
+                ctx.fillStyle = "#0f172a";
+                ctx.fillText(String(value), x, y);
+            });
+
+            ctx.restore();
+        },
+    };
+
     const { fetchWithTimeout, resolveApiOrigin } = window.DashboardShared;
 
     const DOM = {
         from: document.getElementById("from-utc"),
         to: document.getElementById("to-utc"),
         status: document.getElementById("trend-status"),
+        loading: document.getElementById("trend-loading"),
         clock: document.getElementById("current-datetime"),
         chartCanvas: document.getElementById("load-trend-chart"),
+        runningHoursCanvas: document.getElementById("running-hours-chart"),
         apply: document.getElementById("apply-btn"),
         prev: document.getElementById("prev-24h-btn"),
         next: document.getElementById("next-24h-btn"),
@@ -17,10 +47,11 @@
 
     const CONFIG = {
         apiBase: `${resolveApiOrigin()}/api/engine_graph`,
+        latestStatusApiBase: `${resolveApiOrigin()}/api/check_all_status_lable/all`,
         rangeMs: 24 * 60 * 60 * 1000,
         maxGapMs: 15 * 60 * 1000,
         minZoomRangeMs: 5 * 60 * 1000,
-        requestTimeoutMs: 20000,
+        requestTimeoutMs: 60000,
         requestMaxPoints: 720,
         cacheTtlMs: 60 * 1000,
         cachePrefix: "load-graph-trend::",
@@ -34,11 +65,13 @@
 
     const state = {
         chart: null,
+        runningHoursChart: null,
         range: { fromMs: NaN, toMs: NaN },
         isPanning: false,
         lastPanClientX: 0,
         activeRequestId: 0,
         timeZone: "__browser__",
+        selectedPointMs: NaN,
     };
     const initialDg = (() => {
         const raw = new URLSearchParams(window.location.search).get("dg");
@@ -138,6 +171,16 @@
     function setStatus(message, isError) {
         DOM.status.textContent = message || "";
         DOM.status.classList.toggle("error", !!isError);
+    }
+
+    function setLoading(isLoading) {
+        if (!DOM.loading) return;
+        DOM.loading.classList.toggle("active", !!isLoading);
+    }
+
+    function clearSelectedTrendPoint() {
+        state.selectedPointMs = NaN;
+        if (state.chart) state.chart.update("none");
     }
 
     function buildCacheKey(queryString) { return `${CONFIG.cachePrefix}${queryString}`; }
@@ -260,6 +303,64 @@
     }
 
     function buildChart() { state.chart = new Chart(DOM.chartCanvas.getContext("2d"), createChartConfig()); }
+    function createRunningHoursChartConfig() {
+        return {
+            type: "bar",
+            data: {
+                labels: ["DG#1", "DG#2", "DG#3"],
+                datasets: [{
+                    label: "Running Hours Max",
+                    data: [0, 0, 0],
+                    backgroundColor: ["rgba(29, 78, 216, 0.75)", "rgba(22, 163, 74, 0.75)", "rgba(185, 28, 28, 0.75)"],
+                    borderColor: ["#1d4ed8", "#16a34a", "#b91c1c"],
+                    borderWidth: 1.5,
+                    borderRadius: 8,
+                    categoryPercentage: 0.5,
+                    barPercentage: 0.5,
+                }],
+            },
+            options: {
+                animation: false,
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label(context) {
+                                const value = Number(context.parsed.y);
+                                return `${context.label}: ${Number.isFinite(value) ? value : 0} x10Hours`;
+                            },
+                        },
+                    },
+                },
+                scales: {
+                    x: {
+                        ticks: { color: "#475569", font: { size: 13, weight: "700" } },
+                        grid: { display: false },
+                        border: { color: "rgba(100, 116, 139, 0.28)" },
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: "#475569" },
+                        title: { display: true, text: "Running Hours (x10Hours)", color: "#334155", font: { size: 14, style: "italic", weight: "700" } },
+                        grid: { color: "rgba(100, 116, 139, 0.14)" },
+                        border: { color: "rgba(100, 116, 139, 0.28)" },
+                    },
+                },
+            },
+        };
+    }
+    function buildRunningHoursChart() {
+        if (!DOM.runningHoursCanvas) return;
+        state.runningHoursChart = new Chart(
+            DOM.runningHoursCanvas.getContext("2d"),
+            {
+                ...createRunningHoursChartConfig(),
+                plugins: [runningHoursValueLabelPlugin],
+            }
+        );
+    }
 
     function panChartByPixels(deltaX) {
         const xScale = state.chart?.scales?.x;
@@ -321,13 +422,34 @@
         DOM.chartCanvas.addEventListener("mouseleave", stopPan);
         DOM.chartCanvas.addEventListener("contextmenu", (event) => { if (state.isPanning || event.button === 2) event.preventDefault(); });
         DOM.chartCanvas.addEventListener("wheel", (event) => { event.preventDefault(); zoomChartAtClientX(event.deltaY, event.clientX); }, { passive: false });
+        DOM.chartCanvas.addEventListener("click", (event) => {
+            if (!state.chart) return;
+            const points = state.chart.getElementsAtEventForMode(
+                event,
+                "nearest",
+                { intersect: true },
+                false
+            );
+            if (!Array.isArray(points) || points.length === 0) return;
+            const firstPoint = points[0];
+            const dataset = state.chart.data.datasets?.[firstPoint.datasetIndex];
+            const rawPoint = dataset?.data?.[firstPoint.index];
+            if (!rawPoint || !Number.isFinite(rawPoint.x) || !Number.isFinite(rawPoint.y)) return;
+            state.selectedPointMs = Number(rawPoint.x);
+            state.chart.update("none");
+        });
         DOM.chartCanvas.addEventListener("dblclick", () => {
             if (!Number.isFinite(state.range.fromMs) || !Number.isFinite(state.range.toMs)) return;
+            clearSelectedTrendPoint();
             state.chart.options.scales.x.min = state.range.fromMs;
             state.chart.options.scales.x.max = state.range.toMs;
             state.chart.update("none");
         });
         window.addEventListener("mouseup", stopPan);
+    }
+
+    function isSelectedPoint(pointX) {
+        return Number.isFinite(state.selectedPointMs) && Math.abs(Number(pointX) - state.selectedPointMs) < 1000;
     }
 
     function applyChartData(payload) {
@@ -347,9 +469,42 @@
             const basePointRadius = validPoints.length <= 2 ? 4 : 1.5;
             return [{
                 label: item.dg_name, unit: item.unit || "KwE", data, parsing: false, normalized: true,
-                borderColor: style.borderColor, backgroundColor: style.backgroundColor, pointBackgroundColor: style.borderColor, pointBorderColor: style.borderColor,
-                pointRadius(context) { return context?.raw?.y === 0 ? Math.max(basePointRadius, 2.5) : basePointRadius; },
-                pointHoverRadius: 4, pointHitRadius: 10, borderWidth: 2.5, tension: 0.15, fill: false, clip: false, showLine: true, spanGaps: false,
+                borderColor: Number.isFinite(state.selectedPointMs) ? "rgba(148, 163, 184, 0.8)" : style.borderColor,
+                backgroundColor: Number.isFinite(state.selectedPointMs) ? "rgba(148, 163, 184, 0.18)" : style.backgroundColor,
+                pointBackgroundColor(context) {
+                    const pointX = Number(context?.raw?.x);
+                    return isSelectedPoint(pointX) || !Number.isFinite(state.selectedPointMs)
+                        ? style.borderColor
+                        : "rgba(148, 163, 184, 0.75)";
+                },
+                pointBorderColor(context) {
+                    const pointX = Number(context?.raw?.x);
+                    return isSelectedPoint(pointX) || !Number.isFinite(state.selectedPointMs)
+                        ? style.borderColor
+                        : "rgba(100, 116, 139, 0.9)";
+                },
+                pointRadius(context) {
+                    const pointX = Number(context?.raw?.x);
+                    const isSelected = isSelectedPoint(pointX);
+                    const defaultRadius = context?.raw?.y === 0 ? Math.max(basePointRadius, 2.5) : basePointRadius;
+                    return isSelected ? Math.max(defaultRadius, 5) : defaultRadius;
+                },
+                pointBorderWidth(context) {
+                    const pointX = Number(context?.raw?.x);
+                    return isSelectedPoint(pointX) ? 2 : 1;
+                },
+                pointHoverRadius: 4, pointHitRadius: 10, borderWidth: 2.5,
+                segment: {
+                    borderColor(context) {
+                        if (!Number.isFinite(state.selectedPointMs)) return style.borderColor;
+                        const startX = Number(context?.p0?.parsed?.x);
+                        const endX = Number(context?.p1?.parsed?.x);
+                        return isSelectedPoint(startX) || isSelectedPoint(endX)
+                            ? style.borderColor
+                            : "rgba(148, 163, 184, 0.8)";
+                    },
+                },
+                tension: 0.15, fill: false, clip: false, showLine: true, spanGaps: false,
             }];
         });
         state.chart.update("none");
@@ -369,6 +524,36 @@
         return { params };
     }
 
+    function applyRunningHoursChartData(payload, selectedDgNames) {
+        if (!state.runningHoursChart) return;
+        const labels = ["DG#1", "DG#2", "DG#3"];
+        const latestByDg = new Map(labels.map((dgName) => [dgName, null]));
+        for (const machineItem of Array.isArray(payload) ? payload : []) {
+            const dgName = String(machineItem?.dg_name || "").trim();
+            if (!latestByDg.has(dgName)) continue;
+            const analogRows = Array.isArray(machineItem?.analog) ? machineItem.analog : [];
+            const runningHourRow = analogRows.find((row) => String(row?.label || "").trim().toUpperCase() === "RUNNING HOUR");
+            const value = Number(runningHourRow?.value);
+            if (Number.isFinite(value)) latestByDg.set(dgName, value);
+        }
+        const palette = {
+            "DG#1": { background: "rgba(29, 78, 216, 0.75)", border: "#1d4ed8" },
+            "DG#2": { background: "rgba(22, 163, 74, 0.75)", border: "#16a34a" },
+            "DG#3": { background: "rgba(185, 28, 28, 0.75)", border: "#b91c1c" },
+        };
+        const values = labels.map((dgName) => {
+            const value = latestByDg.get(dgName);
+            return Number.isFinite(value) ? value : 0;
+        });
+        const maxValue = values.reduce((highest, value) => Math.max(highest, Number(value) || 0), 0);
+        state.runningHoursChart.data.labels = labels;
+        state.runningHoursChart.data.datasets[0].data = values;
+        state.runningHoursChart.data.datasets[0].backgroundColor = labels.map((dgName) => palette[dgName]?.background || "rgba(100, 116, 139, 0.75)");
+        state.runningHoursChart.data.datasets[0].borderColor = labels.map((dgName) => palette[dgName]?.border || "#64748b");
+        state.runningHoursChart.options.scales.y.max = maxValue > 0 ? maxValue : 1;
+        state.runningHoursChart.update("none");
+    }
+
     async function loadTrend() {
         const { params, error } = getTrendParams();
         if (error) { setStatus(error, true); return; }
@@ -381,18 +566,29 @@
         } else {
             setStatus("Loading trend data...");
         }
+        setLoading(true);
         try {
-            const response = await fetchWithTimeout(`${CONFIG.apiBase}?${queryString}`, CONFIG.requestTimeoutMs, { cache: "no-store" });
+            const [response, runningHoursResponse] = await Promise.all([
+                fetchWithTimeout(`${CONFIG.apiBase}?${queryString}`, CONFIG.requestTimeoutMs, { cache: "no-store" }),
+                fetchWithTimeout(CONFIG.latestStatusApiBase, CONFIG.requestTimeoutMs, { cache: "no-store" }),
+            ]);
             if (!response.ok) throw new Error(`Trend API error: ${response.status}`);
             const payload = await response.json();
+            if (runningHoursResponse && !runningHoursResponse.ok) {
+                throw new Error(`Running hour API error: ${runningHoursResponse.status}`);
+            }
+            const runningHoursPayload = runningHoursResponse ? await runningHoursResponse.json() : null;
             if (requestId !== state.activeRequestId) return;
             writeCachedPayload(queryString, payload);
             const totalVisiblePoints = applyChartData(payload);
+            applyRunningHoursChartData(runningHoursPayload);
             setStatus(totalVisiblePoints > 0 ? "Trend loaded successfully." : "No trend data in the selected time range.", totalVisiblePoints === 0);
         } catch (error) {
             console.error("Load trend fetch error:", error);
             if (cachedPayload) { setStatus("Network refresh failed. Showing recent cached trend.", false); return; }
-            setStatus("Failed to load trend data.", true);
+            setStatus(error?.message || "Failed to load trend data.", true);
+        } finally {
+            if (requestId === state.activeRequestId) setLoading(false);
         }
     }
 
@@ -413,6 +609,7 @@
         updateHeaderTime();
         setInterval(updateHeaderTime, 1000);
         buildChart();
+        buildRunningHoursChart();
         bindPanZoom();
         bindEvents();
         loadTrend();

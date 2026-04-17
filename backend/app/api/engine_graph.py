@@ -14,6 +14,7 @@ DEFAULT_MAX_POINTS = 720
 MAX_MAX_POINTS = 5000
 GRAPH_PRESETS = {
     "load": ("LOAD",),
+    "running_hour": ("RUNNING HOUR",),
     "load_detail": (
         "LOAD",
         "LUB OIL PRESSURE",
@@ -73,7 +74,7 @@ def get_engine_graph(
     to_dt, to_db = _normalize_utc_timestamp(to_ts)
     target_labels = GRAPH_PRESETS[normalized_graph_type]
 
-    if normalized_graph_type in {"load", "load_detail"}:
+    if normalized_graph_type in {"load", "load_detail", "running_hour"}:
         if dg_names:
             normalized_names = []
             for item in dg_names:
@@ -150,6 +151,8 @@ def get_engine_graph(
                 "unit": (
                     "KwE"
                     if label == "LOAD"
+                    else "x10Hours"
+                    if label == "RUNNING HOUR"
                     else "MPa"
                     if label in {"LUB OIL PRESSURE", "FUEL OIL PRESSURE ENGINE INLET"}
                     else "deg C"

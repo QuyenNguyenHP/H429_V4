@@ -24,7 +24,17 @@
         .trend-breadcrumb { color: #64748b; font-size: .85rem; font-weight: 700; margin-top: 8px; }
         .trend-check { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #94a3b8; border-radius: 999px; padding: 8px 12px; color: #0f172a; font-weight: 700; }
         .trend-chart-wrap { margin-top: 16px; background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #94a3b8; border-radius: 22px; padding: 18px; }
-        .trend-chart-canvas { width: 100%; height: 380px; }
+        .trend-chart-box { position: relative; width: 100%; height: 380px; }
+        .trend-chart-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
+        .trend-chart-box-sm { position: relative; width: 100%; height: 300px; }
+        .trend-chart-placeholder { min-height: 300px; border: 1px dashed #cbd5e1; border-radius: 18px; background: linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 100%); }
+        @media (max-width: 900px) {
+            .trend-chart-grid { grid-template-columns: 1fr; }
+            .trend-chart-placeholder { min-height: 120px; }
+        }
+        .trend-chart-canvas,
+        .trend-chart-canvas-sm { display: block; width: 100% !important; height: 100% !important; }
+        .trend-chart-title { color: #0f172a; font-size: 1rem; font-weight: 800; margin: 0 0 12px; }
         .trend-status { color: #475569; font-size: .95rem; font-weight: 700; min-height: 24px; }
         .trend-status.error { color: #fca5a5; }
         .series-dot { width: 12px; height: 12px; border-radius: 999px; display: inline-block; }
@@ -74,8 +84,23 @@
             </div>
 
             <div id="trend-status" class="trend-status mt-4"></div>
+            <div class="trend-chart-wrap relative">
+                <div id="trend-loading" class="embedded-trend-loading" aria-hidden="true">
+                    <div class="embedded-trend-spinner"></div>
+                </div>
+                <h2 class="trend-chart-title">Load Trend</h2>
+                <div class="trend-chart-box">
+                    <canvas id="load-trend-chart" class="trend-chart-canvas"></canvas>
+                </div>
+            </div>
             <div class="trend-chart-wrap">
-                <canvas id="load-trend-chart" class="trend-chart-canvas"></canvas>
+                <h2 class="trend-chart-title">DGs Running Hours </h2>
+                <div class="trend-chart-grid">
+                    <div class="trend-chart-box-sm">
+                        <canvas id="running-hours-chart" class="trend-chart-canvas-sm"></canvas>
+                    </div>
+                    <div class="trend-chart-placeholder" aria-hidden="true"></div>
+                </div>
             </div>
         </div>
     </div>

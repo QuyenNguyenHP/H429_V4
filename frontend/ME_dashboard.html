@@ -651,7 +651,7 @@
         let consecutiveFailures = 0;
         let latestMeRevolution = 0;
         const POLL_INTERVAL_MS = 5000;
-        const FETCH_TIMEOUT_MS = 4000;
+        const FETCH_TIMEOUT_MS = 60000;
 
         async function fetchData() {
             if (isFetching) return;
@@ -678,6 +678,7 @@
                 console.error("Fetch error:", error);
                 consecutiveFailures += 1;
                 latestMeRevolution = 0;
+                updateTimestampHeader(error?.message || '---- -- -- --:--:--');
                 if (consecutiveFailures >= 2) {
                     updateHeaderLights([]);
                     updateAlarmLight(null);
