@@ -1,95 +1,91 @@
-# Engine Touchscreen App
+# H429 Monitoring System 🚢
 
-H429 monitoring system with a FastAPI backend, static frontend dashboards, and a local CSV/ZIP importer.
+Hệ thống giám sát H429 gồm:
+- `backend/` FastAPI + importer cho dữ liệu CSV/ZIP
+- `frontend/` dashboard HTML tĩnh
+- `deploy/` tài liệu và mẫu deploy
 
-## Structure
+## Cấu trúc chính 📁
 
 ```text
-H429_v2/
+H429_v3/
   backend/
-    app/
-    archived_csv/
-    arrived_data/
-    data/
-    h429_data.db
-    import_new_data_to_database.py
-    run.py
   frontend/
-    index.html
-    Engine_graph.html
-    ME_dashboard.html
-  iot_send_data__to_server/
-  h429_date.examble.db
+  deploy/
   README.md
 ```
 
-## Runtime
+## Thành phần chính 🧩
 
-- Backend API: `http://localhost:8888`
-- Active database: `backend/h429_data.db`
-- Schema-only example database: `h429_date.examble.db`
+### Backend ⚙️
+- Chạy API tại `http://localhost:8888`
+- Đọc dữ liệu từ SQLite `backend/h429_data.db`
+- Tự chạy importer từ `backend/import_new_data_to_database.py`
 
-Start the backend with:
+### Frontend 🖥️
+- Chạy static server tại `http://localhost:5170`
+- Trang chính:
+  - `index.html`
+  - `dg_dashboard.html`
+  - `me_dashboard.html`
+  - `3DGs_graph.html`
+  - `Cyl_exh_graph.html`
+
+### Deploy 🚀
+- Có mẫu `systemd` trong `deploy/systemd/`
+- Có tài liệu triển khai thực tế trong `deploy/deployment_recommendations.md`
+
+## Chạy local ▶️
+
+### Backend
 
 ```bash
 cd backend
 python3 run.py
 ```
 
-`run.py` starts the FastAPI server and also launches `backend/import_new_data_to_database.py`.
+### Frontend
 
-## Import Flow
+```bash
+cd frontend
+python3 -m http.server 5170 --bind 0.0.0.0
+```
 
-The importer watches `backend/arrived_data` every 3 seconds.
+Mở:
 
-- If a `.csv` file arrives, it is read directly.
-- If a `.zip` file arrives, all CSV files inside are extracted and merged.
-- All imported rows are merged into one archived CSV file in `backend/archived_csv`.
-- Table `live_engine_data` is fully replaced on each successful import.
-- Table `Stored_database` keeps all historical inserted rows.
-- Processed files are deleted from `backend/arrived_data`.
+- `http://localhost:5170/index.html`
 
-## Database Schema
+## API đang dùng 🔌
 
-Both `backend/h429_data.db` and `h429_date.examble.db` use the same table structure:
+Frontend hiện dùng các API chính:
 
-### `live_engine_data`
+- `GET /api/check_all_status_lable/all`
+- `GET /api/check_all_status_lable/index`
+- `GET /api/check_all_status_lable/snapshot`
+- `GET /api/engine_graph`
+- `GET /api/engine_graph/pms`
 
-| Column | Type |
-| --- | --- |
-| `imo` | `INTEGER` |
-| `serial` | `TEXT` |
-| `dg_name` | `TEXT` |
-| `addr` | `TEXT` |
-| `label` | `TEXT` |
-| `timestamp` | `DATETIME` |
-| `val` | `REAL` |
-| `unit` | `TEXT` |
+## Import dữ liệu 📥
 
-### `Stored_database`
+Importer hiện:
+- theo dõi `backend/arrived_data`
+- nhận file `.csv` hoặc `.zip`
+- giải nén CSV nếu cần
+- cập nhật `live_engine_data`
+- lưu lịch sử vào `Stored_database`
+- gom file đã xử lý vào `backend/archived_csv`
 
-| Column | Type |
-| --- | --- |
-| `imo` | `INTEGER` |
-| `serial` | `TEXT` |
-| `dg_name` | `TEXT` |
-| `addr` | `TEXT` |
-| `label` | `TEXT` |
-| `timestamp` | `DATETIME` |
-| `val` | `REAL` |
-| `unit` | `TEXT` |
+## Deploy gợi ý 🛡️
 
-## Frontend APIs
+Khuyến nghị thực tế:
+- chỉ public `80/443`
+- không public trực tiếp `5170` và `8888`
+- dùng reverse proxy phía trước
+- backend nên bind nội bộ `127.0.0.1:8888`
 
-- `frontend/index.html`
-  - `GET /api/check_all_status_lable/all`
-- `frontend/Engine_graph.html`
-  - `GET /api/check_all_status_lable/all`
-  - `GET /api/timestamp?dg_name=...`
-- `frontend/ME_dashboard.html`
-  - `GET /api/check_all_status_lable/all`
+## Ghi chú 📝
 
-## Notes
-
-- `backend/h429_data.db` is the runtime SQLite database used by the backend and importer.
-- `h429_date.examble.db` is intended for sharing schema without bundling runtime data.
+- Tên file dashboard DG/ME hiện tại là:
+  - `frontend/dg_dashboard.html`
+  - `frontend/me_dashboard.html`
+- Một số tài liệu hoặc file backup cũ có thể vẫn còn tên cũ như `Engine_graph.html` hoặc `ME_dashboard.html`, nhưng không còn là luồng active.

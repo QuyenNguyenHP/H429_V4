@@ -9,43 +9,41 @@
     <link rel="stylesheet" href="./app.css">
 </head>
 <body>
-
     <div class="main-container">
-        <!-- Header Section -->
-        <div id="header-stage" class="relative flex justify-between items-start mb-4" style="min-height: 110px;">
-            <!-- Vessel Tag -->
-            <div id="vessel-box" class="header-box px-5 py-2 text-center">
-                <span class="dg-title vessel-title !mb-0 !pb-0 !border-b-0">VESSEL : H429</span>
-            </div>
+            <!-- Header Section -->
+            <div id="header-stage" class="relative flex justify-between items-start mb-4" style="min-height: 50px;">
+                <!-- Vessel Tag -->
+                <div id="vessel-box" class="header-box px-5 py-2 text-center">
+                    <span class="dg-title vessel-title !mb-0 !pb-0 !border-b-0">VESSEL : H429</span>
+                </div>
 
-            <!-- DRUMS Logo Center -->
-            <div id="logo-box" class="header-clickable absolute left-0 top-0 flex items-center justify-center">
-                <img src="./Asset/DRUMS_LOGO.png" alt="DRUMS logo" class="h-14 w-auto object-contain">
-            </div>
+                <!-- DRUMS Logo Center -->
+                <div id="logo-box" class="header-clickable absolute left-0 top-0 flex items-center justify-center">
+                    <img src="./Asset/DRUMS_LOGO.png" alt="DRUMS logo" class="h-14 w-auto object-contain">
+                </div>
 
-            <!-- Icons bên phải -->
-            <div id="header-right" class="flex items-start gap-3">
-                <div id="date-time-box" class="header-box min-w-[220px] h-10 flex items-center px-3 py-1">
-                    <div class="w-full">
-                        <div class="text-[10px] font-extrabold border-b border-gray-100 mb-0.5 text-center text-gray-600 leading-none">DATE & TIME</div>
-                        <div class="text-base font-bold text-center tracking-tight leading-none" id="clock">--/--/-- &nbsp;&nbsp; --:--:--</div>
+                <!-- Icons bên phải -->
+                <div id="header-right" class="flex items-start gap-3">
+                    <div id="date-time-box" class="header-box min-w-[220px] h-10 flex items-center px-3 py-1">
+                        <div class="w-full">
+                            <div class="text-[10px] font-extrabold border-b border-gray-100 mb-0.5 text-center text-gray-600 leading-none">DATE & TIME</div>
+                            <div class="text-base font-bold text-center tracking-tight leading-none" id="clock">--/--/-- &nbsp;&nbsp; --:--:--</div>
+                        </div>
+                    </div>
+                    <div id="header-icons" class="flex gap-2">
+                        <button title="User Profile" class="header-clickable w-10 h-10 bg-blue-600 rounded flex items-center justify-center text-white hover:bg-blue-700 transition-colors shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        </button>
+                        <button title="System Info" class="header-clickable w-10 h-10 bg-white border-2 border-blue-800 rounded-full flex items-center justify-center text-blue-800 font-black hover:bg-blue-50 transition-colors shadow-sm">i</button>
                     </div>
                 </div>
-                <div id="header-icons" class="flex gap-2">
-                    <button title="User Profile" class="header-clickable w-10 h-10 bg-blue-600 rounded flex items-center justify-center text-white hover:bg-blue-700 transition-colors shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                    </button>
-                    <button title="System Info" class="header-clickable w-10 h-10 bg-white border-2 border-blue-800 rounded-full flex items-center justify-center text-blue-800 font-black hover:bg-blue-50 transition-colors shadow-sm">i</button>
-                </div>
             </div>
 
-        </div>
-
-        <!-- Grid 5 máy -->
-        <div id="dg-cards-stage" class="dg-cards-stage mb-8">
-            
+            <!-- Grid 5 máy -->
+            <div id="dg-cards-stage" class="dg-cards-stage mb-8">
+                <section id="dg-section" class="dashboard-group-card">
             <!-- DG#1 -->
-            <div class="dg-card" data-dg-card="1" onclick="location.href='./Engine_graph.html?dg=1'">
+            <div class="dg-card" data-dg-card="1" onclick="location.href='./dg_dashboard.html?dg=1'">
                 <span class="dg-title">DG#1</span>
                 <div class="dg-card-main">
                     <div class="dg-engine-box dg-engine-visual flex items-center justify-center border border-gray-100">
@@ -70,7 +68,7 @@
             </div>
 
             <!-- DG#2 -->
-            <div class="dg-card" data-dg-card="2" onclick="location.href='./Engine_graph.html?dg=2'">
+            <div class="dg-card" data-dg-card="2" onclick="location.href='./dg_dashboard.html?dg=2'">
                 <span class="dg-title">DG#2</span>
                 <div class="dg-card-main">
                     <div class="dg-engine-box dg-engine-visual flex items-center justify-center border border-gray-100">
@@ -95,7 +93,7 @@
             </div>
 
             <!-- DG#3 -->
-            <div class="dg-card" data-dg-card="3" onclick="location.href='./Engine_graph.html?dg=3'">
+            <div class="dg-card" data-dg-card="3" onclick="location.href='./dg_dashboard.html?dg=3'">
                 <span class="dg-title">DG#3</span>
                 <div class="dg-card-main">
                     <div class="dg-engine-box dg-engine-visual flex items-center justify-center border border-gray-100">
@@ -119,6 +117,10 @@
                 <div id="dg3-link-fail" class="serial-fail">FAIL CONNECTION !</div>
             </div>
 
+                </section>
+
+                <section id="pms-section" class="dashboard-group-card">
+                    <div class="dashboard-group-title dashboard-group-title-centered">Power Management System</div>
             <!-- PMS Cards -->
             <div class="dg-card pms-card" data-pms-card="1">
                 <div class="pms-metrics">
@@ -143,7 +145,8 @@
                         <span id="pms-card-dg1-pwr" class="pms-value">--</span>
                     </div>
                 </div>
-                <div class="serial-fail" data-hide-when-ok="1"></div>
+                <div class="pms-card-title">DG#1</div>
+                
             </div>
 
             <div class="dg-card pms-card" data-pms-card="2">
@@ -169,7 +172,8 @@
                         <span id="pms-card-dg2-pwr" class="pms-value">--</span>
                     </div>
                 </div>
-                <div class="serial-fail" data-hide-when-ok="1"></div>
+                <div class="pms-card-title">DG#2</div>
+                
             </div>
 
             <div class="dg-card pms-card" data-pms-card="3">
@@ -195,11 +199,15 @@
                         <span id="pms-card-dg3-pwr" class="pms-value">--</span>
                     </div>
                 </div>
-                <div class="serial-fail" data-hide-when-ok="1"></div>
+                <div class="pms-card-title">DG#3</div>
+                
             </div>
 
+                </section>
+
+                <section id="me-section" class="dashboard-group-card">
             <!-- ME-STBD -->
-            <div class="dg-card" data-dg-card="4" onclick="location.href='./ME_dashboard.html?dg=ME-STBD'">
+            <div class="dg-card" data-dg-card="4" onclick="location.href='./me_dashboard.html?dg=ME-STBD'">
                 <span class="dg-title">ME-STBD</span>
                 <div class="dg-card-main">
                     <div class="dg-engine-box dg-engine-visual flex items-center justify-center border border-gray-100">
@@ -224,7 +232,7 @@
             </div>
 
             <!-- ME-PORT -->
-            <div class="dg-card" data-dg-card="5" onclick="location.href='./ME_dashboard.html?dg=ME-PORT'">
+            <div class="dg-card" data-dg-card="5" onclick="location.href='./me_dashboard.html?dg=ME-PORT'">
                 <span class="dg-title">ME-PORT</span>
                 <div class="dg-card-main">
                     <div class="dg-engine-box dg-engine-visual flex items-center justify-center border border-gray-100">
@@ -246,18 +254,18 @@
                     </div>
                 </div>
                 <div class="serial-fail" data-hide-when-ok="1"></div>
-            </div>
+                </section>
 
         </div>
 
-        <!-- Thanh trạng thái phía dưới (Status Bar) -->
-        <div id="system-status-bar" class="mt-auto border border-gray-400 bg-gray-200 p-2 text-[10px] font-bold flex justify-between text-gray-700 shadow-inner">
-            <div class="flex gap-6">
-                <span>SYSTEM STATUS: <span class="text-green-700">NORMAL</span></span>
-                <span>COMMUNICATION: <span class="text-blue-700">TCP/IP CONNECTED</span></span>
+            <!-- Thanh trạng thái phía dưới (Status Bar) -->
+            <div id="system-status-bar" class="mt-auto border border-gray-400 bg-gray-200 p-2 text-[10px] font-bold flex justify-between text-gray-700 shadow-inner">
+                <div class="flex gap-6">
+                    <span>SYSTEM STATUS: <span class="text-green-700">NORMAL</span></span>
+                    <span>COMMUNICATION: <span class="text-blue-700">TCP/IP CONNECTED</span></span>
+                </div>
+                <div class="italic">DRUMS v2.5.0</div>
             </div>
-            <div class="italic">DRUMS v2.5.0</div>
-        </div>
     </div>
 
     <script src="./dashboard_shared.js"></script>
@@ -277,23 +285,17 @@
         ];
         const INDEX_IDLE_CRITICAL_IGNORE_LABELS = new Set(["STARTING AIR PRESSURE"]);
 
-        // Cập nhật đồng hồ thời gian thực
+        // Manual UI layout for the home dashboard.
+        // Edit only this object when you want to move DG / PMS / ME cards around.
         const UI_LAYOUT = {
             vesselBox: { mode: "absolute", x: "50%", y: "8px", width: "360px", transform: "translateX(-50%)" },
             logoBox: { mode: "absolute", x: "0%", y: "0%" },
             headerRight: { mode: "absolute", x: "100%", y: "0%", transform: "translateX(-100%)" },
             systemStatusBar: { mode: "absolute", x: "1.5%", y: "96%", width: "97%" },
-            cards: {
-                "1": { x: "1.5%", y: "3%", width: "31%", height: "330px" },
-                "2": { x: "34.5%", y: "3%", width: "31%", height: "330px" },
-                "3": { x: "67.5%", y: "3%", width: "31%", height: "330px" },
-                "4": { x: "1.5%", y: "76%", width: "47%", height: "330px" },
-                "5": { x: "51.5%", y: "76%", width: "47%", height: "330px" }
-            },
-            pmsCards: {
-                "1": { x: "1.5%", y: "44%", width: "31%", height: "230px" },
-                "2": { x: "34.5%", y: "44%", width: "31%", height: "230px" },
-                "3": { x: "67.5%", y: "44%", width: "31%", height: "230px" }
+            sections: {
+                dg: { x: "1.5%", y: "3%", width: "97%", height: "360px" },
+                pms: { x: "1.5%", y: "53%", width: "97%", height: "390px" },
+                me: { x: "1.5%", y: "107%", width: "97%", height: "530px" }
             }
         };
 
@@ -319,40 +321,14 @@
             applyLayoutForElement(document.getElementById("logo-box"), layout.logoBox);
             applyLayoutForElement(document.getElementById("header-right"), layout.headerRight);
             applyLayoutForElement(document.getElementById("system-status-bar"), layout.systemStatusBar);
-            applyCardLayout(layout.cards);
-            applyPmsCardLayout(layout.pmsCards);
+            applySectionLayout(layout.sections);
         }
 
-        function applyCardLayout(layout) {
-            const stage = document.getElementById("dg-cards-stage");
-            if (!stage) return;
-            const cards = stage.querySelectorAll(".dg-card[data-dg-card]");
-            cards.forEach((card) => {
-                const key = card.getAttribute("data-dg-card");
-                const cfg = layout[key];
-                if (!cfg) return;
-                card.style.position = "absolute";
-                if (cfg.x != null) card.style.left = cfg.x;
-                if (cfg.y != null) card.style.top = cfg.y;
-                if (cfg.width != null) card.style.width = cfg.width;
-                if (cfg.height != null) card.style.height = cfg.height;
-            });
-        }
-
-        function applyPmsCardLayout(layout) {
-            const stage = document.getElementById("dg-cards-stage");
-            if (!stage || !layout) return;
-            const cards = stage.querySelectorAll(".pms-card[data-pms-card]");
-            cards.forEach((card) => {
-                const key = card.getAttribute("data-pms-card");
-                const cfg = layout[key];
-                if (!cfg) return;
-                card.style.position = "absolute";
-                if (cfg.x != null) card.style.left = cfg.x;
-                if (cfg.y != null) card.style.top = cfg.y;
-                if (cfg.width != null) card.style.width = cfg.width;
-                if (cfg.height != null) card.style.height = cfg.height;
-            });
+        function applySectionLayout(layout) {
+            if (!layout) return;
+            applyLayoutForElement(document.getElementById("dg-section"), layout.dg);
+            applyLayoutForElement(document.getElementById("pms-section"), layout.pms);
+            applyLayoutForElement(document.getElementById("me-section"), layout.me);
         }
 
         function updateClock() {

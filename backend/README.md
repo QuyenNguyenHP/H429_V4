@@ -1,19 +1,17 @@
-# Backend
+# Backend ⚙️
 
-FastAPI backend for H429 monitoring.
+FastAPI backend cho hệ thống giám sát H429.
 
-## Active Files
+## Thành phần active 📦
 
 ```text
 backend/
   app/
     api/
       Check_all_status_lable.py
-      system.py
-      timestamp.py
+      engine_graph.py
     services/
       live_service.py
-      system_service.py
     config.py
     db.py
     main.py
@@ -26,70 +24,109 @@ backend/
   run.py
 ```
 
-## APIs
+## API đang dùng ✅
+
+Các API đang được frontend active gọi:
 
 - `GET /api/check_all_status_lable/all`
+- `GET /api/check_all_status_lable/index`
+- `GET /api/check_all_status_lable/snapshot`
+- `GET /api/engine_graph`
+- `GET /api/engine_graph/pms`
+
+## API đã bỏ 🧹
+
+Các API legacy không còn dùng và đã được xóa:
+
 - `GET /api/timestamp`
 - `GET /api/system/health`
 - `GET /api/system/status`
+- `GET /api/load_trend`
+- `GET /api/cylinder_exh`
 
-## Database
+## `engine_graph` hiện xử lý gì 📊
 
-Configured in [config.py](</c:/Users/Quyen PC/Desktop/My Repo/H429/backend/app/config.py:7>).
+`/api/engine_graph` hiện là API trend trung tâm cho:
+
+- `graph_type=load`
+- `graph_type=load_detail`
+- `graph_type=cylinder_exh`
+- `graph_type=tc_exh`
+
+`/api/engine_graph/pms` dùng để trả snapshot PMS:
+
+- `power_kw`
+- `current`
+- `voltage`
+- `frequency`
+
+Theo từng:
+- `DG#1`
+- `DG#2`
+- `DG#3`
+
+## Database 🗄️
 
 Runtime database:
 
 - `backend/h429_data.db`
 
-Tables:
+Bảng chính:
 
 - `live_engine_data`
 - `Stored_database`
 
-## Importer
+## Importer 📥
 
-Script: [import_new_data_to_database.py](</c:/Users/Quyen PC/Desktop/My Repo/H429/backend/import_new_data_to_database.py:1>)
+Script:
+
+- `backend/import_new_data_to_database.py`
 
 Behavior:
 
-- Watches `backend/arrived_data` every 3 seconds
-- Accepts `.csv` and `.zip`
-- Extracts CSV files from zip archives
-- Merges all rows into one archived CSV file in `backend/archived_csv`
-- Replaces all rows in `live_engine_data`
-- Appends imported rows into `Stored_database`
-- Deletes processed source files from `arrived_data`
+- theo dõi `backend/arrived_data`
+- nhận `.csv` và `.zip`
+- giải nén CSV từ file zip
+- thay toàn bộ dữ liệu `live_engine_data`
+- append lịch sử vào `Stored_database`
+- ghi archive vào `backend/archived_csv`
+- xóa file nguồn sau khi xử lý xong
 
-Run one cycle manually:
+### Chạy một lần
 
 ```bash
 cd backend
 python3 import_new_data_to_database.py --once
 ```
 
-Run continuously:
+### Chạy liên tục
 
 ```bash
 cd backend
 python3 import_new_data_to_database.py
 ```
 
-## Start Backend
+## Chạy backend ▶️
 
 ```bash
 cd backend
 python3 run.py
 ```
 
-`run.py` starts both:
+`run.py` sẽ chạy:
+- FastAPI server trên port `8888`
+- importer background
 
-- the FastAPI server on port `8131`
-- the background importer process
-
-## Quick Checks
+## Kiểm tra nhanh 🔎
 
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:8131/api/check_all_status_lable/all" -Method Get | ConvertTo-Json -Depth 6
-Invoke-RestMethod -Uri "http://localhost:8131/api/timestamp?dg_name=DG%231" -Method Get | ConvertTo-Json -Depth 5
-Invoke-RestMethod -Uri "http://localhost:8131/api/system/health" -Method Get | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Uri "http://localhost:8888/api/check_all_status_lable/all" -Method Get | ConvertTo-Json -Depth 6
+Invoke-RestMethod -Uri "http://localhost:8888/api/check_all_status_lable/index" -Method Get | ConvertTo-Json -Depth 6
+Invoke-RestMethod -Uri "http://localhost:8888/api/engine_graph?from=2026-04-17T00:00:00Z&to=2026-04-18T00:00:00Z&graph_type=load&dg_names=DG%231" -Method Get | ConvertTo-Json -Depth 6
+Invoke-RestMethod -Uri "http://localhost:8888/api/engine_graph/pms?timestamp=2026-04-18T00:00:00Z" -Method Get | ConvertTo-Json -Depth 6
 ```
+
+## Ghi chú 📝
+
+- Backend hiện dùng `engine_graph.py` làm đầu mối cho trend API.
+- PMS đã được gom vào backend hiện tại, không còn API riêng kiểu cũ nữa.

@@ -1,0 +1,16 @@
+[Unit]
+Description=H429 FastAPI backend
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=__APP_ROOT__/backend
+ExecStart=__PYTHON_BIN__ run.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

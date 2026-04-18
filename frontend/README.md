@@ -1,164 +1,124 @@
-# Frontend
+# Frontend 🖥️
 
-Static frontend pages for the H429 monitoring system.
+Frontend là tập các trang HTML tĩnh cho dashboard H429.
 
-The frontend is file-based and talks to the FastAPI backend over HTTP. It provides:
+## Trang active 🌐
 
-- a home overview for all major machines
-- detailed DG dashboards
-- detailed main engine dashboards
-- a DG load trend page with time-range filtering and timezone-aware display
-- a cylinder exhaust trend page with six cylinder series
+### `index.html` 🏠
+- Trang tổng quan toàn hệ thống
+- Hiển thị:
+  - `DG#1`, `DG#2`, `DG#3`
+  - `ME-PORT`, `ME-STBD`
+  - 3 card `PMS`
+- Có sidebar menu chung
+- Dùng `UI_LAYOUT` để chỉnh vị trí các section trên trang chủ
 
-## Active Pages
+API dùng:
+- `GET /api/check_all_status_lable/index`
+- fallback PMS từ `GET /api/check_all_status_lable/all`
 
-### `index.html`
+### `dg_dashboard.html` 🔵
+- Dashboard chi tiết cho DG
+- Route:
+  - `dg_dashboard.html?dg=1`
+  - `dg_dashboard.html?dg=2`
+  - `dg_dashboard.html?dg=3`
+- Có:
+  - overlay giá trị trên ảnh máy
+  - bảng `Digital Value`
+  - embedded trend chart
+  - điều hướng sang `3DGs_graph.html`
 
-Home page for the vessel overview.
+API dùng:
+- `GET /api/check_all_status_lable/snapshot?dg_name=...`
+- `GET /api/engine_graph`
 
-Main features:
+### `me_dashboard.html` 🟢
+- Dashboard chi tiết cho main engine
+- Route:
+  - `me_dashboard.html?dg=ME-PORT`
+  - `me_dashboard.html?dg=ME-STBD`
+- Có:
+  - overlay tag trên ảnh máy
+  - bảng `Analog Value`
+  - bảng `Digital Value`
+- Vị trí UI chỉnh qua `UI_LAYOUT`
 
-- shows the five main machine cards: `DG#1`, `DG#2`, `DG#3`, `ME-PORT`, and `ME-STBD`
-- displays high-level status indicators such as ready, running, alarm, and connection state
-- provides quick navigation into the machine-specific detail pages
-- shows a live date/time header
+API dùng:
+- `GET /api/check_all_status_lable/snapshot?dg_name=...`
 
-API usage:
+### `3DGs_graph.html` 📈
+- Trang trend cho 3 DG
+- Đã tách thành 2 section lớn:
+  - section filter + `LOAD`
+  - section `DGs Running Hours` + `PMS`
+- Có:
+  - chọn thời gian
+  - chọn `DG#`
+  - nút `Prev 24h / Next 24h / Apply`
+  - chọn điểm trên đồ thị để sync `PMS`
+  - `Esc` để reset điểm chọn
+  - zoom bằng nút kính lúp `+ / -`
+  - pan chart bằng chuột trái
 
+Script chính:
+- `dg_load_trend.js`
+
+API dùng:
+- `GET /api/engine_graph?graph_type=load`
+- `GET /api/engine_graph/pms`
 - `GET /api/check_all_status_lable/all`
 
-### `Engine_graph.html`
+### `Cyl_exh_graph.html` 🌡️
+- Trang trend nhiệt độ exhaust
+- Có:
+  - chọn DG
+  - chọn cylinder
+  - zoom/pan chart
+  - hiển thị theo browser timezone
 
-Detailed dashboard for a diesel generator.
-
-Routing:
-
-- `Engine_graph.html?dg=1`
-- `Engine_graph.html?dg=2`
-- `Engine_graph.html?dg=3`
-
-Main features:
-
-- shows DG-specific analog and digital points
-- updates header lights and alarm state
-- displays the latest timestamp for the selected DG
-- allows switching between DG pages from inside the dashboard
-- provides navigation to the DG load trend page
-
-API usage:
-
-- `GET /api/check_all_status_lable/all`
-- `GET /api/timestamp?dg_name=...`
-
-### `ME_dashboard.html`
-
-Detailed dashboard for a main engine page.
-
-Routing:
-
-- `ME_dashboard.html?dg=ME-PORT`
-- `ME_dashboard.html?dg=ME-STBD`
-
-Main features:
-
-- shows analog and digital values for the selected main engine
-- updates running/ready/alarm indicators
-- displays the latest available timestamp in the page header
-- allows switching between `ME-PORT` and `ME-STBD`
-
-API usage:
-
-- `GET /api/check_all_status_lable/all`
-
-### `3DGs_graph.html`
-
-DG load trend page.
-
-Main features:
-
-- plots DG load history over a selected time range
-- supports selecting one or more DGs
-- keeps the response capped to a maximum number of points for performance
-- uses the browser timezone for display while keeping backend/API requests in UTC
-- supports wheel zoom, right-click drag panning, and double-click reset to the selected full range
-- caches recent trend responses in session storage for faster repeat loads
-
-Primary script:
-
-- `Load_graph.js`
-
-API usage:
-
-- `GET /api/load_trend?from=...&to=...&dg_names=...&max_points=...`
-
-### `Cyl_exh_graph.html`
-
-Cylinder exhaust trend page.
-
-Main features:
-
-- plots six cylinder exhaust temperature series for a selected DG
-- supports enabling or disabling each cylinder line independently
-- keeps the response capped to a maximum number of points for performance
-- uses the browser timezone for display while keeping backend/API requests in UTC
-- supports wheel zoom, right-click drag panning, and double-click reset to the selected full range
-
-Primary script:
-
+Script chính:
 - `Cyl_exh_graph.js`
 
-API usage:
+API dùng:
+- `GET /api/engine_graph?graph_type=cylinder_exh`
 
-- `GET /api/cylinder_exh?from=...&to=...&dg_name=...&max_points=...`
-
-## Shared Frontend Files
+## File dùng chung ♻️
 
 ### `app.css`
-
-Shared styling used across the frontend pages.
+- CSS dùng chung toàn frontend
+- chứa style cho:
+  - `main-container`
+  - sidebar menu
+  - home cards
+  - dashboard tables
 
 ### `dashboard_shared.js`
+- helper dùng chung cho frontend:
+  - resolve backend origin
+  - fetch with timeout
+  - global sidebar menu
+  - helper pan / zoom / reset viewport cho chart
 
-Shared helpers for:
-
-- backend origin resolution
-- lightweight fetch-with-timeout handling
-- common utility methods for DOM access and DG-name normalization
-
-## Assets
-
-The `Asset/` directory contains images and visual resources used by the dashboards, such as:
-
-- DRUMS logos
-- engine illustrations
-- page-specific visual assets
-
-## Local Run
-
-Serve the frontend from the `frontend/` directory with any static file server.
-
-Example using Python:
+## Chạy local ▶️
 
 ```bash
 cd frontend
-python -m http.server 5170 --bind 0.0.0.0
+python3 -m http.server 5170 --bind 0.0.0.0
 ```
 
-Then open:
+Mở:
 
 - `http://localhost:5170/index.html`
-- `http://localhost:5170/Engine_graph.html?dg=1`
-- `http://localhost:5170/ME_dashboard.html?dg=ME-PORT`
+- `http://localhost:5170/dg_dashboard.html?dg=1`
+- `http://localhost:5170/me_dashboard.html?dg=ME-PORT`
 - `http://localhost:5170/3DGs_graph.html`
 - `http://localhost:5170/Cyl_exh_graph.html`
 
-The backend is expected to be available at:
+## Ghi chú 📝
 
-- `http://localhost:8888`
-
-You can override the frontend API target by defining `window.API_BASE_URL` or `window.APP_CONFIG.apiBaseUrl` before the page scripts run.
-
-## Notes
-
-- `DGs_dashboard.html.bak` is an inactive backup file that may still contain older API references and is not part of the active UI flow.
-- The current frontend primarily uses inline page scripts plus `dashboard_shared.js`.
+- File active hiện tại là:
+  - `dg_dashboard.html`
+  - `me_dashboard.html`
+- Các tên cũ như `Engine_graph.html` và `ME_dashboard.html` không còn là file active.
+- `DGs_dashboard.html.bak` chỉ là file backup cũ, không thuộc luồng chạy hiện tại.

@@ -1,0 +1,16 @@
+[Unit]
+Description=H429 static frontend server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=__APP_ROOT__/frontend
+ExecStart=__PYTHON_BIN__ -m http.server 5170 --bind 0.0.0.0
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

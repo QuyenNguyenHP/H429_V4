@@ -18,35 +18,65 @@
             datasetMeta.data.forEach((bar, index) => {
                 const value = Number(dataset.data[index]);
                 if (!Number.isFinite(value)) return;
-
-                const x = bar.x;
-                const y = (bar.y + bar.base) / 2;
                 ctx.fillStyle = "#0f172a";
-                ctx.fillText(String(value), x, y);
+                ctx.fillText(String(value), bar.x, (bar.y + bar.base) / 2);
             });
 
             ctx.restore();
         },
     };
 
-    const { fetchWithTimeout, resolveApiOrigin } = window.DashboardShared;
+    const pmsValueLabelPlugin = {
+        id: "pmsValueLabel",
+        afterDatasetsDraw(chart) {
+            if (chart?.canvas?.id !== "pms-chart") return;
+            const { ctx } = chart;
+            ctx.save();
+            ctx.textAlign = "center";
+            ctx.textBaseline = "bottom";
+            ctx.font = "700 11px sans-serif";
+            ctx.fillStyle = "#0f172a";
+
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+                const meta = chart.getDatasetMeta(datasetIndex);
+                meta.data.forEach((bar, index) => {
+                    const value = Number(dataset.data[index]);
+                    if (!Number.isFinite(value) || value <= 0) return;
+                    ctx.fillText(String(Math.round(value * 100) / 100), bar.x, bar.y - 4);
+                });
+            });
+
+            ctx.restore();
+        },
+    };
+
+    const { fetchWithTimeout, resolveApiOrigin, bindChartViewportControls } = window.DashboardShared;
 
     const DOM = {
         from: document.getElementById("from-utc"),
         to: document.getElementById("to-utc"),
+        dgCheckboxes: Array.from(document.querySelectorAll('input[name="dg-name"]')),
         status: document.getElementById("trend-status"),
         loading: document.getElementById("trend-loading"),
         clock: document.getElementById("current-datetime"),
         chartCanvas: document.getElementById("load-trend-chart"),
         runningHoursCanvas: document.getElementById("running-hours-chart"),
+        pmsCanvas: document.getElementById("pms-chart"),
+        pmsStatus: document.getElementById("pms-status"),
+        pmsLoading: document.getElementById("pms-loading"),
+        pmsVoltageValue: document.getElementById("pms-voltage-value"),
+        pmsFrequencyValue: document.getElementById("pms-frequency-value"),
         apply: document.getElementById("apply-btn"),
         prev: document.getElementById("prev-24h-btn"),
         next: document.getElementById("next-24h-btn"),
+        zoomIn: document.getElementById("zoom-in-btn"),
+        zoomOut: document.getElementById("zoom-out-btn"),
         home: document.getElementById("go-home-logo"),
     };
 
     const CONFIG = {
         apiBase: `${resolveApiOrigin()}/api/engine_graph`,
+        pmsApiBase: `${resolveApiOrigin()}/api/engine_graph/pms`,
         latestStatusApiBase: `${resolveApiOrigin()}/api/check_all_status_lable/all`,
         rangeMs: 24 * 60 * 60 * 1000,
         maxGapMs: 15 * 60 * 1000,
@@ -66,13 +96,16 @@
     const state = {
         chart: null,
         runningHoursChart: null,
+        pmsChart: null,
         range: { fromMs: NaN, toMs: NaN },
-        isPanning: false,
-        lastPanClientX: 0,
+        didPan: false,
         activeRequestId: 0,
+        activePmsRequestId: 0,
         timeZone: "__browser__",
         selectedPointMs: NaN,
+        selectedDgNames: [],
     };
+
     const initialDg = (() => {
         const raw = new URLSearchParams(window.location.search).get("dg");
         const normalized = String(raw || "").trim().toUpperCase();
@@ -161,6 +194,12 @@
         return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}:${parts.second} ${getSelectedTimeZoneLabel()}`;
     }
 
+    function formatPmsSnapshotText(timestampValue) {
+        const ms = parseApiTimestamp(timestampValue);
+        if (!Number.isFinite(ms)) return "Showing latest PMS snapshot.";
+        return `PMS snapshot at ${formatTooltipTime(ms)}.`;
+    }
+
     function updateHeaderTime() {
         if (!DOM.clock) return;
         const now = new Date();
@@ -178,9 +217,9 @@
         DOM.loading.classList.toggle("active", !!isLoading);
     }
 
-    function clearSelectedTrendPoint() {
-        state.selectedPointMs = NaN;
-        if (state.chart) state.chart.update("none");
+    function setPmsLoading(isLoading) {
+        if (!DOM.pmsLoading) return;
+        DOM.pmsLoading.classList.toggle("active", !!isLoading);
     }
 
     function buildCacheKey(queryString) { return `${CONFIG.cachePrefix}${queryString}`; }
@@ -237,10 +276,21 @@
         const tooltipEl = document.createElement("div");
         tooltipEl.className = "chartjs-external-tooltip";
         Object.assign(tooltipEl.style, {
-            background: "rgba(255, 255, 255, 0.98)", border: "1px solid #94a3b8", borderRadius: "10px", color: "#0f172a",
-            pointerEvents: "none", position: "absolute", transform: "translate(-50%, 0)", transition: "all .08s ease",
-            padding: "8px 10px", fontWeight: "700", fontSize: "12px", boxShadow: "0 10px 20px rgba(15, 23, 42, 0.18)",
-            whiteSpace: "nowrap", zIndex: "20", opacity: "0",
+            background: "rgba(255, 255, 255, 0.98)",
+            border: "1px solid #94a3b8",
+            borderRadius: "10px",
+            color: "#0f172a",
+            pointerEvents: "none",
+            position: "absolute",
+            transform: "translate(-50%, 0)",
+            transition: "all .08s ease",
+            padding: "8px 10px",
+            fontWeight: "700",
+            fontSize: "12px",
+            boxShadow: "0 10px 20px rgba(15, 23, 42, 0.18)",
+            whiteSpace: "nowrap",
+            zIndex: "20",
+            opacity: "0",
         });
         chartInstance.canvas.parentNode.style.position = "relative";
         chartInstance.canvas.parentNode.appendChild(tooltipEl);
@@ -302,7 +352,6 @@
         };
     }
 
-    function buildChart() { state.chart = new Chart(DOM.chartCanvas.getContext("2d"), createChartConfig()); }
     function createRunningHoursChartConfig() {
         return {
             type: "bar",
@@ -351,105 +400,133 @@
             },
         };
     }
+
+    function createPmsChartConfig() {
+        return {
+            type: "bar",
+            data: {
+                labels: ["DG#1", "DG#2", "DG#3"],
+                datasets: [
+                    { label: "Power (kW)", data: [0, 0, 0], backgroundColor: [], borderColor: [], borderWidth: 1.5, borderRadius: 8, categoryPercentage: 0.62, barPercentage: 0.88 },
+                    { label: "Current (A)", data: [0, 0, 0], backgroundColor: [], borderColor: [], borderWidth: 1.5, borderRadius: 8, categoryPercentage: 0.62, barPercentage: 0.88 },
+                ],
+            },
+            options: {
+                animation: false,
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        onClick: () => {},
+                        labels: { color: "#334155", font: { size: 12, weight: "700" } },
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label(context) {
+                                const unit = context.dataset.label.includes("Current") ? "A" : "kW";
+                                const value = Number(context.parsed.y);
+                                return `${context.dataset.label} ${context.label}: ${Number.isFinite(value) ? value : 0} ${unit}`;
+                            },
+                        },
+                    },
+                },
+                scales: {
+                    x: {
+                        stacked: false,
+                        ticks: {
+                            color(context) {
+                                const label = String(context?.tick?.label || "");
+                                return state.selectedDgNames.includes(label) ? "#475569" : "#94a3b8";
+                            },
+                            font: { size: 13, weight: "700" },
+                        },
+                        grid: { display: false },
+                        border: { color: "rgba(100, 116, 139, 0.28)" },
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 600,
+                        ticks: { color: "#475569" },
+                        title: { display: true, text: "Power / Current", color: "#334155", font: { size: 14, style: "italic", weight: "700" } },
+                        grid: { color: "rgba(100, 116, 139, 0.14)" },
+                        border: { color: "rgba(100, 116, 139, 0.28)" },
+                    },
+                },
+            },
+        };
+    }
+
+    function buildChart() {
+        state.chart = new Chart(DOM.chartCanvas.getContext("2d"), createChartConfig());
+    }
+
     function buildRunningHoursChart() {
         if (!DOM.runningHoursCanvas) return;
-        state.runningHoursChart = new Chart(
-            DOM.runningHoursCanvas.getContext("2d"),
-            {
-                ...createRunningHoursChartConfig(),
-                plugins: [runningHoursValueLabelPlugin],
-            }
-        );
+        state.runningHoursChart = new Chart(DOM.runningHoursCanvas.getContext("2d"), {
+            ...createRunningHoursChartConfig(),
+            plugins: [runningHoursValueLabelPlugin],
+        });
     }
 
-    function panChartByPixels(deltaX) {
-        const xScale = state.chart?.scales?.x;
-        if (!xScale) return;
-        const min = Number(xScale.min), max = Number(xScale.max), originalMin = Number(state.range.fromMs), originalMax = Number(state.range.toMs);
-        if (![min, max, originalMin, originalMax].every(Number.isFinite) || max <= min || originalMax <= originalMin) return;
-        const shift = deltaX * ((max - min) / (xScale.width || 1));
-        const windowSize = max - min;
-        let nextMin = min - shift, nextMax = max - shift;
-        if (nextMin < originalMin) [nextMin, nextMax] = [originalMin, originalMin + windowSize];
-        if (nextMax > originalMax) [nextMin, nextMax] = [originalMax - windowSize, originalMax];
-        state.chart.options.scales.x.min = Math.max(nextMin, originalMin);
-        state.chart.options.scales.x.max = Math.min(nextMax, originalMax);
-        state.chart.update("none");
-    }
-
-    function zoomChartAtClientX(deltaY, clientX) {
-        const xScale = state.chart?.scales?.x;
-        if (!xScale) return;
-        const min = Number(xScale.min), max = Number(xScale.max), originalMin = Number(state.range.fromMs), originalMax = Number(state.range.toMs);
-        if (![min, max, originalMin, originalMax].every(Number.isFinite) || max <= min || originalMax <= originalMin) return;
-        const fullRange = originalMax - originalMin, currentRange = max - min;
-        const pointerRatio = Math.min(1, Math.max(0, (clientX - xScale.left) / (xScale.width || 1)));
-        const anchorValue = min + currentRange * pointerRatio;
-        const zoomFactor = deltaY < 0 ? 0.85 : 1.18;
-        let nextRange = currentRange * zoomFactor;
-        nextRange = Math.max(CONFIG.minZoomRangeMs, Math.min(fullRange, nextRange));
-        if (Math.abs(nextRange - currentRange) < 1) return;
-        if (nextRange >= fullRange) {
-            state.chart.options.scales.x.min = originalMin;
-            state.chart.options.scales.x.max = originalMax;
-            state.chart.update("none");
-            return;
-        }
-        let nextMin = anchorValue - nextRange * pointerRatio;
-        let nextMax = nextMin + nextRange;
-        if (nextMin < originalMin) { nextMin = originalMin; nextMax = originalMin + nextRange; }
-        if (nextMax > originalMax) { nextMax = originalMax; nextMin = originalMax - nextRange; }
-        state.chart.options.scales.x.min = nextMin;
-        state.chart.options.scales.x.max = nextMax;
-        state.chart.update("none");
-    }
-
-    function bindPanZoom() {
-        DOM.chartCanvas.addEventListener("mousedown", (event) => {
-            if (event.button !== 2) return;
-            event.preventDefault();
-            state.isPanning = true;
-            state.lastPanClientX = event.clientX;
+    function buildPmsChart() {
+        if (!DOM.pmsCanvas) return;
+        state.pmsChart = new Chart(DOM.pmsCanvas.getContext("2d"), {
+            ...createPmsChartConfig(),
+            plugins: [pmsValueLabelPlugin],
         });
-        DOM.chartCanvas.addEventListener("mousemove", (event) => {
-            if (!state.isPanning) return;
-            event.preventDefault();
-            panChartByPixels(event.clientX - state.lastPanClientX);
-            state.lastPanClientX = event.clientX;
-        });
-        const stopPan = () => { state.isPanning = false; };
-        DOM.chartCanvas.addEventListener("mouseup", stopPan);
-        DOM.chartCanvas.addEventListener("mouseleave", stopPan);
-        DOM.chartCanvas.addEventListener("contextmenu", (event) => { if (state.isPanning || event.button === 2) event.preventDefault(); });
-        DOM.chartCanvas.addEventListener("wheel", (event) => { event.preventDefault(); zoomChartAtClientX(event.deltaY, event.clientX); }, { passive: false });
-        DOM.chartCanvas.addEventListener("click", (event) => {
-            if (!state.chart) return;
-            const points = state.chart.getElementsAtEventForMode(
-                event,
-                "nearest",
-                { intersect: true },
-                false
-            );
-            if (!Array.isArray(points) || points.length === 0) return;
-            const firstPoint = points[0];
-            const dataset = state.chart.data.datasets?.[firstPoint.datasetIndex];
-            const rawPoint = dataset?.data?.[firstPoint.index];
-            if (!rawPoint || !Number.isFinite(rawPoint.x) || !Number.isFinite(rawPoint.y)) return;
-            state.selectedPointMs = Number(rawPoint.x);
-            state.chart.update("none");
-        });
-        DOM.chartCanvas.addEventListener("dblclick", () => {
-            if (!Number.isFinite(state.range.fromMs) || !Number.isFinite(state.range.toMs)) return;
-            clearSelectedTrendPoint();
-            state.chart.options.scales.x.min = state.range.fromMs;
-            state.chart.options.scales.x.max = state.range.toMs;
-            state.chart.update("none");
-        });
-        window.addEventListener("mouseup", stopPan);
     }
 
     function isSelectedPoint(pointX) {
         return Number.isFinite(state.selectedPointMs) && Math.abs(Number(pointX) - state.selectedPointMs) < 1000;
+    }
+
+    async function loadPmsSnapshot(timestampIso) {
+        const requestId = ++state.activePmsRequestId;
+        const params = new URLSearchParams();
+        if (timestampIso) params.set("timestamp", timestampIso);
+        if (DOM.pmsStatus) DOM.pmsStatus.textContent = timestampIso ? "Loading PMS snapshot for selected point..." : "Loading latest PMS snapshot...";
+        setPmsLoading(true);
+        try {
+            const response = await fetchWithTimeout(`${CONFIG.pmsApiBase}?${params.toString()}`, CONFIG.requestTimeoutMs, { cache: "no-store" });
+            if (!response.ok) throw new Error(`PMS API error: ${response.status}`);
+            const payload = await response.json();
+            if (requestId !== state.activePmsRequestId) return;
+            applyPmsChartData(payload);
+        } catch (error) {
+            console.error("PMS snapshot fetch error:", error);
+            if (requestId !== state.activePmsRequestId) return;
+            if (DOM.pmsStatus) DOM.pmsStatus.textContent = error?.message || "Failed to load PMS snapshot.";
+        } finally {
+            if (requestId === state.activePmsRequestId) setPmsLoading(false);
+        }
+    }
+
+    function clearSelectedTrendPoint() {
+        state.selectedPointMs = NaN;
+        if (state.chart) state.chart.update("none");
+        void loadPmsSnapshot("");
+    }
+
+    function bindPanZoom() {
+        bindChartViewportControls({
+            chartCanvas: DOM.chartCanvas,
+            zoomInButton: DOM.zoomIn,
+            zoomOutButton: DOM.zoomOut,
+            getChart: () => state.chart,
+            getRange: () => state.range,
+            minZoomRangeMs: CONFIG.minZoomRangeMs,
+            mouseButton: 0,
+            intersect: false,
+            onPointSelect: (rawPoint) => {
+                state.selectedPointMs = Number(rawPoint.x);
+                state.chart?.update("none");
+                void loadPmsSnapshot(new Date(state.selectedPointMs).toISOString());
+            },
+            onReset: () => {
+                if (!Number.isFinite(state.selectedPointMs)) return;
+                clearSelectedTrendPoint();
+            },
+        });
     }
 
     function applyChartData(payload) {
@@ -468,20 +545,20 @@
             const style = CONFIG.seriesStyle[item.dg_name] || CONFIG.seriesStyle["DG#1"];
             const basePointRadius = validPoints.length <= 2 ? 4 : 1.5;
             return [{
-                label: item.dg_name, unit: item.unit || "KwE", data, parsing: false, normalized: true,
+                label: item.dg_name,
+                unit: item.unit || "KwE",
+                data,
+                parsing: false,
+                normalized: true,
                 borderColor: Number.isFinite(state.selectedPointMs) ? "rgba(148, 163, 184, 0.8)" : style.borderColor,
                 backgroundColor: Number.isFinite(state.selectedPointMs) ? "rgba(148, 163, 184, 0.18)" : style.backgroundColor,
                 pointBackgroundColor(context) {
                     const pointX = Number(context?.raw?.x);
-                    return isSelectedPoint(pointX) || !Number.isFinite(state.selectedPointMs)
-                        ? style.borderColor
-                        : "rgba(148, 163, 184, 0.75)";
+                    return isSelectedPoint(pointX) || !Number.isFinite(state.selectedPointMs) ? style.borderColor : "rgba(148, 163, 184, 0.75)";
                 },
                 pointBorderColor(context) {
                     const pointX = Number(context?.raw?.x);
-                    return isSelectedPoint(pointX) || !Number.isFinite(state.selectedPointMs)
-                        ? style.borderColor
-                        : "rgba(100, 116, 139, 0.9)";
+                    return isSelectedPoint(pointX) || !Number.isFinite(state.selectedPointMs) ? style.borderColor : "rgba(100, 116, 139, 0.9)";
                 },
                 pointRadius(context) {
                     const pointX = Number(context?.raw?.x);
@@ -493,18 +570,22 @@
                     const pointX = Number(context?.raw?.x);
                     return isSelectedPoint(pointX) ? 2 : 1;
                 },
-                pointHoverRadius: 4, pointHitRadius: 10, borderWidth: 2.5,
+                pointHoverRadius: 4,
+                pointHitRadius: 10,
+                borderWidth: 2.5,
                 segment: {
                     borderColor(context) {
                         if (!Number.isFinite(state.selectedPointMs)) return style.borderColor;
                         const startX = Number(context?.p0?.parsed?.x);
                         const endX = Number(context?.p1?.parsed?.x);
-                        return isSelectedPoint(startX) || isSelectedPoint(endX)
-                            ? style.borderColor
-                            : "rgba(148, 163, 184, 0.8)";
+                        return isSelectedPoint(startX) || isSelectedPoint(endX) ? style.borderColor : "rgba(148, 163, 184, 0.8)";
                     },
                 },
-                tension: 0.15, fill: false, clip: false, showLine: true, spanGaps: false,
+                tension: 0.15,
+                fill: false,
+                clip: false,
+                showLine: true,
+                spanGaps: false,
             }];
         });
         state.chart.update("none");
@@ -521,10 +602,10 @@
         const params = new URLSearchParams({ from: from.toISOString(), to: to.toISOString(), graph_type: "load" });
         dgNames.forEach((dgName) => params.append("dg_names", dgName));
         params.set("max_points", String(CONFIG.requestMaxPoints));
-        return { params };
+        return { params, dgNames };
     }
 
-    function applyRunningHoursChartData(payload, selectedDgNames) {
+    function applyRunningHoursChartData(payload) {
         if (!state.runningHoursChart) return;
         const labels = ["DG#1", "DG#2", "DG#3"];
         const latestByDg = new Map(labels.map((dgName) => [dgName, null]));
@@ -554,9 +635,73 @@
         state.runningHoursChart.update("none");
     }
 
+    function createDiagonalPattern(context, color) {
+        const patternCanvas = document.createElement("canvas");
+        patternCanvas.width = 12;
+        patternCanvas.height = 12;
+        const patternCtx = patternCanvas.getContext("2d");
+        if (!patternCtx) return color;
+        patternCtx.fillStyle = "rgba(255,255,255,0.9)";
+        patternCtx.fillRect(0, 0, patternCanvas.width, patternCanvas.height);
+        patternCtx.strokeStyle = color;
+        patternCtx.lineWidth = 2;
+        patternCtx.beginPath();
+        patternCtx.moveTo(-2, 10);
+        patternCtx.lineTo(10, -2);
+        patternCtx.moveTo(2, 14);
+        patternCtx.lineTo(14, 2);
+        patternCtx.stroke();
+        return context.createPattern(patternCanvas, "repeat") || color;
+    }
+
+    function applyPmsChartData(payload) {
+        if (!state.pmsChart) return;
+        const labels = ["DG#1", "DG#2", "DG#3"];
+        const selectedSet = new Set(Array.isArray(state.selectedDgNames) && state.selectedDgNames.length > 0
+            ? state.selectedDgNames
+            : labels);
+        const ctx = state.pmsChart.ctx;
+        const palette = {
+            "DG#1": { solid: "rgba(29, 78, 216, 0.82)", border: "#1d4ed8" },
+            "DG#2": { solid: "rgba(22, 163, 74, 0.82)", border: "#16a34a" },
+            "DG#3": { solid: "rgba(185, 28, 28, 0.82)", border: "#b91c1c" },
+        };
+
+        const machineMap = new Map((Array.isArray(payload?.machines) ? payload.machines : []).map((machine) => [String(machine?.dg_name || "").trim(), machine]));
+        const powerValues = labels.map((dgName) => selectedSet.has(dgName) ? (Number(machineMap.get(dgName)?.power_kw?.value) || 0) : 0);
+        const currentValues = labels.map((dgName) => selectedSet.has(dgName) ? (Number(machineMap.get(dgName)?.current?.value) || 0) : 0);
+        const maxValue = Math.max(1, ...powerValues, ...currentValues);
+
+        state.pmsChart.data.labels = labels;
+        state.pmsChart.data.datasets[0].data = powerValues;
+        state.pmsChart.data.datasets[0].backgroundColor = labels.map((dgName) => palette[dgName].solid);
+        state.pmsChart.data.datasets[0].borderColor = labels.map((dgName) => palette[dgName].border);
+        state.pmsChart.data.datasets[1].data = currentValues;
+        state.pmsChart.data.datasets[1].backgroundColor = labels.map((dgName) => createDiagonalPattern(ctx, palette[dgName].border));
+        state.pmsChart.data.datasets[1].borderColor = labels.map((dgName) => palette[dgName].border);
+        state.pmsChart.options.scales.y.max = 600;
+        state.pmsChart.update("none");
+
+        const activeMachine = labels
+            .map((dgName) => machineMap.get(dgName))
+            .find((machine) => (Number(machine?.power_kw?.value) || 0) > 0) || null;
+
+        if (DOM.pmsVoltageValue) {
+            DOM.pmsVoltageValue.textContent = activeMachine ? `${Number(activeMachine?.voltage?.value) || 0} ${activeMachine?.voltage?.unit || "V"}` : "--";
+        }
+        if (DOM.pmsFrequencyValue) {
+            DOM.pmsFrequencyValue.textContent = activeMachine ? `${Number(activeMachine?.frequency?.value) || 0} ${activeMachine?.frequency?.unit || "Hz"}` : "--";
+        }
+
+        if (DOM.pmsStatus) {
+            DOM.pmsStatus.textContent = formatPmsSnapshotText(payload?.snapshot_timestamp);
+        }
+    }
+
     async function loadTrend() {
-        const { params, error } = getTrendParams();
+        const { params, dgNames, error } = getTrendParams();
         if (error) { setStatus(error, true); return; }
+        state.selectedDgNames = dgNames.slice();
         const queryString = params.toString();
         const requestId = ++state.activeRequestId;
         const cachedPayload = readCachedPayload(queryString);
@@ -582,10 +727,18 @@
             writeCachedPayload(queryString, payload);
             const totalVisiblePoints = applyChartData(payload);
             applyRunningHoursChartData(runningHoursPayload);
+            if (Number.isFinite(state.selectedPointMs)) {
+                await loadPmsSnapshot(new Date(state.selectedPointMs).toISOString());
+            } else {
+                await loadPmsSnapshot("");
+            }
             setStatus(totalVisiblePoints > 0 ? "Trend loaded successfully." : "No trend data in the selected time range.", totalVisiblePoints === 0);
         } catch (error) {
             console.error("Load trend fetch error:", error);
-            if (cachedPayload) { setStatus("Network refresh failed. Showing recent cached trend.", false); return; }
+            if (cachedPayload) {
+                setStatus("Network refresh failed. Showing recent cached trend.", false);
+                return;
+            }
             setStatus(error?.message || "Failed to load trend data.", true);
         } finally {
             if (requestId === state.activeRequestId) setLoading(false);
@@ -597,6 +750,11 @@
         DOM.prev.addEventListener("click", () => shiftRange(-CONFIG.rangeMs));
         DOM.next.addEventListener("click", () => shiftRange(CONFIG.rangeMs));
         DOM.home.addEventListener("click", () => { window.location.href = "./index.html"; });
+        DOM.dgCheckboxes.forEach((input) => {
+            input.addEventListener("change", () => {
+                loadTrend();
+            });
+        });
     }
 
     function init() {
@@ -610,6 +768,7 @@
         setInterval(updateHeaderTime, 1000);
         buildChart();
         buildRunningHoursChart();
+        buildPmsChart();
         bindPanZoom();
         bindEvents();
         loadTrend();
