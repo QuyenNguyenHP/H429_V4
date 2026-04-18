@@ -125,9 +125,9 @@ sudo systemctl reload apache2
 Ví dụ:
 
 ```bash
-sudo chmod -R o+rX /home/nguyen/H429_v3/frontend
+sudo chmod -R o+rX /home/nguyen/H429_V4/frontend
 sudo chmod o+rx /home/nguyen
-sudo chmod o+rx /home/nguyen/H429_v3
+sudo chmod o+rx /home/nguyen/H429_V4
 ```
 
 Nếu muốn chặt hơn, nên dùng group thay vì `o+rX`. 🔐
