@@ -1,126 +1,161 @@
 # 🚀 Deployment Recommendations
 
-This document summarizes the recommended production-style deployment for this project when the server is hosted at home and exposed through a router. 🏠
+Tài liệu này ghi lại cách triển khai phù hợp cho project H429 khi public qua domain:
 
-## ✅ Recommended Architecture
+- `drums.dqcloud.online` 🌐
 
-Best approach for this project:
+## ✅ Kiến trúc khuyến nghị
 
-- Use `Apache` as the reverse proxy because that matches your current workflow. 🌐
-- Forward only router ports `80` and `443`. 🔓
-- Run the backend only on `127.0.0.1:8888`. 🔒
-- Do not expose port `8888` publicly. ⛔
-- Do not expose port `5170` publicly. ⛔
-- Serve the frontend through Apache, or proxy it to `127.0.0.1:5170`. 🖥️
-- Add `ufw` firewall rules on the Linux server. 🛡️
+Phương án nên dùng:
 
-## 🤔 Why This Is Better
+- Apache serve trực tiếp static frontend từ thư mục `frontend/` 📁
+- Apache proxy `/api/` tới backend local `127.0.0.1:8888` 🔁
+- Chỉ forward router:
+  - `80`
+  - `443`
+- Không public trực tiếp:
+  - `5170`
+  - `8888`
 
-If you open `8888` and `5170` directly to the internet:
-
-- bots will continuously scan the services 🤖
-- the backend API is reachable by anyone 🚪
-- invalid HTTP requests and random probes will appear in logs 📋
-- future API changes or mistakes become directly exposed ⚠️
-- `python -m http.server` is not a production-grade public web server 🧪
-
-If Apache is the only public entrypoint:
-
-- the backend stays private on localhost 🔐
-- the frontend is easier to protect and manage 🧰
-- HTTPS can be added at the proxy layer 🔒
-- logs and access control are centralized 🗂️
-
-## 🌍 Recommended Public Exposure
-
-Router port forwarding:
-
-- `80` -> your Linux server ✅
-- `443` -> your Linux server ✅
-
-Do not forward:
-
-- `5170` ❌
-- `8888` ❌
-
-## 🔧 Backend Binding
-
-The backend should listen on localhost only:
-
-```text
-127.0.0.1:8888
-```
-
-Do not bind the backend to:
-
-```text
-0.0.0.0:8888
-```
-
-Reason:
-
-- `127.0.0.1` means only local processes such as Apache can reach it 🏠
-- external scanners on the internet cannot connect directly to the backend 🚫
-
-## 🖼️ Frontend Options
-
-You have two valid Apache-based options.
-
-### ⭐ Option 1: Best Option
-
-Let Apache serve the static frontend files directly from the `frontend/` directory.
-
-Advantages:
-
-- fewer running processes ⚙️
-- more stable than `python -m http.server` 📈
-- simpler deployment 🧩
-- better fit for production 🏭
-
-### 👍 Option 2: Acceptable Option
-
-Run the frontend locally on:
-
-```text
-127.0.0.1:5170
-```
-
-and let Apache reverse proxy requests to it.
-
-This still works, but it is less clean than serving static files directly from Apache.
-
-## 🏗️ Recommended Apache Layout
-
-Recommended request flow:
+## 🧭 Mô hình chạy
 
 ```text
 Internet
   -> Router 80/443
   -> Apache
-     -> /       serves frontend
+     -> /       serves /home/nguyen/H429_v3/frontend
      -> /api/   proxies to 127.0.0.1:8888
 ```
 
-## 🔁 Example Apache Reverse Proxy Idea
+## 🔒 Backend phải listen local only
 
-Typical direction:
+Backend nên chạy tại:
 
-- `/` serves files from your frontend directory 📁
-- `/api/` proxies to `http://127.0.0.1:8888/api/` 🔀
+```text
+127.0.0.1:8888
+```
 
-Typical Apache modules you may need:
+Không dùng:
 
-- `proxy`
-- `proxy_http`
-- `rewrite`
-- `headers`
-- `ssl` if using HTTPS 🔒
+```text
+0.0.0.0:8888
+```
 
-## 🛡️ Firewall Recommendation
+## 📄 File Apache mẫu trong repo
 
-Use `ufw` on the Linux server.
+File mẫu đã được tạo sẵn tại:
 
-Recommended rules:
+- `deploy/apache/drums.dqcloud.online.conf` 🧩
+
+File này dùng cấu trúc:
+
+- `ServerName drums.dqcloud.online`
+- `DocumentRoot /home/nguyen/H429_v3/frontend`
+- `/api/ -> http://127.0.0.1:8888/api/`
+
+## 🛠️ Các bước triển khai
+
+### 1. Đảm bảo backend chạy local only
+
+Chạy backend:
+
+```bash
+cd /home/nguyen/H429_v3/backend
+python3 run.py
+```
+
+Kiểm tra:
+
+```bash
+ss -ltnp | grep 8888
+```
+
+Kỳ vọng:
+
+```text
+127.0.0.1:8888
+```
+
+### 2. Cài Apache nếu chưa có
+
+```bash
+sudo apt update
+sudo apt install apache2
+```
+
+### 3. Bật các module cần dùng
+
+```bash
+sudo a2enmod proxy
+sudo a2enmod proxy_http
+sudo a2enmod headers
+sudo systemctl restart apache2
+```
+
+Nếu sau này bật HTTPS:
+
+```bash
+sudo a2enmod ssl
+sudo systemctl restart apache2
+```
+
+### 4. Copy file config mẫu từ repo
+
+```bash
+sudo cp /home/nguyen/H429_v3/deploy/apache/drums.dqcloud.online.conf /etc/apache2/sites-available/
+```
+
+### 5. Bật site
+
+```bash
+sudo a2ensite drums.dqcloud.online.conf
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+```
+
+Nếu không dùng site mặc định:
+
+```bash
+sudo a2dissite 000-default.conf
+sudo systemctl reload apache2
+```
+
+### 6. Đảm bảo Apache đọc được thư mục frontend
+
+Ví dụ:
+
+```bash
+sudo chmod -R o+rX /home/nguyen/H429_v3/frontend
+sudo chmod o+rx /home/nguyen
+sudo chmod o+rx /home/nguyen/H429_v3
+```
+
+Nếu muốn chặt hơn, nên dùng group thay vì `o+rX`. 🔐
+
+### 7. Cấu hình DNS
+
+Tại nhà cung cấp domain hoặc DNS:
+
+- tạo record `A`
+- trỏ `drums.dqcloud.online` tới public IP của nhà bạn
+
+Nếu IP động:
+
+- dùng DDNS hoặc script cập nhật DNS tự động 🔄
+
+### 8. Router port forwarding
+
+Chỉ forward:
+
+- `80` ✅
+- `443` ✅
+
+Không forward:
+
+- `5170` ❌
+- `8888` ❌
+
+### 9. Bật firewall
 
 ```bash
 sudo ufw allow 80/tcp
@@ -131,26 +166,49 @@ sudo ufw deny 8888/tcp
 sudo ufw enable
 ```
 
-If SSH is restricted by IP in your environment, that is even better than leaving `22` open broadly. 🔐
+### 10. Kiểm tra sau deploy
 
-## 📋 Practical Deployment Plan
+Test frontend:
 
-1. Configure the backend service to listen on `127.0.0.1:8888`. 🔒
-2. Stop forwarding router ports `5170` and `8888`. ⛔
-3. Forward only `80` and `443`. 🌍
-4. Configure Apache as the public entrypoint. 🌐
-5. Route `/api/` to the backend. 🔁
-6. Serve the frontend from Apache directly, or proxy to `127.0.0.1:5170`. 🖥️
-7. Enable `ufw` and deny public access to `5170` and `8888`. 🛡️
-8. Add HTTPS if the site is accessible from the internet. 🔐
+```bash
+curl http://drums.dqcloud.online/
+```
 
-## 💡 Strong Recommendation For This Project
+Test API qua Apache:
 
-For this specific project, the cleanest setup is:
+```bash
+curl http://drums.dqcloud.online/api/check_all_status_lable/index
+```
 
-- Apache serves files from `frontend/` 📁
-- Apache proxies `/api/` to `127.0.0.1:8888` 🔀
-- backend service runs only on localhost 🔒
-- no public router forwarding for `5170` or `8888` ⛔
+Mở trình duyệt:
 
-That gives you the same functionality with a much safer deployment surface. ✅
+```text
+http://drums.dqcloud.online/
+```
+
+## 🔐 HTTPS với Certbot
+
+Nếu domain đã trỏ đúng:
+
+```bash
+sudo apt install certbot python3-certbot-apache
+sudo certbot --apache -d drums.dqcloud.online
+```
+
+Nếu cần cả `www`:
+
+```bash
+sudo certbot --apache -d drums.dqcloud.online -d www.drums.dqcloud.online
+```
+
+## 📌 Kết luận
+
+Cấu hình nên dùng cho project này:
+
+- Apache serve trực tiếp `frontend/` 📁
+- Apache proxy `/api/` tới `127.0.0.1:8888` 🔁
+- backend chỉ listen local 🔒
+- router chỉ mở `80/443` 🌍
+- không public `5170` và `8888` ⛔
+
+Đây là phương án gọn, ổn định và phù hợp production hơn so với việc mở trực tiếp frontend/backend ra internet. ✅

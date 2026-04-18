@@ -1,0 +1,55 @@
+.trend-input {
+    background: #fff;
+    color: #0f172a;
+    border: 1px solid #94a3b8;
+    border-radius: 14px;
+    padding: 10px 14px;
+    min-height: 48px;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.trend-time-group {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    gap: 16px;
+    padding: 12px 14px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid #94a3b8;
+    border-radius: 18px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.65);
+}
+
+.trend-time-field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 240px;
+    flex: 1 1 260px;
+}
+
+.trend-btn {
+    min-height: 42px;
+    border-radius: 8px;
+    border: 1px solid #64748b;
+    background: #fff;
+    color: #1d4ed8;
+    box-shadow: 1px 1px 0 #475569;
+    padding: 0 18px;
+    font-size: .98rem;
+    font-weight: 800;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.trend-btn:hover {
+    border-color: #2563eb;
+    box-shadow: 0 4px 12px rgba(37,99,235,.15);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 900px) {
+    .trend-time-group {
+        flex-wrap: wrap;
+    }
+}

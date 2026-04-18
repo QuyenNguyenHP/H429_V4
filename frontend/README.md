@@ -69,20 +69,6 @@ API dùng:
 - `GET /api/engine_graph/pms`
 - `GET /api/check_all_status_lable/all`
 
-### `Cyl_exh_graph.html` 🌡️
-- Trang trend nhiệt độ exhaust
-- Có:
-  - chọn DG
-  - chọn cylinder
-  - zoom/pan chart
-  - hiển thị theo browser timezone
-
-Script chính:
-- `Cyl_exh_graph.js`
-
-API dùng:
-- `GET /api/engine_graph?graph_type=cylinder_exh`
-
 ## File dùng chung ♻️
 
 ### `app.css`
@@ -113,7 +99,6 @@ Mở:
 - `http://localhost:5170/dg_dashboard.html?dg=1`
 - `http://localhost:5170/me_dashboard.html?dg=ME-PORT`
 - `http://localhost:5170/3DGs_graph.html`
-- `http://localhost:5170/Cyl_exh_graph.html`
 
 ## Ghi chú 📝
 

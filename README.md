@@ -18,7 +18,7 @@ H429_v3/
 ## Thành phần chính 🧩
 
 ### Backend ⚙️
-- Chạy API tại `http://localhost:8888`
+- Chạy API tại `http://127.0.0.1:8888`
 - Đọc dữ liệu từ SQLite `backend/h429_data.db`
 - Tự chạy importer từ `backend/import_new_data_to_database.py`
 
@@ -29,7 +29,6 @@ H429_v3/
   - `dg_dashboard.html`
   - `me_dashboard.html`
   - `3DGs_graph.html`
-  - `Cyl_exh_graph.html`
 
 ### Deploy 🚀
 - Có mẫu `systemd` trong `deploy/systemd/`
@@ -43,6 +42,10 @@ H429_v3/
 cd backend
 python3 run.py
 ```
+
+Backend hiện listen local only:
+
+- `127.0.0.1:8888` 🔒
 
 ### Frontend
 

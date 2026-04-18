@@ -243,7 +243,6 @@
         if (pathname.endsWith("/dg_dashboard.html")) return `./dg_dashboard.html?dg=${dg === "DG#2" ? "2" : dg === "DG#3" ? "3" : "1"}`;
         if (pathname.endsWith("/me_dashboard.html")) return `./me_dashboard.html?dg=${dg === "ME-STBD" ? "ME-STBD" : "ME-PORT"}`;
         if (pathname.endsWith("/3dgs_graph.html")) return "./3DGs_graph.html";
-        if (pathname.endsWith("/cyl_exh_graph.html")) return "./Cyl_exh_graph.html";
         return "";
     }
 
@@ -258,7 +257,6 @@
             { href: "./me_dashboard.html?dg=ME-PORT", short: "MP", label: "ME-PORT" },
             { href: "./me_dashboard.html?dg=ME-STBD", short: "MS", label: "ME-STBD" },
             { href: "./3DGs_graph.html", short: "LG", label: "Load Graph" },
-            { href: "./Cyl_exh_graph.html", short: "CX", label: "Cyl Exhaust" },
         ];
 
         document.body.classList.add("has-global-nav");
