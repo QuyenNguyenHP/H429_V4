@@ -1,6 +1,51 @@
 (function (global) {
     "use strict";
 
+    const THEME_STORAGE_KEY = "drums:theme";
+
+    function resolveInitialTheme() {
+        try {
+            const savedTheme = global.localStorage?.getItem(THEME_STORAGE_KEY);
+            if (savedTheme === "dark" || savedTheme === "light") return savedTheme;
+        } catch (_) {}
+
+        return global.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+
+    function updateThemeToggleLabels(theme) {
+        document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+            const isDark = theme === "dark";
+            button.setAttribute("aria-pressed", isDark ? "true" : "false");
+            button.setAttribute("title", isDark ? "Switch to light theme" : "Switch to dark theme");
+            button.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
+            const icon = button.querySelector("[data-theme-toggle-icon]");
+            const text = button.querySelector("[data-theme-toggle-text]");
+            if (icon) icon.textContent = isDark ? "\u2600" : "\u263E";
+            if (text) text.textContent = isDark ? "Light" : "Dark";
+        });
+    }
+
+    function applyTheme(theme) {
+        const nextTheme = theme === "dark" ? "dark" : "light";
+        document.documentElement.setAttribute("data-theme", nextTheme);
+        document.body?.setAttribute("data-theme", nextTheme);
+        try {
+            global.localStorage?.setItem(THEME_STORAGE_KEY, nextTheme);
+        } catch (_) {}
+        updateThemeToggleLabels(nextTheme);
+        return nextTheme;
+    }
+
+    function getTheme() {
+        return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+    }
+
+    function toggleTheme() {
+        return applyTheme(getTheme() === "dark" ? "light" : "dark");
+    }
+
+    applyTheme(resolveInitialTheme());
+
     function getById(id) {
         return document.getElementById(id);
     }
@@ -80,6 +125,15 @@
     function resolveApiOrigin(port) {
         const override = global.APP_CONFIG?.apiBaseUrl || global.API_BASE_URL || null;
         if (override) return String(override).replace(/\/+$/, "");
+
+        const location = global.location;
+        const hostname = String(location?.hostname || "").toLowerCase();
+        const protocol = String(location?.protocol || "").toLowerCase();
+        const currentPort = String(location?.port || "");
+        const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
+        const backendOrigin = "http://127.0.0.1:8888";
+        if (protocol === "file:") return backendOrigin;
+        if (isLocalHost && currentPort !== "8888") return backendOrigin;
 
         return "";
     }
@@ -279,11 +333,16 @@
                     </a>
                 `).join("")}
             </nav>
+            <button class="global-theme-toggle" type="button" data-theme-toggle>
+                <span class="global-theme-toggle-icon" data-theme-toggle-icon aria-hidden="true"></span>
+                <span class="global-theme-toggle-text" data-theme-toggle-text></span>
+            </button>
         `;
 
         document.body.insertBefore(shell, document.body.firstChild);
 
         const toggle = shell.querySelector(".global-nav-toggle");
+        const themeToggle = shell.querySelector("[data-theme-toggle]");
         if (toggle) {
             toggle.addEventListener("click", () => {
                 const collapsed = shell.classList.toggle("is-collapsed");
@@ -293,6 +352,8 @@
                 } catch (_) {}
             });
         }
+        if (themeToggle) themeToggle.addEventListener("click", toggleTheme);
+        updateThemeToggleLabels(getTheme());
     }
 
     if (document.readyState === "loading") {
@@ -312,5 +373,8 @@
         resolveApiOrigin,
         bindChartViewportControls,
         createGlobalNav,
+        applyTheme,
+        getTheme,
+        toggleTheme,
     };
 })(window);
