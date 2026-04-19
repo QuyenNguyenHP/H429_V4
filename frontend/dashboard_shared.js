@@ -33,6 +33,7 @@
             global.localStorage?.setItem(THEME_STORAGE_KEY, nextTheme);
         } catch (_) {}
         updateThemeToggleLabels(nextTheme);
+        global.dispatchEvent?.(new CustomEvent("drums:themechange", { detail: { theme: nextTheme } }));
         return nextTheme;
     }
 

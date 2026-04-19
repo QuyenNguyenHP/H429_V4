@@ -47,7 +47,7 @@
                 
                 <!-- Background Engine Image (New File) -->
                 <div class="absolute inset-0 flex items-center justify-center rounded-[inherit] overflow-hidden bg-[#f5f5f5] p-4">
-                    <img id="engine-background-image" src="Asset/Engine.png" alt="Engine Layout" class="w-full h-full object-contain opacity-90 pointer-events-none">
+                    <img id="engine-background-image" src="Asset/Engine light mode.png" alt="Engine Layout" class="w-full h-full object-contain opacity-90 pointer-events-none">
                 </div>
 
             <!-- Cylinder Temperatures (Top) -->
@@ -515,6 +515,21 @@
             if (statusMsg) statusMsg.style.opacity = '0';
         }
 
+        function getEngineIdleImagePath() {
+            return document.documentElement.getAttribute("data-theme") === "dark"
+                ? "Asset/Engine dark mode.png"
+                : "Asset/Engine light mode.png";
+        }
+
+        let lastEngineRunningState = false;
+
+        function updateEngineBackgroundImage(isEngineRunning) {
+            lastEngineRunningState = Boolean(isEngineRunning);
+            const engineBackgroundImage = getById("engine-background-image");
+            if (!engineBackgroundImage) return;
+            engineBackgroundImage.src = lastEngineRunningState ? "Asset/Engine_Runing.gif" : getEngineIdleImagePath();
+        }
+
         function updateHeaderLights(digitalRows) {
             const rows = Array.isArray(digitalRows) ? digitalRows : [];
             const readyRow = rows.find(item => normLabel(item.label) === "READY TO START");
@@ -523,13 +538,10 @@
 
             const readyLight = getById("light-ready");
             const runLight = getById("light-run");
-            const engineBackgroundImage = getById("engine-background-image");
 
             if (readyLight) readyLight.classList.toggle("active", isOnValue(readyRow?.value));
             if (runLight) runLight.classList.toggle("active", isEngineRunning);
-            if (engineBackgroundImage) {
-                engineBackgroundImage.src = isEngineRunning ? "Asset/Engine_Runing.gif" : "Asset/Engine.png";
-            }
+            updateEngineBackgroundImage(isEngineRunning);
         }
 
         function updateAlarmLight(machineData) {
@@ -1587,6 +1599,8 @@
             updateDigitalTable([]);
             updateTimestampHeader('');
             initEmbeddedTrend();
+            updateEngineBackgroundImage(false);
+            window.addEventListener("drums:themechange", () => updateEngineBackgroundImage(lastEngineRunningState));
             fetchData();
             
             setInterval(fetchData, POLL_INTERVAL_MS);

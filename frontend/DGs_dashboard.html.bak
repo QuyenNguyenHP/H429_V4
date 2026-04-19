@@ -240,7 +240,7 @@
             
             <!-- Background Engine Image (New File) -->
             <div class="absolute inset-0 flex items-center justify-center p-4">
-                <img src="Asset/Engine.png" alt="Engine Layout" class="w-full h-full object-contain opacity-90 pointer-events-none">
+                <img src="Asset/Engine light mode.png" alt="Engine Layout" class="w-full h-full object-contain opacity-90 pointer-events-none">
             </div>
 
             <!-- Cylinder Temperatures (Top) -->
