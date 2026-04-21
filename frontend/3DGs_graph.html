@@ -47,6 +47,33 @@
         .trend-chart-title { color: var(--text-main); font-size: 1rem; font-weight: 800; margin: 0 0 12px; }
         .trend-status { color: var(--text-muted); font-size: .95rem; font-weight: 700; min-height: 24px; }
         .trend-status.error { color: #fca5a5; }
+        .trend-control-cluster { display: flex; flex-direction: column; gap: 12px; margin-left: auto; align-items: flex-end; }
+        .trend-action-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; justify-content: flex-end; }
+        .trend-mode-switch { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: flex-end; }
+        .trend-mode-btn {
+            min-width: 0;
+            min-height: 0;
+            border: 1px solid #94a3b8;
+            border-radius: 16px;
+            background: linear-gradient(180deg, var(--surface-strong) 0%, var(--surface-1) 100%);
+            color: #1d4ed8;
+            padding: 10px 18px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            box-shadow: 0 3px 0 #64748b;
+            transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease, background-color .18s ease, color .18s ease;
+        }
+        .trend-mode-btn:hover {
+            border-color: #2563eb;
+            box-shadow: 0 5px 14px rgba(37,99,235,.16);
+            transform: translateY(-1px);
+        }
+        .trend-mode-btn.is-active {
+            background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+            border-color: #1d4ed8;
+            color: #fff;
+            box-shadow: 0 3px 0 #1e3a8a;
+        }
         .series-dot { width: 12px; height: 12px; border-radius: 999px; display: inline-block; }
         .pms-header-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
         .pms-top-row { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-bottom: 6px; min-height: 30px; }
@@ -59,6 +86,9 @@
             .pms-header-row { flex-direction: column; }
             .pms-top-row { justify-content: flex-start; }
             .pms-metrics { flex-wrap: wrap; }
+            .trend-control-cluster { margin-left: 0; align-items: stretch; width: 100%; }
+            .trend-action-row,
+            .trend-mode-switch { justify-content: flex-start; }
         }
     </style>
 </head>
@@ -104,9 +134,17 @@
                         <label class="trend-check trend-check-dg3"><input type="checkbox" name="dg-name" value="DG#3" checked><span class="trend-check-box"></span><span class="trend-check-label">DG#3</span></label>
                     </div>
                 </div>
-                <button id="prev-24h-btn" class="trend-btn" type="button">Prev 24h</button>
-                <button id="next-24h-btn" class="trend-btn" type="button">Next 24h</button>
-                <button id="apply-btn" class="trend-btn" type="button">Apply</button>
+                <div class="trend-control-cluster">
+                    <div class="trend-mode-switch">
+                        <button id="mode-load-btn" class="trend-mode-btn is-active" type="button">LOAD</button>
+                        <button id="mode-pms-btn" class="trend-mode-btn" type="button">PMS</button>
+                    </div>
+                    <div class="trend-action-row">
+                        <button id="prev-24h-btn" class="trend-btn" type="button">Prev 24h</button>
+                        <button id="next-24h-btn" class="trend-btn" type="button">Next 24h</button>
+                        <button id="apply-btn" class="trend-btn" type="button">Apply</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Main load trend chart: clicking a point syncs the PMS panel -->
@@ -132,7 +170,7 @@
                         </svg>
                     </button>
                 </div>
-                <h2 class="trend-chart-title">Load Trend</h2>
+                <h2 id="main-chart-title" class="trend-chart-title">Load Trend</h2>
                 <div class="trend-chart-box">
                     <canvas id="load-trend-chart" class="trend-chart-canvas"></canvas>
                 </div>

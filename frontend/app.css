@@ -76,6 +76,18 @@ body {
     transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+img,
+svg,
+canvas {
+    max-width: 100%;
+}
+
 .header-clickable {
     cursor: pointer;
     transition: transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
@@ -326,26 +338,26 @@ body {
     border: 1px solid var(--panel-border);
     border-radius: 6px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
-    padding: 4px;
+    padding: calc(4px * var(--overlay-scale, 1));
 }
 
 .data-tag .label-box {
     min-width: 300px;
-    min-height: 34px;
+    min-height: calc(34px * var(--overlay-scale, 1));
     display: flex;
     align-items: center;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: max(0.66rem, calc(1.1rem * var(--overlay-scale, 1)));
 }
 
 .data-tag .digital-value {
     min-width: 86px;
-    min-height: 34px;
+    min-height: calc(34px * var(--overlay-scale, 1));
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: max(0.66rem, calc(1.1rem * var(--overlay-scale, 1)));
 }
 
 .cylinder-layer {
@@ -364,18 +376,18 @@ body {
     border: 1px solid var(--panel-border);
     border-radius: 6px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.55);
-    padding: 4px;
+    padding: calc(4px * var(--overlay-scale, 1));
 }
 
 .cyl-item .cyl-label {
-    min-height: 30px;
-    min-width: 86px;
+    min-height: calc(30px * var(--overlay-scale, 1));
+    min-width: calc(86px * var(--overlay-scale, 1));
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: max(0.66rem, calc(1.1rem * var(--overlay-scale, 1)));
     background-color: #fff;
     border: 1px solid var(--label-border);
     margin-bottom: 4px;
@@ -386,10 +398,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 30px;
-    min-width: 86px;
+    min-height: calc(30px * var(--overlay-scale, 1));
+    min-width: calc(86px * var(--overlay-scale, 1));
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: max(0.72rem, calc(1.2rem * var(--overlay-scale, 1)));
     background: transparent;
     border: 0;
     box-shadow: none;
@@ -418,6 +430,22 @@ body {
     justify-content: center;
 }
 
+.engine-container .metric-card {
+    padding: calc(4px * var(--overlay-scale, 1));
+}
+
+.engine-container .metric-label {
+    min-height: calc(30px * var(--overlay-scale, 1));
+    font-size: max(0.72rem, calc(1.1rem * var(--overlay-scale, 1)));
+    margin-bottom: calc(4px * var(--overlay-scale, 1));
+    padding: 0 calc(8px * var(--overlay-scale, 1));
+}
+
+.engine-container .metric-value {
+    min-height: calc(30px * var(--overlay-scale, 1));
+    font-size: max(0.78rem, calc(1.2rem * var(--overlay-scale, 1)));
+}
+
 #panel-engine-speed .metric-card {
     width: 170px;
 }
@@ -430,7 +458,7 @@ body {
 .main-container {
     width: min(1400px, calc(100vw - 32px));
     max-width: 1500px;
-    min-height: 1600px;
+    min-height: auto;
     margin: 0 auto;
     background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border: 1px solid #94a3b8;
@@ -438,7 +466,7 @@ body {
     padding: 16px;
     box-shadow: var(--shadow-strong);
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     box-sizing: border-box;
 }
 
@@ -639,11 +667,13 @@ body {
 
 .dg-cards-stage {
     position: relative;
-    min-height: 780px;
+    display: grid;
+    gap: 24px;
+    min-height: auto;
 }
 
 .dashboard-group-card {
-    position: absolute;
+    position: static;
     display: grid;
     gap: 16px;
     padding: 16px;
@@ -930,6 +960,96 @@ body {
     font-weight: 700;
 }
 
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.dashboard-header-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.dashboard-header-title {
+    margin-left: 36px;
+    min-width: 0;
+}
+
+.dashboard-time-box {
+    min-width: 220px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    padding: 4px 12px;
+}
+
+.engine-dashboard {
+    position: relative;
+    max-width: 1456px;
+    margin: 0 auto 16px;
+    min-height: 650px;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: 1px solid #d1d5db;
+    background: linear-gradient(to bottom, var(--engine-bg-start), var(--engine-bg-end));
+}
+
+.engine-dashboard-bg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    border-radius: inherit;
+    overflow: hidden;
+    background: linear-gradient(to bottom, var(--engine-bg-start), var(--engine-bg-end));
+}
+
+.engine-dashboard-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+:root[data-theme="dark"] .engine-dashboard,
+:root[data-theme="dark"] .engine-dashboard-bg {
+    border-color: #334155;
+    background: linear-gradient(to bottom, var(--engine-bg-start), var(--engine-bg-end));
+}
+
+:root[data-theme="dark"] .cyl-item .cyl-label {
+    background: var(--surface-strong);
+    color: var(--text-main);
+    border-color: #334155;
+}
+
+:root[data-theme="dark"] .cyl-item .digital-value {
+    color: var(--text-main);
+}
+
+.embedded-trend-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.embedded-trend-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+
 @media (max-width: 980px) {
     .has-global-nav,
     .has-global-nav.global-nav-collapsed {
@@ -986,5 +1106,257 @@ body {
     #pms-section,
     #me-section {
         grid-template-columns: 1fr;
+    }
+
+    .main-container {
+        width: min(100%, calc(100vw - 20px));
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+        margin-bottom: 18px;
+    }
+
+    .dashboard-header-title {
+        margin-left: 0;
+    }
+
+    .dashboard-time-box {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .dg-cards-stage {
+        min-height: auto;
+        display: grid;
+        gap: 18px;
+    }
+
+    .dashboard-group-card {
+        position: static;
+        width: auto !important;
+        height: auto !important;
+        min-height: 0;
+    }
+
+    .dg-card-main {
+        flex-direction: column;
+    }
+
+    .dg-status-column {
+        width: 100%;
+    }
+
+    .pms-metrics {
+        height: auto;
+    }
+
+    .engine-dashboard {
+        min-height: 540px;
+    }
+
+    .digital-table {
+        font-size: 0.78rem;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .main-container {
+        width: 100%;
+        padding: 12px;
+        border-radius: 14px;
+    }
+
+    #header-stage {
+        display: flex !important;
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 12px;
+        min-height: 0 !important;
+        margin-bottom: 18px !important;
+    }
+
+    #vessel-box,
+    #logo-box,
+    #header-right,
+    #system-status-bar {
+        position: static !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        width: auto !important;
+        transform: none !important;
+    }
+
+    #logo-box {
+        justify-content: flex-start !important;
+        order: -1;
+    }
+
+    #header-right {
+        display: grid !important;
+        grid-template-columns: 1fr;
+        gap: 10px !important;
+    }
+
+    #date-time-box,
+    #header-icons {
+        width: 100%;
+    }
+
+    #header-icons {
+        justify-content: flex-start;
+    }
+
+    .dashboard-header-main {
+        width: 100%;
+        align-items: flex-start;
+    }
+
+    .dashboard-header-title h1,
+    h1.text-4xl,
+    #page-title {
+        font-size: clamp(1.5rem, 5vw, 2rem) !important;
+        line-height: 1.1;
+    }
+
+    .dg-title,
+    .dashboard-group-title {
+        font-size: 1.25rem;
+    }
+
+    .dg-card {
+        padding: 12px;
+    }
+
+    .dg-engine-box {
+        margin-bottom: 0;
+        min-height: 180px;
+    }
+
+    .status-light {
+        width: 22px;
+        height: 22px;
+    }
+
+    .dg-status-item {
+        min-height: 38px;
+    }
+
+    .dg-status-label {
+        font-size: 0.7rem;
+    }
+
+    .pms-value-row {
+        font-size: 0.82rem;
+    }
+
+    .pms-value {
+        min-width: 64px;
+        font-size: 0.82rem;
+    }
+
+    .engine-dashboard {
+        min-height: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .engine-dashboard-bg {
+        position: relative;
+        inset: auto;
+        min-height: 220px;
+        padding: 8px;
+        order: 0;
+    }
+
+    .cylinder-layer,
+    #panel-engine-speed,
+    #panel-running-hour,
+    #panel-load,
+    #panel-me-rev,
+    #panel-tc-rev,
+    .data-tag {
+        position: static !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        width: 100% !important;
+        transform: none !important;
+    }
+
+    .cylinder-layer {
+        order: 1;
+    }
+
+    #cylinders-container {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 8px;
+        width: 100%;
+    }
+
+    .cyl-item {
+        width: 100% !important;
+    }
+
+    #panel-engine-speed,
+    #panel-running-hour,
+    #panel-load,
+    #panel-me-rev,
+    #panel-tc-rev {
+        z-index: auto !important;
+    }
+
+    #panel-engine-speed .metric-card,
+    #panel-running-hour .metric-card,
+    #panel-load .metric-card,
+    #panel-me-rev .metric-card,
+    #panel-tc-rev .metric-card,
+    .metric-card {
+        width: 100%;
+    }
+
+    .data-tag {
+        z-index: auto;
+        gap: 8px;
+    }
+
+    .data-tag .label-box,
+    .data-tag .digital-value {
+        min-height: 36px;
+    }
+
+    .digital-table-wrap {
+        overflow-x: auto;
+    }
+
+    .digital-table {
+        min-width: 520px;
+    }
+
+    .embedded-trend-toolbar,
+    .embedded-trend-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .embedded-trend-actions {
+        margin-left: 0;
+    }
+
+    .embedded-trend-actions > *,
+    .embedded-trend-toolbar > * {
+        width: 100%;
+        min-width: 0 !important;
     }
 }

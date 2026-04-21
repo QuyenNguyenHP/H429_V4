@@ -254,6 +254,7 @@
                     </div>
                 </div>
                 <div class="serial-fail" data-hide-when-ok="1"></div>
+            </div>
                 </section>
 
         </div>
@@ -285,38 +286,58 @@
         ];
         const INDEX_IDLE_CRITICAL_IGNORE_LABELS = new Set(["STARTING AIR PRESSURE"]);
 
-        // Manual UI layout for the home dashboard.
-        // Edit only this object when you want to move DG / PMS / ME cards around.
-        const UI_LAYOUT = {
-            vesselBox: { mode: "absolute", x: "50%", y: "8px", width: "360px", transform: "translateX(-50%)" },
-            logoBox: { mode: "absolute", x: "0%", y: "0%" },
-            headerRight: { mode: "absolute", x: "100%", y: "0%", transform: "translateX(-100%)" },
-            systemStatusBar: { mode: "absolute", x: "1.5%", y: "96%", width: "97%" },
-            sections: {
-                dg: { x: "1.5%", y: "3%", width: "97%", height: "360px" },
-                pms: { x: "1.5%", y: "53%", width: "97%", height: "390px" },
-                me: { x: "1.5%", y: "107%", width: "97%", height: "530px" }
-            }
-        };
-
         function applyLayoutForElement(el, cfg) {
             if (!el || !cfg) return;
             if ((cfg.mode || "absolute") === "static") {
                 el.style.position = "static";
                 el.style.left = "";
+                el.style.right = "";
                 el.style.top = "";
                 el.style.transform = "";
+                el.style.width = "";
+                el.style.height = "";
                 return;
             }
             el.style.position = "absolute";
             if (cfg.x != null) el.style.left = cfg.x;
+            else el.style.left = "";
+            el.style.right = "";
             if (cfg.y != null) el.style.top = cfg.y;
+            else el.style.top = "";
             el.style.transform = cfg.transform || "";
-            if (cfg.width != null) el.style.width = cfg.width;
-            if (cfg.height != null) el.style.height = cfg.height;
+            el.style.width = cfg.width != null ? cfg.width : "";
+            el.style.height = cfg.height != null ? cfg.height : "";
         }
 
-        function applyUILayout(layout = UI_LAYOUT) {
+        function buildResponsiveLayout() {
+            const width = window.innerWidth || document.documentElement.clientWidth || 0;
+            if (width <= 768) {
+                return {
+                    vesselBox: { mode: "static" },
+                    logoBox: { mode: "static" },
+                    headerRight: { mode: "static" },
+                    systemStatusBar: { mode: "static" },
+                    sections: {
+                        dg: { mode: "static" },
+                        pms: { mode: "static" },
+                        me: { mode: "static" }
+                    }
+                };
+            }
+            return {
+                vesselBox: { mode: "absolute", x: "50%", y: "8px", width: width <= 1200 ? "320px" : "360px", transform: "translateX(-50%)" },
+                logoBox: { mode: "absolute", x: "0%", y: "0%" },
+                headerRight: { mode: "absolute", x: "100%", y: "0%", transform: "translateX(-100%)" },
+                systemStatusBar: { mode: "static" },
+                sections: {
+                    dg: { mode: "static" },
+                    pms: { mode: "static" },
+                    me: { mode: "static" }
+                }
+            };
+        }
+
+        function applyUILayout(layout = buildResponsiveLayout()) {
             applyLayoutForElement(document.getElementById("vessel-box"), layout.vesselBox);
             applyLayoutForElement(document.getElementById("logo-box"), layout.logoBox);
             applyLayoutForElement(document.getElementById("header-right"), layout.headerRight);
@@ -525,6 +546,8 @@
             restoreIndexFromCache();
             loadIndexStatus();
         });
+
+        window.addEventListener("resize", applyUILayout);
     </script>
 </body>
 </html>

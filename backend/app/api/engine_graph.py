@@ -34,6 +34,7 @@ PMS_ADDR_MAP = {
 }
 GRAPH_PRESETS = {
     "load": ("LOAD",),
+    "pms": ("POWER_KW",),
     "running_hour": ("RUNNING HOUR",),
     "load_detail": (
         "LOAD",
@@ -294,7 +295,7 @@ def get_engine_graph(
     to_dt, to_db = _normalize_utc_timestamp(to_ts)
     target_labels = GRAPH_PRESETS[normalized_graph_type]
 
-    if normalized_graph_type in {"load", "load_detail", "running_hour"}:
+    if normalized_graph_type in {"load", "load_detail", "running_hour", "pms"}:
         if dg_names:
             normalized_names = []
             for item in dg_names:
@@ -311,55 +312,112 @@ def get_engine_graph(
             raise HTTPException(status_code=400, detail=f"Unsupported dg_name: {dg_name}")
         normalized_names = [normalized_single]
 
-    placeholders = ", ".join(f":dg_{index}" for index, _ in enumerate(normalized_names))
-    label_placeholders = ", ".join(f":label_{index}" for index, _ in enumerate(target_labels))
-    params = {
-        "from_ts": from_db,
-        "to_ts": to_db,
-    }
-    for index, dg_name_item in enumerate(normalized_names):
-        params[f"dg_{index}"] = dg_name_item
-    for index, label in enumerate(target_labels):
-        params[f"label_{index}"] = label
-
     range_seconds = max(1, int((to_dt - from_dt).total_seconds()))
     bucket_seconds = max(1, math.ceil(range_seconds / max_points))
-    params["from_epoch"] = int(from_dt.replace(tzinfo=timezone.utc).timestamp())
-    params["bucket_seconds"] = bucket_seconds
+    rows = []
+    if normalized_graph_type == "pms":
+        addr_placeholders = ", ".join(f":addr_{index}" for index, _ in enumerate(normalized_names))
+        params = {
+            "from_ts": from_db,
+            "to_ts": to_db,
+            "from_epoch": int(from_dt.replace(tzinfo=timezone.utc).timestamp()),
+            "bucket_seconds": bucket_seconds,
+        }
+        dg_name_by_addr = {}
+        for index, dg_name_item in enumerate(normalized_names):
+            addr = PMS_ADDR_MAP[dg_name_item]["power_kw"]
+            params[f"addr_{index}"] = addr
+            dg_name_by_addr[addr] = dg_name_item
 
-    stmt = text(
-        f"""
-        WITH filtered AS (
-            SELECT
-                dg_name,
-                label,
-                datetime(timestamp) AS normalized_timestamp,
-                val,
-                unit,
-                CAST(((CAST(strftime('%s', datetime(timestamp)) AS INTEGER) - :from_epoch) / :bucket_seconds) AS INTEGER) AS bucket
-            FROM Stored_database
-            WHERE dg_name IN ({placeholders})
-              AND label IN ({label_placeholders})
-              AND datetime(timestamp) IS NOT NULL
-              AND datetime(timestamp) >= datetime(:from_ts)
-              AND datetime(timestamp) <= datetime(:to_ts)
-        ),
-        latest_per_bucket AS (
-            SELECT dg_name, label, bucket, MAX(normalized_timestamp) AS latest_timestamp
-            FROM filtered
-            GROUP BY dg_name, label, bucket
+        stmt = text(
+            f"""
+            WITH filtered AS (
+                SELECT
+                    addr,
+                    datetime(timestamp) AS normalized_timestamp,
+                    val,
+                    unit,
+                    CAST(((CAST(strftime('%s', datetime(timestamp)) AS INTEGER) - :from_epoch) / :bucket_seconds) AS INTEGER) AS bucket
+                FROM Stored_database
+                WHERE dg_name = 'PMS'
+                  AND addr IN ({addr_placeholders})
+                  AND datetime(timestamp) IS NOT NULL
+                  AND datetime(timestamp) >= datetime(:from_ts)
+                  AND datetime(timestamp) <= datetime(:to_ts)
+            ),
+            latest_per_bucket AS (
+                SELECT addr, bucket, MAX(normalized_timestamp) AS latest_timestamp
+                FROM filtered
+                GROUP BY addr, bucket
+            )
+            SELECT f.addr, f.normalized_timestamp AS timestamp, f.val, f.unit
+            FROM filtered AS f
+            INNER JOIN latest_per_bucket AS b
+                ON b.addr = f.addr
+               AND b.bucket = f.bucket
+               AND b.latest_timestamp = f.normalized_timestamp
+            ORDER BY f.normalized_timestamp ASC, f.addr ASC
+            """
         )
-        SELECT f.dg_name, f.label, f.normalized_timestamp AS timestamp, f.val, f.unit
-        FROM filtered AS f
-        INNER JOIN latest_per_bucket AS b
-            ON b.dg_name = f.dg_name
-           AND b.label = f.label
-           AND b.bucket = f.bucket
-           AND b.latest_timestamp = f.normalized_timestamp
-        ORDER BY f.normalized_timestamp ASC, f.dg_name ASC, f.label ASC
-        """
-    )
-    rows = db.execute(stmt, params).mappings().all()
+        raw_rows = db.execute(stmt, params).mappings().all()
+        rows = [
+            {
+                "dg_name": dg_name_by_addr.get(str(row["addr"]), ""),
+                "label": "POWER_KW",
+                "timestamp": row["timestamp"],
+                "val": row["val"],
+                "unit": row["unit"] or "kW",
+            }
+            for row in raw_rows
+            if dg_name_by_addr.get(str(row["addr"]))
+        ]
+    else:
+        placeholders = ", ".join(f":dg_{index}" for index, _ in enumerate(normalized_names))
+        label_placeholders = ", ".join(f":label_{index}" for index, _ in enumerate(target_labels))
+        params = {
+            "from_ts": from_db,
+            "to_ts": to_db,
+            "from_epoch": int(from_dt.replace(tzinfo=timezone.utc).timestamp()),
+            "bucket_seconds": bucket_seconds,
+        }
+        for index, dg_name_item in enumerate(normalized_names):
+            params[f"dg_{index}"] = dg_name_item
+        for index, label in enumerate(target_labels):
+            params[f"label_{index}"] = label
+
+        stmt = text(
+            f"""
+            WITH filtered AS (
+                SELECT
+                    dg_name,
+                    label,
+                    datetime(timestamp) AS normalized_timestamp,
+                    val,
+                    unit,
+                    CAST(((CAST(strftime('%s', datetime(timestamp)) AS INTEGER) - :from_epoch) / :bucket_seconds) AS INTEGER) AS bucket
+                FROM Stored_database
+                WHERE dg_name IN ({placeholders})
+                  AND label IN ({label_placeholders})
+                  AND datetime(timestamp) IS NOT NULL
+                  AND datetime(timestamp) >= datetime(:from_ts)
+                  AND datetime(timestamp) <= datetime(:to_ts)
+            ),
+            latest_per_bucket AS (
+                SELECT dg_name, label, bucket, MAX(normalized_timestamp) AS latest_timestamp
+                FROM filtered
+                GROUP BY dg_name, label, bucket
+            )
+            SELECT f.dg_name, f.label, f.normalized_timestamp AS timestamp, f.val, f.unit
+            FROM filtered AS f
+            INNER JOIN latest_per_bucket AS b
+                ON b.dg_name = f.dg_name
+               AND b.label = f.label
+               AND b.bucket = f.bucket
+               AND b.latest_timestamp = f.normalized_timestamp
+            ORDER BY f.normalized_timestamp ASC, f.dg_name ASC, f.label ASC
+            """
+        )
+        rows = db.execute(stmt, params).mappings().all()
 
     grouped = {}
     for dg_name_item in normalized_names:
@@ -371,6 +429,8 @@ def get_engine_graph(
                 "unit": (
                     "KwE"
                     if label == "LOAD"
+                    else "kW"
+                    if label == "POWER_KW"
                     else "x10Hours"
                     if label == "RUNNING HOUR"
                     else "MPa"

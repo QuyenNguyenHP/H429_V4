@@ -67,6 +67,9 @@
         pmsVoltageValue: document.getElementById("pms-voltage-value"),
         pmsFrequencyValue: document.getElementById("pms-frequency-value"),
         apply: document.getElementById("apply-btn"),
+        modeLoad: document.getElementById("mode-load-btn"),
+        modePms: document.getElementById("mode-pms-btn"),
+        mainChartTitle: document.getElementById("main-chart-title"),
         prev: document.getElementById("prev-24h-btn"),
         next: document.getElementById("next-24h-btn"),
         zoomIn: document.getElementById("zoom-in-btn"),
@@ -78,13 +81,29 @@
         apiBase: `${resolveApiOrigin()}/api/engine_graph`,
         pmsApiBase: `${resolveApiOrigin()}/api/engine_graph/pms`,
         latestStatusApiBase: `${resolveApiOrigin()}/api/check_all_status_lable/all`,
-        rangeMs: 24 * 60 * 60 * 1000,
+        rangeMs: 10 * 60 * 60 * 1000,
         maxGapMs: 15 * 60 * 1000,
         minZoomRangeMs: 5 * 60 * 1000,
         requestTimeoutMs: 60000,
-        requestMaxPoints: 720,
+        requestMaxPoints: 300,
         cacheTtlMs: 60 * 1000,
         cachePrefix: "load-graph-trend::",
+        chartModes: {
+            load: {
+                graphType: "load",
+                title: "Load Trend",
+                yTitle: "Load (KwE)",
+                yRange: { min: 0, max: 750, step: 50 },
+                unit: "KwE",
+            },
+            pms: {
+                graphType: "pms",
+                title: "PMS Trend",
+                yTitle: "PMS Power (kW)",
+                yRange: { min: 0, max: 750, step: 50 },
+                unit: "kW",
+            },
+        },
         yRange: { min: 0, max: 750, step: 50 },
         seriesStyle: {
             "DG#1": { borderColor: "#1d4ed8", backgroundColor: "rgba(29, 78, 216, 0.18)" },
@@ -104,6 +123,7 @@
         timeZone: "__browser__",
         selectedPointMs: NaN,
         selectedDgNames: [],
+        chartMode: "load",
     };
 
     const initialDg = (() => {
@@ -212,6 +232,16 @@
         DOM.status.classList.toggle("error", !!isError);
     }
 
+    function getActiveChartModeConfig() {
+        return CONFIG.chartModes[state.chartMode] || CONFIG.chartModes.load;
+    }
+
+    function updateModeButtons() {
+        if (DOM.modeLoad) DOM.modeLoad.classList.toggle("is-active", state.chartMode === "load");
+        if (DOM.modePms) DOM.modePms.classList.toggle("is-active", state.chartMode === "pms");
+        if (DOM.mainChartTitle) DOM.mainChartTitle.textContent = getActiveChartModeConfig().title;
+    }
+
     function setLoading(isLoading) {
         if (!DOM.loading) return;
         DOM.loading.classList.toggle("active", !!isLoading);
@@ -241,10 +271,37 @@
         return Array.from(document.querySelectorAll('input[name="dg-name"]:checked'), (input) => input.value);
     }
 
-    function syncDefaultRange() {
-        const now = new Date();
-        DOM.from.value = formatDateForInput(new Date(now.getTime() - CONFIG.rangeMs), state.timeZone);
-        DOM.to.value = formatDateForInput(now, state.timeZone);
+    function extractLatestTimestampMs(payload) {
+        const candidates = [];
+        const pushTimestamp = (value) => {
+            const ms = parseApiTimestamp(value);
+            if (Number.isFinite(ms)) candidates.push(ms);
+        };
+        (Array.isArray(payload) ? payload : []).forEach((machine) => {
+            pushTimestamp(machine?.timestamp);
+            pushTimestamp(machine?.TimeStamp);
+            pushTimestamp(machine?.timeStamp);
+            pushTimestamp(machine?.time_stamp);
+            const analogRows = Array.isArray(machine?.analog) ? machine.analog : [];
+            const digitalRows = Array.isArray(machine?.digital) ? machine.digital : [];
+            analogRows.forEach((row) => pushTimestamp(row?.timestamp));
+            digitalRows.forEach((row) => pushTimestamp(row?.timestamp));
+        });
+        return candidates.length > 0 ? Math.max(...candidates) : NaN;
+    }
+
+    async function syncDefaultRange() {
+        let maxTimestampMs = NaN;
+        try {
+            const response = await fetchWithTimeout(CONFIG.latestStatusApiBase, CONFIG.requestTimeoutMs, { cache: "no-store" });
+            if (response.ok) {
+                const payload = await response.json();
+                maxTimestampMs = extractLatestTimestampMs(payload);
+            }
+        } catch (_) {}
+        const anchorDate = Number.isFinite(maxTimestampMs) ? new Date(maxTimestampMs) : new Date();
+        DOM.from.value = formatDateForInput(new Date(anchorDate.getTime() - CONFIG.rangeMs), state.timeZone);
+        DOM.to.value = formatDateForInput(anchorDate, state.timeZone);
     }
 
     function shiftRange(deltaMs) {
@@ -318,6 +375,7 @@
     }
 
     function createChartConfig() {
+        const mode = getActiveChartModeConfig();
         return {
             type: "line",
             data: { datasets: [] },
@@ -340,10 +398,10 @@
                         border: { color: "rgba(100, 116, 139, 0.28)" },
                     },
                     y: {
-                        min: CONFIG.yRange.min,
-                        max: CONFIG.yRange.max,
-                        ticks: { color: "#475569", stepSize: CONFIG.yRange.step },
-                        title: { display: true, text: "Load (KwE)", color: "#334155", font: { size: 14, style: "italic", weight: "700" } },
+                        min: mode.yRange.min,
+                        max: mode.yRange.max,
+                        ticks: { color: "#475569", stepSize: mode.yRange.step },
+                        title: { display: true, text: mode.yTitle, color: "#334155", font: { size: 14, style: "italic", weight: "700" } },
                         grid: { color: "rgba(100, 116, 139, 0.14)" },
                         border: { color: "rgba(100, 116, 139, 0.28)" },
                     },
@@ -530,11 +588,16 @@
     }
 
     function applyChartData(payload) {
+        const mode = getActiveChartModeConfig();
         state.range = { fromMs: parseApiTimestamp(payload?.from), toMs: parseApiTimestamp(payload?.to) };
         let totalVisiblePoints = 0;
         const bucketGapMs = Number(payload?.bucket_seconds) > 0 ? Number(payload.bucket_seconds) * 2000 : 0;
         const gapThresholdMs = Math.max(CONFIG.maxGapMs, bucketGapMs);
         state.chart.options.scales.x.title.text = `Time (${getSelectedTimeZoneLabel()})`;
+        state.chart.options.scales.y.min = mode.yRange.min;
+        state.chart.options.scales.y.max = mode.yRange.max;
+        state.chart.options.scales.y.ticks.stepSize = mode.yRange.step;
+        state.chart.options.scales.y.title.text = mode.yTitle;
         state.chart.options.scales.x.min = Number.isFinite(state.range.fromMs) ? state.range.fromMs : undefined;
         state.chart.options.scales.x.max = Number.isFinite(state.range.toMs) ? state.range.toMs : undefined;
         state.chart.data.datasets = (Array.isArray(payload?.series) ? payload.series : []).flatMap((item) => {
@@ -546,7 +609,7 @@
             const basePointRadius = validPoints.length <= 2 ? 4 : 1.5;
             return [{
                 label: item.dg_name,
-                unit: item.unit || "KwE",
+                unit: item.unit || mode.unit,
                 data,
                 parsing: false,
                 normalized: true,
@@ -596,10 +659,11 @@
         const from = parseInputValueForTimeZone(DOM.from.value, state.timeZone);
         const to = parseInputValueForTimeZone(DOM.to.value, state.timeZone);
         const dgNames = getSelectedDgNames();
+        const mode = getActiveChartModeConfig();
         if (!from || !to) return { error: "Please choose both From and To time." };
         if (from >= to) return { error: "'From' must be earlier than 'To'." };
         if (dgNames.length === 0) return { error: "Please select at least one DG." };
-        const params = new URLSearchParams({ from: from.toISOString(), to: to.toISOString(), graph_type: "load" });
+        const params = new URLSearchParams({ from: from.toISOString(), to: to.toISOString(), graph_type: mode.graphType });
         dgNames.forEach((dgName) => params.append("dg_names", dgName));
         params.set("max_points", String(CONFIG.requestMaxPoints));
         return { params, dgNames };
@@ -704,7 +768,7 @@
         state.selectedDgNames = dgNames.slice();
         const queryString = params.toString();
         const requestId = ++state.activeRequestId;
-        const cachedPayload = readCachedPayload(queryString);
+        const cachedPayload = readCachedPayload(`${state.chartMode}::${queryString}`);
         if (cachedPayload) {
             applyChartData(cachedPayload);
             setStatus("Showing recent cached trend while refreshing...");
@@ -724,7 +788,7 @@
             }
             const runningHoursPayload = runningHoursResponse ? await runningHoursResponse.json() : null;
             if (requestId !== state.activeRequestId) return;
-            writeCachedPayload(queryString, payload);
+            writeCachedPayload(`${state.chartMode}::${queryString}`, payload);
             const totalVisiblePoints = applyChartData(payload);
             applyRunningHoursChartData(runningHoursPayload);
             if (Number.isFinite(state.selectedPointMs)) {
@@ -747,6 +811,22 @@
 
     function bindEvents() {
         DOM.apply.addEventListener("click", loadTrend);
+        if (DOM.modeLoad) {
+            DOM.modeLoad.addEventListener("click", () => {
+                if (state.chartMode === "load") return;
+                state.chartMode = "load";
+                updateModeButtons();
+                loadTrend();
+            });
+        }
+        if (DOM.modePms) {
+            DOM.modePms.addEventListener("click", () => {
+                if (state.chartMode === "pms") return;
+                state.chartMode = "pms";
+                updateModeButtons();
+                loadTrend();
+            });
+        }
         DOM.prev.addEventListener("click", () => shiftRange(-CONFIG.rangeMs));
         DOM.next.addEventListener("click", () => shiftRange(CONFIG.rangeMs));
         DOM.home.addEventListener("click", () => { window.location.href = "./index.html"; });
@@ -757,21 +837,22 @@
         });
     }
 
-    function init() {
+    async function init() {
         if (initialDg) {
             document.querySelectorAll('input[name="dg-name"]').forEach((input) => {
                 input.checked = input.value === initialDg;
             });
         }
-        syncDefaultRange();
+        await syncDefaultRange();
         updateHeaderTime();
         setInterval(updateHeaderTime, 1000);
+        updateModeButtons();
         buildChart();
         buildRunningHoursChart();
         buildPmsChart();
         bindPanZoom();
         bindEvents();
-        loadTrend();
+        await loadTrend();
     }
 
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });
