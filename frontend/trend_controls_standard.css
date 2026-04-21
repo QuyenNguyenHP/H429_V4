@@ -9,6 +9,19 @@
     font-weight: 700;
 }
 
+.trend-input[type="datetime-local"] {
+    color-scheme: light;
+}
+
+.trend-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+.trend-input[type="datetime-local"]::-webkit-date-and-time-value {
+    text-align: left;
+}
+
 .trend-time-group {
     display: flex;
     flex-wrap: nowrap;
@@ -52,4 +65,13 @@
     .trend-time-group {
         flex-wrap: wrap;
     }
+}
+
+:root[data-theme="dark"] .trend-input[type="datetime-local"] {
+    color-scheme: dark;
+}
+
+:root[data-theme="dark"] .trend-input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(1.9);
+    opacity: 1;
 }
