@@ -1,109 +1,139 @@
-# Frontend 🖥️
+# Frontend
 
-Frontend là tập các trang HTML tĩnh cho dashboard H429.
+Frontend la tap cac trang HTML/CSS/JS tinh cho dashboard H429.
 
-## Trang active 🌐
+## Trang active
 
-### `index.html` 🏠
-- Trang tổng quan toàn hệ thống
-- Hiển thị:
-  - `DG#1`, `DG#2`, `DG#3`
-  - `ME-PORT`, `ME-STBD`
-  - 3 card `PMS`
-- Có sidebar menu chung
-- Dùng `UI_LAYOUT` để chỉnh vị trí các section trên trang chủ
+### `index.html`
 
-API dùng:
+- Trang tong quan toan he thong
+- Hien thi `DG#1`, `DG#2`, `DG#3`, `ME-PORT`, `ME-STBD`, va 3 card `PMS`
+- Layout trang chu da chuyen sang autosize theo noi dung
+- Man hinh nho se tu xuong cot de tranh chong layout
+
+API dung:
+
 - `GET /api/check_all_status_lable/index`
-- fallback PMS từ `GET /api/check_all_status_lable/all`
+- fallback PMS tu `GET /api/check_all_status_lable/all`
 
-### `dg_dashboard.html` 🔵
-- Dashboard chi tiết cho DG
+### `dg_dashboard.html`
+
+- Dashboard chi tiet cho DG
 - Route:
   - `dg_dashboard.html?dg=1`
   - `dg_dashboard.html?dg=2`
   - `dg_dashboard.html?dg=3`
-- Có:
-  - overlay giá trị trên ảnh máy
-  - bảng `Digital Value`
+- Co:
+  - overlay gia tri tren anh may
+  - bang `Digital Value`
   - embedded trend chart
-  - điều hướng sang `3DGs_graph.html`
+  - dieu huong sang `3DGs_graph.html`
 
-API dùng:
+Overlay tren anh engine hien tai:
+
+- `Engine Speed`, `Running Hour`, `Load`
+- `Cylinder`
+- cac `data-tag`
+
+Hanh vi moi:
+
+- overlay tu scale theo kich thuoc hien thi thuc te cua anh engine
+- dung `ResizeObserver` bam vao `engine-container` va `engine-background-image`
+- dark mode da doi nen vung engine sang tong toi
+- cylinder tag trong dark mode da bo nen trang va doi chu sang tong sang
+- embedded trend mac dinh mo theo `MaxTimestamp - 10h` den `MaxTimestamp`
+- embedded trend dung `max_points = 300`
+
+API dung:
+
 - `GET /api/check_all_status_lable/snapshot?dg_name=...`
 - `GET /api/engine_graph`
 
-### `me_dashboard.html` 🟢
-- Dashboard chi tiết cho main engine
-- Route:
-  - `me_dashboard.html?dg=ME-PORT`
-  - `me_dashboard.html?dg=ME-STBD`
-- Có:
-  - overlay tag trên ảnh máy
-  - bảng `Analog Value`
-  - bảng `Digital Value`
-- Vị trí UI chỉnh qua `UI_LAYOUT`
+### `ME_dashboard.html`
 
-API dùng:
+- Dashboard chi tiet cho main engine
+- Route:
+  - `ME_dashboard.html?dg=ME-PORT`
+  - `ME_dashboard.html?dg=ME-STBD`
+- Co:
+  - overlay tag tren anh may
+  - bang `Analog Value`
+  - bang `Digital Value`
+
+Hanh vi moi:
+
+- overlay tren anh engine tu scale theo kich thuoc hien thi cua anh
+- dung `ResizeObserver` de refresh overlay khi anh engine thay doi kich thuoc
+- dark mode da doi nen vung engine sang tong toi
+- cylinder tag da dong bo mau voi dark theme
+
+API dung:
+
 - `GET /api/check_all_status_lable/snapshot?dg_name=...`
 
-### `3DGs_graph.html` 📈
-- Trang trend cho 3 DG
-- Đã tách thành 2 section lớn:
-  - section filter + `LOAD`
-  - section `DGs Running Hours` + `PMS`
-- Có:
-  - chọn thời gian
-  - chọn `DG#`
-  - nút `Prev 24h / Next 24h / Apply`
-  - chọn điểm trên đồ thị để sync `PMS`
-  - `Esc` để reset điểm chọn
-  - zoom bằng nút kính lúp `+ / -`
-  - pan chart bằng chuột trái
+### `3DGs_graph.html`
 
-Script chính:
+- Trang trend cho 3 DG
+- Chart chinh co 2 mode:
+  - `LOAD`
+  - `PMS`
+- Mac dinh khi mo trang:
+  - mode `LOAD`
+  - khoang thoi gian `MaxTimestamp - 10h` den `MaxTimestamp`
+  - `max_points = 300`
+
+Tinh nang:
+
+- chon thoi gian
+- chon `DG#`
+- nut `LOAD / PMS`
+- nut `Prev 24h / Next 24h / Apply`
+- chon 1 diem du lieu tren chart de sync `PMS`
+- `Esc` de reset diem chon
+- zoom bang nut `+ / -`
+- pan chart bang chuot trai
+
+Script chinh:
+
 - `dg_load_trend.js`
 
-API dùng:
+API dung:
+
 - `GET /api/engine_graph?graph_type=load`
+- `GET /api/engine_graph?graph_type=pms`
 - `GET /api/engine_graph/pms`
 - `GET /api/check_all_status_lable/all`
 
-## File dùng chung ♻️
+## File dung chung
 
 ### `app.css`
-- CSS dùng chung toàn frontend
-- chứa style cho:
+
+- CSS dung chung toan frontend
+- chua style cho:
   - `main-container`
-  - sidebar menu
   - home cards
   - dashboard tables
+  - responsive layout
+  - dark theme cho vung engine va cylinder tag
 
 ### `dashboard_shared.js`
-- helper dùng chung cho frontend:
+
+- helper dung chung:
   - resolve backend origin
   - fetch with timeout
-  - global sidebar menu
-  - helper pan / zoom / reset viewport cho chart
+  - pan / zoom / reset viewport cho chart
+  - helper layout chung
 
-## Chạy local ▶️
+## Chay local
 
 ```bash
 cd frontend
 python3 -m http.server 5170 --bind 0.0.0.0
 ```
 
-Mở:
+Mo:
 
 - `http://localhost:5170/index.html`
 - `http://localhost:5170/dg_dashboard.html?dg=1`
-- `http://localhost:5170/me_dashboard.html?dg=ME-PORT`
+- `http://localhost:5170/ME_dashboard.html?dg=ME-PORT`
 - `http://localhost:5170/3DGs_graph.html`
-
-## Ghi chú 📝
-
-- File active hiện tại là:
-  - `dg_dashboard.html`
-  - `me_dashboard.html`
-- Các tên cũ như `Engine_graph.html` và `ME_dashboard.html` không còn là file active.
-- `DGs_dashboard.html.bak` chỉ là file backup cũ, không thuộc luồng chạy hiện tại.
