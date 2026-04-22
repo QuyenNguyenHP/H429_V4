@@ -442,8 +442,16 @@
             engineBackgroundImage.src = lastEngineRunningState ? "Asset/Engine_Runing.gif" : getEngineIdleImagePath();
         }
 
+        function resolveDisplayRows(rows) {
+            if (!Array.isArray(rows)) return [];
+            if (rows.length === 0) return rows;
+            return rows.some((item) => item && item.dg_name != null)
+                ? filterRowsByTarget(rows)
+                : rows;
+        }
+
         function updateHeaderLights(digitalRows) {
-            const rows = filterRowsByTarget(digitalRows);
+            const rows = resolveDisplayRows(digitalRows);
             const runRow = rows.find(item => String(item.label || "").trim().toUpperCase() === "ENGINE RUN");
             const meRevNum = Number(latestMeRevolution);
             const isRunningByMeRev = Number.isFinite(meRevNum) && meRevNum !== 0;
@@ -461,9 +469,18 @@
             if (indicator) indicator.classList.toggle("active", analogCritical || digitalAlarm);
         }
 
+        function getCylinderValueElementId(label) {
+            const normalized = String(label || "")
+                .toUpperCase()
+                .replace(/\s+/g, " ")
+                .trim();
+            const match = normalized.match(/(?:^|[\s/-])NO\.\s*(\d+)\s*CYL\./i);
+            return match ? `val-cyl-${match[1]}` : null;
+        }
+
         function updateOverlayAnalog(data) {
             if (!data || data.length === 0) return;
-            const rows = filterRowsByTarget(data);
+            const rows = resolveDisplayRows(data);
             let nextMeRevolution = 0;
             let hasMeRevolution = false;
             rows.forEach((item) => {
@@ -474,9 +491,9 @@
                     nextMeRevolution = Number.isFinite(parsed) ? parsed : 0;
                     hasMeRevolution = true;
                 }
-                const match = label.match(/NO\.(\d+)\s+CYL\.\s+EXH\.\s+GAS\s+OUTLET\s+TEMP\./i);
-                if (match) {
-                    const el = getById(`val-cyl-${match[1]}`);
+                const cylId = getCylinderValueElementId(label);
+                if (cylId) {
+                    const el = getById(cylId);
                     if (el) el.textContent = String(Math.round(item.value));
                     return;
                 }
@@ -499,7 +516,7 @@
             leftTbody.innerHTML = "";
             middleTbody.innerHTML = "";
             rightTbody.innerHTML = "";
-            const rows = filterRowsByTarget(data);
+            const rows = resolveDisplayRows(data);
             const valueByLabel = new Map();
             rows.forEach((item) => {
                 const key = String(item.label || "").trim();
@@ -545,7 +562,7 @@
             leftTbody.innerHTML = "";
             middleTbody.innerHTML = "";
             rightTbody.innerHTML = "";
-            const rows = filterRowsByTarget(data);
+            const rows = resolveDisplayRows(data);
             const greenStatusLabels = new Set(["ENGINE RUN", "READY TO START"]);
             const valueByLabel = new Map();
             rows.forEach((item) => {
@@ -671,6 +688,7 @@
         function refreshOverlayLayout() {
             applyUILayout();
             initCylinders();
+            updateOverlayAnalog(latestAnalogRows);
         }
 
         function scheduleOverlayRefresh() {
@@ -703,6 +721,7 @@
         let latestMeRevolution = 0;
         const POLL_INTERVAL_MS = 5000;
         const FETCH_TIMEOUT_MS = 60000;
+        let latestAnalogRows = [];
 
         async function fetchData() {
             if (isFetching) return;
@@ -717,6 +736,7 @@
                     : null;
                 const analogData = Array.isArray(machineData?.analog) ? machineData.analog : [];
                 const digitalData = Array.isArray(machineData?.digital) ? machineData.digital : [];
+                latestAnalogRows = analogData;
 
                 updateOverlayAnalog(analogData);
                 updateAnalogTable(analogData);

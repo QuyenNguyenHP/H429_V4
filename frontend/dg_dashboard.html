@@ -496,24 +496,29 @@
             }
         }
 
+        function getCylinderValueElementId(label) {
+            const normalized = String(label || "")
+                .toUpperCase()
+                .replace(/\s+/g, ' ')
+                .trim();
+            const match = normalized.match(/(?:^|[\s/-])NO\.\s*(\d+)\s*CYL\./i);
+            return match ? `val-cyl-${match[1]}` : null;
+        }
+
         function updateUI(analogRows) {
             if (!analogRows || analogRows.length === 0) return;
 
             analogRows.forEach(item => {
                 if (item.value == null || item.label == null) return;
-                // Xá»­ lÃ½ cÃ¡c giÃ¡ trá»‹ Cylinder (No.1 - No.6)
-                if (item.label.includes("No.")) {
-                    const match = item.label.match(/No\.(\d+)/);
-                    if (match) {
-                        const cylId = `val-cyl-${match[1]}`;
-                        const el = getById(cylId);
-                        if (el) {
-                            const next = String(Math.round(item.value));
-                            setText(el, next);
-                            applyStatusStyle(el, item.status);
-                        }
+                const cylId = getCylinderValueElementId(item.label);
+                if (cylId) {
+                    const el = getById(cylId);
+                    if (el) {
+                        const next = String(Math.round(item.value));
+                        setText(el, next);
+                        applyStatusStyle(el, item.status);
                     }
-                } 
+                }
                 // Xá»­ lÃ½ cÃ¡c thÃ´ng sá»‘ khÃ¡c
                 else {
                     const elementId = DATA_MAPPING[item.label];
@@ -659,6 +664,7 @@
         function applyMachineSnapshot(machineData, timestampValue) {
             const analogRows = Array.isArray(machineData?.analog) ? machineData.analog : [];
             const digitalRows = Array.isArray(machineData?.digital) ? machineData.digital : [];
+            latestAnalogRows = analogRows;
 
             updateUI(analogRows);
             updateDigitalTable(digitalRows);
@@ -735,6 +741,7 @@
         let consecutiveFailures = 0;
         const POLL_INTERVAL_MS = 5000;
         const FETCH_TIMEOUT_MS = 60000;
+        let latestAnalogRows = [];
         const dashboardState = {
             mode: "live",
             snapshotTimestamp: "",
@@ -1684,6 +1691,7 @@
         function refreshOverlayLayout() {
             applyUILayout();
             initCylinders();
+            updateUI(latestAnalogRows);
         }
 
         window.onload = () => {
