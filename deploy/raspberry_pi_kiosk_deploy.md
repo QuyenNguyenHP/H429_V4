@@ -237,6 +237,7 @@ sleep 8
 /usr/bin/chromium \
   --start-fullscreen \
   --kiosk \
+  --touch-events=enabled \
   --force-device-scale-factor=1 \
   --disable-pinch \
   --overscroll-history-navigation=0 \
@@ -350,7 +351,7 @@ Nội dung:
 [Desktop Entry]
 Type=Application
 Name=H429 Kiosk
-Exec=bash -lc "sleep 8; /usr/bin/chromium --start-fullscreen --kiosk --force-device-scale-factor=1 --disable-pinch --overscroll-history-navigation=0 --no-first-run --noerrdialogs --disable-infobars --incognito http://127.0.0.1/"
+Exec=bash -lc "sleep 8; /usr/bin/chromium --start-fullscreen --kiosk --touch-events=enabled --force-device-scale-factor=1 --disable-pinch --overscroll-history-navigation=0 --no-first-run --noerrdialogs --disable-infobars --incognito http://127.0.0.1/"
 Terminal=false
 X-GNOME-Autostart-enabled=true
 ```
