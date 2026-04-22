@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>DRUMS HOME </title>
     <link rel="icon" type="image/png" href="./Asset/DRUMS_logo_small.png">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -311,7 +311,7 @@
 
         function buildResponsiveLayout() {
             const width = window.innerWidth || document.documentElement.clientWidth || 0;
-            if (width <= 768) {
+            if (width <= 1280) {
                 return {
                     vesselBox: { mode: "static" },
                     logoBox: { mode: "static" },
