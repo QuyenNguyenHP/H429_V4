@@ -28,6 +28,19 @@
                     <h1 id="page-title" class="text-4xl font-extrabold tracking-tight text-blue-700 leading-none">DG Dashboard</h1>
                 </div>
             </div>
+            <div id="dashboard-shared-trend-controls" class="header-box flex items-end gap-3 px-4 py-3">
+                <div class="flex flex-col gap-1">
+                    <label for="header-trend-from" class="text-[10px] font-extrabold text-gray-600 leading-none">From</label>
+                    <input id="header-trend-from" class="trend-input h-10 min-w-[220px]" type="datetime-local">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label for="header-trend-to" class="text-[10px] font-extrabold text-gray-600 leading-none">To</label>
+                    <input id="header-trend-to" class="trend-input h-10 min-w-[220px]" type="datetime-local">
+                </div>
+                <button id="header-trend-prev" class="rounded-lg border border-slate-500 bg-white px-4 py-2 h-10 font-extrabold text-slate-900 shadow-[1px_1px_0_#475569] transition hover:-translate-y-px hover:border-blue-600 hover:shadow-lg whitespace-nowrap" type="button">Prev 24h</button>
+                <button id="header-trend-next" class="rounded-lg border border-slate-500 bg-white px-4 py-2 h-10 font-extrabold text-slate-900 shadow-[1px_1px_0_#475569] transition hover:-translate-y-px hover:border-blue-600 hover:shadow-lg whitespace-nowrap" type="button">Next 24h</button>
+                <button id="header-trend-apply" class="rounded-lg border border-slate-500 bg-white px-4 py-2 h-10 font-extrabold text-slate-900 shadow-[1px_1px_0_#475569] transition hover:-translate-y-px hover:border-blue-600 hover:shadow-lg whitespace-nowrap" type="button">Apply</button>
+            </div>
             <!-- Current Date & Time -->
             <div class="header-box dashboard-time-box">
                 <div class="w-full">
@@ -37,7 +50,9 @@
             </div>
         </div>
 
+        <div id="dg-scene-stage" class="dg-scene-stage">
         <!-- Main Engine Visualization Area -->
+        <section id="engine-scene-section" class="dg-scene-section">
         <div class="engine-dashboard engine-container">
                 <img
                     id="engine-alarm-indicator"
@@ -129,8 +144,49 @@
                 <div class="digital-value" id="val-lo-inlet-t">-----</div>
             </div>
         </div>
+        </section>
 
-        <div class="mt-4 digital-table-wrap">
+        <section id="trend-top-right-section" class="dg-scene-section">
+        <div id="embedded-trend-section" class="trend-scene-panel bg-white/75 border border-slate-300 rounded-2xl p-3 shadow-sm">
+            <div class="trend-panel-title text-sm font-extrabold text-slate-700">LOAD</div>
+            <div id="embedded-trend-status" class="mt-2 min-h-6 text-sm font-bold text-slate-600"></div>
+            <div class="relative mt-2 rounded-2xl border border-slate-300 bg-gradient-to-b from-white to-slate-50 p-4 trend-chart-shell">
+                <div id="embedded-trend-loading" class="embedded-trend-loading" aria-hidden="true">
+                    <div class="embedded-trend-spinner"></div>
+                </div>
+                <canvas id="embedded-load-trend-chart" style="width:100%;height:340px;"></canvas>
+            </div>
+        </div>
+        </section>
+
+        <section id="trend-bottom-left-section" class="dg-scene-section">
+        <div id="embedded-trend-section-bl" class="trend-scene-panel bg-white/75 border border-slate-300 rounded-2xl p-3 shadow-sm">
+            <div class="trend-panel-title text-sm font-extrabold text-slate-700">T/C EXH</div>
+            <div id="embedded-trend-status-bl" class="mt-2 min-h-6 text-sm font-bold text-slate-600"></div>
+            <div class="relative mt-2 rounded-2xl border border-slate-300 bg-gradient-to-b from-white to-slate-50 p-4 trend-chart-shell">
+                <div id="embedded-trend-loading-bl" class="embedded-trend-loading" aria-hidden="true">
+                    <div class="embedded-trend-spinner"></div>
+                </div>
+                <canvas id="embedded-load-trend-chart-bl" style="width:100%;height:340px;"></canvas>
+            </div>
+        </div>
+        </section>
+
+        <section id="trend-bottom-right-section" class="dg-scene-section">
+        <div id="embedded-trend-section-br" class="trend-scene-panel bg-white/75 border border-slate-300 rounded-2xl p-3 shadow-sm">
+            <div class="trend-panel-title text-sm font-extrabold text-slate-700">CYLINDER TEMP</div>
+            <div id="embedded-trend-status-br" class="mt-2 min-h-6 text-sm font-bold text-slate-600"></div>
+            <div class="relative mt-2 rounded-2xl border border-slate-300 bg-gradient-to-b from-white to-slate-50 p-4 trend-chart-shell">
+                <div id="embedded-trend-loading-br" class="embedded-trend-loading" aria-hidden="true">
+                    <div class="embedded-trend-spinner"></div>
+                </div>
+                <canvas id="embedded-load-trend-chart-br" style="width:100%;height:340px;"></canvas>
+            </div>
+        </div>
+        </section>
+        </div>
+
+        <div id="dg-digital-table-section" class="mt-4 digital-table-wrap hidden">
             <div class="px-3 py-2 font-bold bg-gray-200 border-b border-gray-300">
                 DIGITAL VALUE (ON/OFF)
             </div>
@@ -165,52 +221,6 @@
             </div>
         </div>
 
-        <div id="embedded-trend-section" class="mt-4 bg-white/75 border border-slate-300 rounded-2xl p-3 shadow-sm">
-            <div class="embedded-trend-toolbar">
-                <div class="flex flex-col gap-2">
-                    <label for="embedded-trend-from" class="text-xs font-bold text-slate-700">From</label>
-                    <input id="embedded-trend-from" class="trend-input h-10 min-w-[230px]" type="datetime-local">
-                </div>
-                <div class="flex flex-col gap-2">
-                    <label for="embedded-trend-to" class="text-xs font-bold text-slate-700">To</label>
-                    <input id="embedded-trend-to" class="trend-input h-10 min-w-[230px]" type="datetime-local">
-                </div>
-                <button id="embedded-trend-prev" class="rounded-lg border border-slate-500 bg-white px-4 py-2 h-10 font-extrabold text-slate-900 shadow-[1px_1px_0_#475569] transition hover:-translate-y-px hover:border-blue-600 hover:shadow-lg whitespace-nowrap" type="button">Prev 24h</button>
-                <button id="embedded-trend-next" class="rounded-lg border border-slate-500 bg-white px-4 py-2 h-10 font-extrabold text-slate-900 shadow-[1px_1px_0_#475569] transition hover:-translate-y-px hover:border-blue-600 hover:shadow-lg whitespace-nowrap" type="button">Next 24h</button>
-                <button id="embedded-trend-apply" class="rounded-lg border border-slate-500 bg-white px-4 py-2 h-10 font-extrabold text-slate-900 shadow-[1px_1px_0_#475569] transition hover:-translate-y-px hover:border-blue-600 hover:shadow-lg whitespace-nowrap" type="button">Apply</button>
-                <div class="embedded-trend-actions">
-                    <span class="text-xs font-bold text-slate-700">Show Graph</span>
-                    <button id="embedded-mode-load" class="rounded-lg border border-blue-700 bg-blue-700 px-3 py-2 h-10 text-sm font-extrabold text-white shadow-sm transition hover:-translate-y-px whitespace-nowrap" type="button">LOAD</button>
-                    <button id="embedded-mode-cylinder" class="rounded-lg border border-slate-400 bg-white px-3 py-2 h-10 text-sm font-extrabold text-slate-800 shadow-sm transition hover:-translate-y-px hover:border-blue-600 whitespace-nowrap" type="button">CYLINDER EXH</button>
-                    <button id="embedded-mode-tc" class="rounded-lg border border-slate-400 bg-white px-3 py-2 h-10 text-sm font-extrabold text-slate-800 shadow-sm transition hover:-translate-y-px hover:border-blue-600 whitespace-nowrap" type="button">T/C EXH</button>
-                </div>
-            </div>
-
-            <div id="embedded-trend-status" class="mt-4 min-h-6 text-sm font-bold text-slate-600"></div>
-            <div class="relative mt-4 rounded-2xl border border-slate-300 bg-gradient-to-b from-white to-slate-50 p-4">
-                <div id="embedded-trend-loading" class="embedded-trend-loading" aria-hidden="true">
-                    <div class="embedded-trend-spinner"></div>
-                </div>
-                <div class="absolute right-4 top-4 z-10 flex gap-2">
-                    <button id="embedded-zoom-in-btn" class="rounded-lg border border-slate-500 bg-white h-10 w-10 flex items-center justify-center text-blue-700 shadow-[1px_1px_0_#475569] transition hover:-translate-y-px hover:border-blue-600 hover:shadow-lg" type="button" aria-label="Zoom in">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" class="h-[18px] w-[18px] stroke-current [stroke-width:2] fill-none [stroke-linecap:round] [stroke-linejoin:round]">
-                            <circle cx="11" cy="11" r="6"></circle>
-                            <line x1="16" y1="16" x2="21" y2="21"></line>
-                            <line x1="11" y1="8.5" x2="11" y2="13.5"></line>
-                            <line x1="8.5" y1="11" x2="13.5" y2="11"></line>
-                        </svg>
-                    </button>
-                    <button id="embedded-zoom-out-btn" class="rounded-lg border border-slate-500 bg-white h-10 w-10 flex items-center justify-center text-blue-700 shadow-[1px_1px_0_#475569] transition hover:-translate-y-px hover:border-blue-600 hover:shadow-lg" type="button" aria-label="Zoom out">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" class="h-[18px] w-[18px] stroke-current [stroke-width:2] fill-none [stroke-linecap:round] [stroke-linejoin:round]">
-                            <circle cx="11" cy="11" r="6"></circle>
-                            <line x1="16" y1="16" x2="21" y2="21"></line>
-                            <line x1="8.5" y1="11" x2="13.5" y2="11"></line>
-                        </svg>
-                    </button>
-                </div>
-                <canvas id="embedded-load-trend-chart" style="width:100%;height:340px;"></canvas>
-            </div>
-        </div>
     </div>
 
     <script src="./dashboard_shared.js"></script>
@@ -370,7 +380,7 @@
         };
 
         const UI_LAYOUT = {
-            baseWidth: 1456,
+            baseWidth: 1000,
             cylinders: [
                 { x: '40.5%', y: '20%', scale: 1.0 },
                 { x: '48%', y: '20%', scale: 1.0 },
@@ -397,6 +407,68 @@
                 'lo-inlet-t': { x: '60%', y: '62%', scale: 1.2, labelWidth: '200px', valueWidth: '60px' }
             }
         };
+        const DG_SCENE_BASE = { width: 1920, height: 1080 };
+        const DG_DASHBOARD_SCENE = {
+            desktop: {
+                engineSection: { x: "150px", y: "112px", width: "800px", height: "450px" },
+                trendTopRight: { x: "1060px", y: "112px", width: "800px", height: "450px" },
+                trendBottomLeft: { x: "150px", y: "600px", width: "800px", height: "450px" },
+                trendBottomRight: { x: "1060px", y: "600px", width: "800px", height: "450px" }
+            },
+            compact: {
+                engineSection: { mode: "static" },
+                trendTopRight: { mode: "static" },
+                trendBottomLeft: { mode: "static" },
+                trendBottomRight: { mode: "static" }
+            }
+        };
+
+        function applySceneBoxStyles(el, cfg = {}) {
+            if (!el) return;
+            if ((cfg.mode || "absolute") === "static") {
+                el.style.position = "static";
+                el.style.left = "";
+                el.style.top = "";
+                el.style.width = "";
+                el.style.height = "";
+                return;
+            }
+            el.style.position = "absolute";
+            el.style.left = cfg.x || "";
+            el.style.top = cfg.y || "";
+            el.style.width = cfg.width || "";
+            el.style.height = cfg.height || "";
+        }
+
+        function buildDashboardSceneLayout() {
+            const width = window.innerWidth || document.documentElement.clientWidth || 0;
+            return width <= 1280 ? DG_DASHBOARD_SCENE.compact : DG_DASHBOARD_SCENE.desktop;
+        }
+
+        function lockViewportFrame() {
+            const mainContainer = document.querySelector(".main-container");
+            const viewportWidth = window.innerWidth || document.documentElement.clientWidth || DG_SCENE_BASE.width;
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight || DG_SCENE_BASE.height;
+            const desktopScale = Math.min(viewportWidth / DG_SCENE_BASE.width, viewportHeight / DG_SCENE_BASE.height);
+            const scale = viewportWidth <= 1280 ? 1 : desktopScale;
+            document.body.classList.toggle("page-locked-viewport", viewportWidth > 1280);
+            if (!mainContainer) return;
+            if (viewportWidth <= 1280) {
+                mainContainer.style.transform = "";
+                mainContainer.style.margin = "0 auto";
+                return;
+            }
+            mainContainer.style.transform = `scale(${scale})`;
+            mainContainer.style.margin = "0";
+        }
+
+        function applyDashboardSceneLayout(layout = buildDashboardSceneLayout()) {
+            lockViewportFrame();
+            applySceneBoxStyles(document.getElementById("engine-scene-section"), layout.engineSection);
+            applySceneBoxStyles(document.getElementById("trend-top-right-section"), layout.trendTopRight);
+            applySceneBoxStyles(document.getElementById("trend-bottom-left-section"), layout.trendBottomLeft);
+            applySceneBoxStyles(document.getElementById("trend-bottom-right-section"), layout.trendBottomRight);
+        }
 
         function getOverlayScale() {
             const container = document.querySelector('.engine-container');
@@ -411,6 +483,7 @@
         }
 
         function applyUILayout() {
+            applyDashboardSceneLayout();
             const overlayScale = getOverlayScale();
             const container = document.querySelector('.engine-container');
             if (container) {
@@ -749,20 +822,46 @@
 
         const TREND_DOM = {
             section: document.getElementById("embedded-trend-section"),
-            from: document.getElementById("embedded-trend-from"),
-            to: document.getElementById("embedded-trend-to"),
+            from: document.getElementById("header-trend-from"),
+            to: document.getElementById("header-trend-to"),
             status: document.getElementById("embedded-trend-status"),
             loading: document.getElementById("embedded-trend-loading"),
             chartCanvas: document.getElementById("embedded-load-trend-chart"),
-            zoomIn: document.getElementById("embedded-zoom-in-btn"),
-            zoomOut: document.getElementById("embedded-zoom-out-btn"),
-            apply: document.getElementById("embedded-trend-apply"),
-            prev: document.getElementById("embedded-trend-prev"),
-            next: document.getElementById("embedded-trend-next"),
-            modeLoad: document.getElementById("embedded-mode-load"),
-            modeCylinder: document.getElementById("embedded-mode-cylinder"),
-            modeTc: document.getElementById("embedded-mode-tc")
+            zoomIn: null,
+            zoomOut: null,
+            apply: document.getElementById("header-trend-apply"),
+            prev: document.getElementById("header-trend-prev"),
+            next: document.getElementById("header-trend-next"),
+            modeLoad: null,
+            modeCylinder: null,
+            modeTc: null
         };
+        function getMirrorTrendDom(prefix) {
+            return {
+                section: document.getElementById(`embedded-trend-section-${prefix}`),
+                from: null,
+                to: null,
+                status: document.getElementById(`embedded-trend-status-${prefix}`),
+                loading: document.getElementById(`embedded-trend-loading-${prefix}`),
+                chartCanvas: document.getElementById(`embedded-load-trend-chart-${prefix}`),
+                apply: null,
+                prev: null,
+                next: null,
+                modeLoad: null,
+                modeCylinder: null,
+                modeTc: null,
+                chart: null
+            };
+        }
+        const TREND_MIRROR_PANELS = [
+            getMirrorTrendDom("bl"),
+            getMirrorTrendDom("br")
+        ];
+        const FIXED_TREND_PANELS = [
+            { dom: TREND_DOM, mode: "load" },
+            { dom: TREND_MIRROR_PANELS[0], mode: "tc" },
+            { dom: TREND_MIRROR_PANELS[1], mode: "cylinder" }
+        ];
         const TREND_CONFIG = {
             rangeMs: 10 * 60 * 60 * 1000,
             maxGapMs: 15 * 60 * 1000,
@@ -932,11 +1031,21 @@
             TREND_DOM.status.textContent = String(message || "").trim();
             TREND_DOM.status.classList.toggle("text-red-400", !!isError);
             TREND_DOM.status.classList.toggle("text-slate-600", !isError);
+            TREND_MIRROR_PANELS.forEach((panel) => {
+                if (!panel.status) return;
+                panel.status.textContent = TREND_DOM.status.textContent;
+                panel.status.classList.toggle("text-red-400", !!isError);
+                panel.status.classList.toggle("text-slate-600", !isError);
+            });
         }
 
         function trendSetLoading(isLoading) {
             if (!TREND_DOM.loading) return;
             TREND_DOM.loading.classList.toggle("active", !!isLoading);
+            TREND_MIRROR_PANELS.forEach((panel) => {
+                if (!panel.loading) return;
+                panel.loading.classList.toggle("active", !!isLoading);
+            });
         }
 
         function trendGetCylinderDisplayLabel(label) {
@@ -953,21 +1062,7 @@
         }
 
         function trendUpdateModeButtons() {
-            const buttons = [
-                { el: TREND_DOM.modeLoad, mode: "load" },
-                { el: TREND_DOM.modeCylinder, mode: "cylinder" },
-                { el: TREND_DOM.modeTc, mode: "tc" }
-            ];
-            buttons.forEach(({ el, mode }) => {
-                if (!el) return;
-                const isActive = trendState.mode === mode;
-                el.classList.toggle("bg-blue-700", isActive);
-                el.classList.toggle("border-blue-700", isActive);
-                el.classList.toggle("text-white", isActive);
-                el.classList.toggle("bg-white", !isActive);
-                el.classList.toggle("border-slate-400", !isActive);
-                el.classList.toggle("text-slate-800", !isActive);
-            });
+            return;
         }
 
         function trendApplyModeAxes() {
@@ -983,28 +1078,11 @@
         }
 
         async function trendLoadCurrentMode() {
-            if (trendState.mode === "cylinder") {
-                await trendLoadExhaust();
-                return;
-            }
-            if (trendState.mode === "tc") {
-                await trendLoadTcExh();
-                return;
-            }
-            await trendLoad();
+            await trendLoadAllPanels();
         }
 
         async function trendSetMode(mode) {
-            if (!TREND_MODE_META[mode] || trendState.mode === mode) return;
-            trendState.mode = mode;
-            trendUpdateModeButtons();
-            trendApplyModeAxes();
-            if (trendState.chart) {
-                trendState.chart.data.datasets = [];
-                trendState.chart.update("none");
-            }
-            await restoreLiveMode(false);
-            await trendLoadCurrentMode();
+            return;
         }
 
         function trendExtractLatestTimestampMs(payload, targetDgName) {
@@ -1051,6 +1129,15 @@
             const anchorDate = Number.isFinite(maxTimestampMs) ? new Date(maxTimestampMs) : new Date();
             TREND_DOM.from.value = trendFormatDateForInput(new Date(anchorDate.getTime() - TREND_CONFIG.rangeMs), trendState.timeZone);
             TREND_DOM.to.value = trendFormatDateForInput(anchorDate, trendState.timeZone);
+            trendSyncMirrorInputs();
+        }
+
+        function trendSyncMirrorInputs() {
+            return;
+        }
+
+        function trendSyncMirrorCharts() {
+            return;
         }
 
         function trendUpdateInputsFromRange() {
@@ -1060,6 +1147,7 @@
             }
             TREND_DOM.from.value = trendFormatDateForInput(new Date(trendState.range.fromMs), trendState.timeZone);
             TREND_DOM.to.value = trendFormatDateForInput(new Date(trendState.range.toMs), trendState.timeZone);
+            trendSyncMirrorInputs();
         }
 
         function trendShiftRange(deltaMs) {
@@ -1068,6 +1156,7 @@
             if (!from || !to) return;
             TREND_DOM.from.value = trendFormatDateForInput(new Date(from.getTime() + deltaMs), trendState.timeZone);
             TREND_DOM.to.value = trendFormatDateForInput(new Date(to.getTime() + deltaMs), trendState.timeZone);
+            trendSyncMirrorInputs();
             trendLoadCurrentMode();
         }
 
@@ -1233,27 +1322,16 @@
         }
 
         function trendBuildChart() {
-            if (!TREND_DOM.chartCanvas || typeof Chart === "undefined") return;
-            trendState.chart = new Chart(TREND_DOM.chartCanvas.getContext("2d"), trendCreateChartConfig());
-            trendApplyModeAxes();
+            if (typeof Chart === "undefined") return;
+            FIXED_TREND_PANELS.forEach((panel) => {
+                if (!panel.dom.chartCanvas) return;
+                panel.dom.chart = new Chart(panel.dom.chartCanvas.getContext("2d"), trendCreateChartConfig());
+            });
+            trendState.chart = TREND_DOM.chart;
         }
 
         function trendBindPanAndZoom() {
-            if (!TREND_DOM.chartCanvas) return;
-            bindChartViewportControls({
-                chartCanvas: TREND_DOM.chartCanvas,
-                zoomInButton: TREND_DOM.zoomIn,
-                zoomOutButton: TREND_DOM.zoomOut,
-                getChart: () => trendState.chart,
-                getRange: () => trendState.range,
-                minZoomRangeMs: TREND_CONFIG.minZoomRangeMs,
-                mouseButton: 0,
-                intersect: true,
-                onPointSelect: (rawPoint) => {
-                    loadSnapshotAt(rawPoint.x);
-                },
-                onReset: () => {}
-            });
+            return;
         }
 
         function trendApplyChartData(payload) {
@@ -1296,6 +1374,7 @@
                 return [dataset];
             });
             trendState.chart.update("none");
+            trendSyncMirrorCharts();
             return totalVisiblePoints;
         }
 
@@ -1329,6 +1408,7 @@
                 )];
             });
             trendState.chart.update("none");
+            trendSyncMirrorCharts();
             return totalVisiblePoints;
         }
 
@@ -1363,6 +1443,90 @@
                 )];
             });
             trendState.chart.update("none");
+            trendSyncMirrorCharts();
+            return totalVisiblePoints;
+        }
+
+        function trendApplyPayloadToChart(chart, payload, mode) {
+            if (!chart) return 0;
+            const localRange = {
+                fromMs: trendParseApiTimestamp(payload?.from),
+                toMs: trendParseApiTimestamp(payload?.to)
+            };
+            trendState.range = localRange;
+            const bucketGapMs = Number(payload?.bucket_seconds) > 0 ? Number(payload.bucket_seconds) * 2000 : 0;
+            const gapThresholdMs = Math.max(TREND_CONFIG.maxGapMs, bucketGapMs);
+            const meta = TREND_MODE_META[mode] || TREND_MODE_META.load;
+            chart.options.scales.x.title.text = `Time (${trendGetSelectedTimeZoneLabel()})`;
+            chart.options.scales.x.min = Number.isFinite(localRange.fromMs) ? localRange.fromMs : undefined;
+            chart.options.scales.x.max = Number.isFinite(localRange.toMs) ? localRange.toMs : undefined;
+            chart.options.scales.y.min = meta.yMin;
+            chart.options.scales.y.max = meta.yMax;
+            chart.options.scales.y.ticks.stepSize = meta.stepSize;
+            chart.options.scales.y.title.text = meta.yTitle;
+            chart.options.scales.y1.display = mode === "load";
+            chart.options.scales.y1.title.display = mode === "load";
+
+            let totalVisiblePoints = 0;
+            if (mode === "load") {
+                chart.data.datasets = (Array.isArray(payload?.series) ? payload.series : []).flatMap((seriesItem) => {
+                    const seriesLabel = String(seriesItem?.label || "");
+                    const style = TREND_CONFIG.loadDetailSeriesStyle[seriesLabel];
+                    if (!style) return [];
+                    const data = trendNormalizeChartPoints(seriesItem?.points, gapThresholdMs);
+                    const validPoints = data.filter((point) => point && typeof point.y === "number");
+                    if (validPoints.length === 0) return [];
+                    totalVisiblePoints += validPoints.length;
+                    const displayLabel =
+                        seriesLabel === "LOAD" ? "LOAD" :
+                        seriesLabel === "LUB OIL PRESSURE" ? "L.O INLET" :
+                        seriesLabel === "FUEL OIL PRESSURE ENGINE INLET" ? "F.O INLET" :
+                        seriesLabel;
+                    const dataset = trendCreateSelectableMultiSeriesDataset(
+                        displayLabel,
+                        seriesItem?.unit || (style.yAxisID === "y1" ? "MPa" : "KwE"),
+                        data,
+                        style,
+                        validPoints
+                    );
+                    dataset.yAxisID = style.yAxisID;
+                    dataset.borderWidth = style.yAxisID === "y1" ? 2 : 2.5;
+                    return [dataset];
+                });
+            } else if (mode === "tc") {
+                chart.data.datasets = (Array.isArray(payload?.series) ? payload.series : []).flatMap((seriesItem) => {
+                    const style = TREND_CONFIG.tcSeriesStyle[seriesItem.label];
+                    if (!style) return [];
+                    const data = trendNormalizeChartPoints(seriesItem?.points, gapThresholdMs);
+                    const validPoints = data.filter((point) => point && typeof point.y === "number");
+                    if (validPoints.length === 0) return [];
+                    totalVisiblePoints += validPoints.length;
+                    return [trendCreateSelectableMultiSeriesDataset(
+                        trendGetTcDisplayLabel(seriesItem.label),
+                        seriesItem?.unit || "deg C",
+                        data,
+                        style,
+                        validPoints
+                    )];
+                });
+            } else {
+                chart.data.datasets = (Array.isArray(payload?.series) ? payload.series : []).flatMap((seriesItem) => {
+                    const style = TREND_CONFIG.exhaustSeriesStyle[seriesItem.label] || TREND_CONFIG.exhaustSeriesStyle["No.1CYL. EXHAUST GAS TEMPERATURE"];
+                    const data = trendNormalizeChartPoints(seriesItem?.points, gapThresholdMs);
+                    const validPoints = data.filter((point) => point && typeof point.y === "number");
+                    if (validPoints.length === 0) return [];
+                    totalVisiblePoints += validPoints.length;
+                    return [trendCreateSelectableMultiSeriesDataset(
+                        trendGetCylinderDisplayLabel(seriesItem.label),
+                        seriesItem?.unit || "deg C",
+                        data,
+                        style,
+                        validPoints
+                    )];
+                });
+            }
+
+            chart.update("none");
             return totalVisiblePoints;
         }
 
@@ -1561,6 +1725,71 @@
             }
         }
 
+        async function trendLoadPanel(panelConfig) {
+            const { params, error } = trendGetParams();
+            if (error) {
+                if (panelConfig.dom.status) panelConfig.dom.status.textContent = error;
+                return;
+            }
+
+            const paramsCopy = new URLSearchParams(params.toString());
+            let loadingMessage = "";
+            if (panelConfig.mode === "load") {
+                paramsCopy.set("graph_type", "load_detail");
+                loadingMessage = `Loading ${TARGET_DG_NAME} load trend...`;
+            } else if (panelConfig.mode === "tc") {
+                paramsCopy.delete("dg_names");
+                paramsCopy.set("dg_name", TARGET_DG_NAME);
+                paramsCopy.set("graph_type", "tc_exh");
+                loadingMessage = `Loading ${TARGET_DG_NAME} T/C exhaust trend...`;
+            } else {
+                paramsCopy.delete("dg_names");
+                paramsCopy.set("dg_name", TARGET_DG_NAME);
+                paramsCopy.set("graph_type", "cylinder_exh");
+                loadingMessage = `Loading ${TARGET_DG_NAME} cylinder exhaust trend...`;
+            }
+
+            if (panelConfig.dom.status) {
+                panelConfig.dom.status.textContent = loadingMessage;
+                panelConfig.dom.status.classList.remove("text-red-400");
+                panelConfig.dom.status.classList.add("text-slate-600");
+            }
+            panelConfig.dom.loading?.classList.add("active");
+
+            try {
+                const payload = await trendFetchJson(`${ENGINE_GRAPH_API_BASE}?${paramsCopy.toString()}`);
+                if (panelConfig.mode === "tc" && !trendPayloadLooksLikeTcExh(payload)) {
+                    throw new Error("T/C exhaust trend is not available from the running backend. Restart backend to load the new trend API.");
+                }
+                const totalVisiblePoints = trendApplyPayloadToChart(panelConfig.dom.chart, payload, panelConfig.mode);
+                if (panelConfig.dom.status) {
+                    panelConfig.dom.status.textContent =
+                        totalVisiblePoints > 0
+                            ? `${TARGET_DG_NAME} trend loaded successfully.`
+                            : `No ${TARGET_DG_NAME} trend data in the selected time range.`;
+                    panelConfig.dom.status.classList.toggle("text-red-400", totalVisiblePoints === 0);
+                    panelConfig.dom.status.classList.toggle("text-slate-600", totalVisiblePoints > 0);
+                }
+            } catch (error) {
+                console.error("Trend panel fetch error:", panelConfig.mode, error);
+                if (panelConfig.dom.status) {
+                    panelConfig.dom.status.textContent = error?.message || `Failed to load ${TARGET_DG_NAME} trend data.`;
+                    panelConfig.dom.status.classList.add("text-red-400");
+                    panelConfig.dom.status.classList.remove("text-slate-600");
+                }
+            } finally {
+                panelConfig.dom.loading?.classList.remove("active");
+            }
+        }
+
+        async function trendLoadAllPanels() {
+            const requestId = ++trendState.activeRequestId;
+            await Promise.all(FIXED_TREND_PANELS.map(async (panelConfig) => {
+                if (requestId !== trendState.activeRequestId) return;
+                await trendLoadPanel(panelConfig);
+            }));
+        }
+
         function trendBindEvents() {
             TREND_DOM.apply?.addEventListener("click", async () => {
                 await restoreLiveMode(false);
@@ -1586,6 +1815,9 @@
         async function initEmbeddedTrend() {
             if (!TREND_ALLOWED_DGS.has(TARGET_DG_NAME)) {
                 if (TREND_DOM.section) TREND_DOM.section.style.display = "none";
+                TREND_MIRROR_PANELS.forEach((panel) => {
+                    if (panel.section) panel.section.style.display = "none";
+                });
                 return;
             }
             if (!TREND_DOM.section || !TREND_DOM.chartCanvas || typeof Chart === "undefined") return;
@@ -1595,6 +1827,7 @@
             trendUpdateModeButtons();
             trendBindPanAndZoom();
             trendBindEvents();
+            trendSyncMirrorInputs();
             await trendLoadCurrentMode();
         }
 

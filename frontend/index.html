@@ -40,8 +40,60 @@
             </div>
 
             <!-- Grid 5 máy -->
-            <div id="dg-cards-stage" class="dg-cards-stage mb-8">
-                <section id="dg-section" class="dashboard-group-card">
+            <div id="dg-cards-stage" class="dg-cards-stage">
+                <section id="me-section" class="dashboard-group-card scene-section">
+            <!-- ME-PORT -->
+            <div class="dg-card dg-card-large" data-dg-card="5" onclick="location.href='./me_dashboard.html?dg=ME-PORT'">
+                <span class="dg-title">ME-PORT</span>
+                <div class="dg-card-main">
+                    <div class="dg-engine-box dg-engine-visual flex items-center justify-center border border-gray-100">
+                        <img src="./Asset/engine_image_mainpage.png" alt="Main Engine PORT" class="dg-engine-image">
+                    </div>
+                    <div class="dg-status-column">
+                        <div class="dg-status-item">
+                            <div id="dg5-ready-light" class="status-light light-ready"></div>
+                            <span class="dg-status-label font-extrabold">READY</span>
+                        </div>
+                        <div class="dg-status-item">
+                            <div id="dg5-run-light" class="status-light light-run"></div>
+                            <span class="dg-status-label font-extrabold">RUNNING</span>
+                        </div>
+                        <div class="dg-status-item">
+                            <div id="dg5-alarm-light" class="status-light light-alarm"></div>
+                            <span class="dg-status-label font-extrabold">ALARM</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="serial-fail" data-hide-when-ok="1"></div>
+            </div>
+
+            <!-- ME-STBD -->
+            <div class="dg-card dg-card-large" data-dg-card="4" onclick="location.href='./me_dashboard.html?dg=ME-STBD'">
+                <span class="dg-title">ME-STBD</span>
+                <div class="dg-card-main">
+                    <div class="dg-engine-box dg-engine-visual flex items-center justify-center border border-gray-100">
+                        <img src="./Asset/engine_image_mainpage.png" alt="Main Engine STBD" class="dg-engine-image">
+                    </div>
+                    <div class="dg-status-column">
+                        <div class="dg-status-item">
+                            <div id="dg4-ready-light" class="status-light light-ready"></div>
+                            <span class="dg-status-label font-extrabold">READY</span>
+                        </div>
+                        <div class="dg-status-item">
+                            <div id="dg4-run-light" class="status-light light-run"></div>
+                            <span class="dg-status-label font-extrabold">RUNNING</span>
+                        </div>
+                        <div class="dg-status-item">
+                            <div id="dg4-alarm-light" class="status-light light-alarm"></div>
+                            <span class="dg-status-label font-extrabold">ALARM</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="serial-fail" data-hide-when-ok="1"></div>
+            </div>
+                </section>
+
+                <section id="dg-section" class="dashboard-group-card scene-section">
             <!-- DG#1 -->
             <div class="dg-card" data-dg-card="1" onclick="location.href='./dg_dashboard.html?dg=1'">
                 <span class="dg-title">DG#1</span>
@@ -119,144 +171,6 @@
 
                 </section>
 
-                <section id="pms-section" class="dashboard-group-card">
-                    <div class="dashboard-group-title dashboard-group-title-centered">Power Management System</div>
-            <!-- PMS Cards -->
-            <div class="dg-card pms-card" data-pms-card="1">
-                <div class="pms-metrics">
-                    <div class="pms-value-row">
-                        <span>POWER FACTOR</span>
-                        <span id="pms-card-dg1-pf" class="pms-value">--</span>
-                    </div>
-                    <div class="pms-value-row">
-                        <span>FREQUENCY</span>
-                        <span id="pms-card-dg1-freq" class="pms-value">--</span>
-                    </div>
-                    <div class="pms-value-row">
-                        <span>CURRENT</span>
-                        <span id="pms-card-dg1-cur" class="pms-value">--</span>
-                    </div>
-                    <div class="pms-value-row">
-                        <span>VOLTAGE</span>
-                        <span id="pms-card-dg1-vol" class="pms-value">--</span>
-                    </div>
-                    <div class="pms-value-row">
-                        <span>POWER (kW)</span>
-                        <span id="pms-card-dg1-pwr" class="pms-value">--</span>
-                    </div>
-                </div>
-                <div class="pms-card-title">DG#1</div>
-                
-            </div>
-
-            <div class="dg-card pms-card" data-pms-card="2">
-                <div class="pms-metrics">
-                    <div class="pms-value-row">
-                        <span>POWER FACTOR</span>
-                        <span id="pms-card-dg2-pf" class="pms-value">--</span>
-                    </div>
-                    <div class="pms-value-row">
-                        <span>FREQUENCY</span>
-                        <span id="pms-card-dg2-freq" class="pms-value">--</span>
-                    </div>
-                    <div class="pms-value-row">
-                        <span>CURRENT</span>
-                        <span id="pms-card-dg2-cur" class="pms-value">--</span>
-                    </div>
-                    <div class="pms-value-row">
-                        <span>VOLTAGE</span>
-                        <span id="pms-card-dg2-vol" class="pms-value">--</span>
-                    </div>
-                    <div class="pms-value-row">
-                        <span>POWER (kW)</span>
-                        <span id="pms-card-dg2-pwr" class="pms-value">--</span>
-                    </div>
-                </div>
-                <div class="pms-card-title">DG#2</div>
-                
-            </div>
-
-            <div class="dg-card pms-card" data-pms-card="3">
-                <div class="pms-metrics">
-                    <div class="pms-value-row">
-                        <span>POWER FACTOR</span>
-                        <span id="pms-card-dg3-pf" class="pms-value">--</span>
-                    </div>
-                    <div class="pms-value-row">
-                        <span>FREQUENCY</span>
-                        <span id="pms-card-dg3-freq" class="pms-value">--</span>
-                    </div>
-                    <div class="pms-value-row">
-                        <span>CURRENT</span>
-                        <span id="pms-card-dg3-cur" class="pms-value">--</span>
-                    </div>
-                    <div class="pms-value-row">
-                        <span>VOLTAGE</span>
-                        <span id="pms-card-dg3-vol" class="pms-value">--</span>
-                    </div>
-                    <div class="pms-value-row">
-                        <span>POWER (kW)</span>
-                        <span id="pms-card-dg3-pwr" class="pms-value">--</span>
-                    </div>
-                </div>
-                <div class="pms-card-title">DG#3</div>
-                
-            </div>
-
-                </section>
-
-                <section id="me-section" class="dashboard-group-card">
-            <!-- ME-STBD -->
-            <div class="dg-card" data-dg-card="4" onclick="location.href='./me_dashboard.html?dg=ME-STBD'">
-                <span class="dg-title">ME-STBD</span>
-                <div class="dg-card-main">
-                    <div class="dg-engine-box dg-engine-visual flex items-center justify-center border border-gray-100">
-                        <img src="./Asset/engine_image_mainpage.png" alt="Main Engine STBD" class="dg-engine-image">
-                    </div>
-                    <div class="dg-status-column">
-                        <div class="dg-status-item">
-                            <div id="dg4-ready-light" class="status-light light-ready"></div>
-                            <span class="dg-status-label font-extrabold">READY</span>
-                        </div>
-                        <div class="dg-status-item">
-                            <div id="dg4-run-light" class="status-light light-run"></div>
-                            <span class="dg-status-label font-extrabold">RUNNING</span>
-                        </div>
-                        <div class="dg-status-item">
-                            <div id="dg4-alarm-light" class="status-light light-alarm"></div>
-                            <span class="dg-status-label font-extrabold">ALARM</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="serial-fail" data-hide-when-ok="1"></div>
-            </div>
-
-            <!-- ME-PORT -->
-            <div class="dg-card" data-dg-card="5" onclick="location.href='./me_dashboard.html?dg=ME-PORT'">
-                <span class="dg-title">ME-PORT</span>
-                <div class="dg-card-main">
-                    <div class="dg-engine-box dg-engine-visual flex items-center justify-center border border-gray-100">
-                        <img src="./Asset/engine_image_mainpage.png" alt="Main Engine PORT" class="dg-engine-image">
-                    </div>
-                    <div class="dg-status-column">
-                        <div class="dg-status-item">
-                            <div id="dg5-ready-light" class="status-light light-ready"></div>
-                            <span class="dg-status-label font-extrabold">READY</span>
-                        </div>
-                        <div class="dg-status-item">
-                            <div id="dg5-run-light" class="status-light light-run"></div>
-                            <span class="dg-status-label font-extrabold">RUNNING</span>
-                        </div>
-                        <div class="dg-status-item">
-                            <div id="dg5-alarm-light" class="status-light light-alarm"></div>
-                            <span class="dg-status-label font-extrabold">ALARM</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="serial-fail" data-hide-when-ok="1"></div>
-            </div>
-                </section>
-
         </div>
 
             <!-- Thanh trạng thái phía dưới (Status Bar) -->
@@ -285,6 +199,61 @@
             { cardNo: 5, dgName: "ME-PORT", hasPms: false }
         ];
         const INDEX_IDLE_CRITICAL_IGNORE_LABELS = new Set(["STARTING AIR PRESSURE"]);
+        const INDEX_SCENE_BASE = { width: 1920, height: 1080 };
+        const INDEX_SCENE_LAYOUT = {
+            desktop: {
+                header: {
+                    vesselBox: { mode: "absolute", x: "50%", y: "10px", width: "540px", transform: "translateX(-50%)" },
+                    logoBox: { mode: "absolute", x: "4px", y: "4px", width: "314px", height: "76px" },
+                    headerRight: { mode: "absolute", x: "100%", y: "0px", transform: "translateX(-100%)" }
+                },
+                sections: {
+                    me: { mode: "absolute", x: "100px", y: "30px", width: "1800px" },
+                    dg: { mode: "absolute", x: "2px", y: "490px", width: "1800px" },
+                    pms: { mode: "static" }
+                },
+                cards: {
+                    dg: {
+                        defaults: { width: "400px", minHeight: "280px" },
+                        items: {
+                            1: { width: "550px", minHeight: "300px" },
+                            2: { width: "550px", minHeight: "300px" },
+                            3: { width: "550px", minHeight: "300px" }
+                        }
+                    },
+                    me: {
+                        defaults: { width: "640px", minHeight: "400px" },
+                        items: {
+                            4: { width: "640px", minHeight: "400px" },
+                            5: { width: "640px", minHeight: "400px" }
+                        }
+                    },
+                    pms: null
+                },
+                visuals: {
+                    defaults: { imageScale: 1, imageShiftX: "0px", imageShiftY: "0px" },
+                    items: {
+                        1: { imageScale: 0.92, imageShiftX: "-10px", imageShiftY: "2px" },
+                        2: { imageScale: 0.92, imageShiftX: "-10px", imageShiftY: "2px" },
+                        3: { imageScale: 0.92, imageShiftX: "-10px", imageShiftY: "2px" },
+                        4: { imageScale: 0.92, imageShiftX: "-6px", imageShiftY: "6px" },
+                        5: { imageScale: 0.92, imageShiftX: "-6px", imageShiftY: "6px" }
+                    }
+                }
+            },
+            compact: {
+                header: {
+                    vesselBox: { mode: "static" },
+                    logoBox: { mode: "static" },
+                    headerRight: { mode: "static" }
+                },
+                sections: {
+                    dg: { mode: "static" },
+                    pms: { mode: "static" },
+                    me: { mode: "static" }
+                }
+            }
+        };
 
         function applyLayoutForElement(el, cfg) {
             if (!el || !cfg) return;
@@ -309,40 +278,51 @@
             el.style.height = cfg.height != null ? cfg.height : "";
         }
 
+        function lockViewportFrame() {
+            const mainContainer = document.querySelector(".main-container");
+            const viewportWidth = window.innerWidth || document.documentElement.clientWidth || INDEX_SCENE_BASE.width;
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight || INDEX_SCENE_BASE.height;
+            const desktopScale = Math.min(viewportWidth / INDEX_SCENE_BASE.width, viewportHeight / INDEX_SCENE_BASE.height);
+            const scale = viewportWidth <= 1280 ? 1 : desktopScale;
+            document.body.classList.toggle("page-locked-viewport", viewportWidth > 1280);
+            if (!mainContainer) return;
+            if (viewportWidth <= 1280) {
+                mainContainer.style.transform = "";
+                mainContainer.style.margin = "0 auto";
+                return;
+            }
+            mainContainer.style.transform = `scale(${scale})`;
+            mainContainer.style.margin = "0";
+        }
+
         function buildResponsiveLayout() {
             const width = window.innerWidth || document.documentElement.clientWidth || 0;
-            if (width <= 1280) {
-                return {
-                    vesselBox: { mode: "static" },
-                    logoBox: { mode: "static" },
-                    headerRight: { mode: "static" },
-                    systemStatusBar: { mode: "static" },
-                    sections: {
-                        dg: { mode: "static" },
-                        pms: { mode: "static" },
-                        me: { mode: "static" }
-                    }
-                };
-            }
+            const preset = width <= 1280 ? INDEX_SCENE_LAYOUT.compact : INDEX_SCENE_LAYOUT.desktop;
             return {
-                vesselBox: { mode: "absolute", x: "50%", y: "8px", width: width <= 1200 ? "320px" : "360px", transform: "translateX(-50%)" },
-                logoBox: { mode: "absolute", x: "0%", y: "0%" },
-                headerRight: { mode: "absolute", x: "100%", y: "0%", transform: "translateX(-100%)" },
-                systemStatusBar: { mode: "static" },
-                sections: {
-                    dg: { mode: "static" },
-                    pms: { mode: "static" },
-                    me: { mode: "static" }
-                }
+                vesselBox: preset.header.vesselBox,
+                logoBox: preset.header.logoBox,
+                headerRight: preset.header.headerRight,
+                systemStatusBar: {
+                    mode: "absolute",
+                    x: "120px",
+                    y: "1010px",
+                    width: "1700px"
+                },
+                sections: preset.sections,
+                cards: preset.cards || null,
+                visuals: preset.visuals || null
             };
         }
 
         function applyUILayout(layout = buildResponsiveLayout()) {
+            lockViewportFrame();
             applyLayoutForElement(document.getElementById("vessel-box"), layout.vesselBox);
             applyLayoutForElement(document.getElementById("logo-box"), layout.logoBox);
             applyLayoutForElement(document.getElementById("header-right"), layout.headerRight);
             applyLayoutForElement(document.getElementById("system-status-bar"), layout.systemStatusBar);
             applySectionLayout(layout.sections);
+            applyCardLayout(layout.cards);
+            applyVisualTuning(layout.visuals);
         }
 
         function applySectionLayout(layout) {
@@ -350,6 +330,53 @@
             applyLayoutForElement(document.getElementById("dg-section"), layout.dg);
             applyLayoutForElement(document.getElementById("pms-section"), layout.pms);
             applyLayoutForElement(document.getElementById("me-section"), layout.me);
+        }
+
+        function applyCardBoxStyles(card, cfg = {}) {
+            if (!card) return;
+            card.style.width = cfg.width || "";
+            card.style.minHeight = cfg.minHeight || "";
+            card.style.height = cfg.height || "";
+        }
+
+        function applyCardLayout(layout) {
+            const dgSection = document.getElementById("dg-section");
+            const meSection = document.getElementById("me-section");
+            const pmsSection = document.getElementById("pms-section");
+            if (!layout || !dgSection || !meSection) {
+                document.querySelectorAll("[data-dg-card], [data-pms-card]").forEach((card) => applyCardBoxStyles(card));
+                return;
+            }
+
+            dgSection.querySelectorAll("[data-dg-card]").forEach((card) => {
+                const cardNo = Number(card.dataset.dgCard);
+                applyCardBoxStyles(card, { ...layout.dg?.defaults, ...(layout.dg?.items?.[cardNo] || {}) });
+            });
+            meSection.querySelectorAll("[data-dg-card]").forEach((card) => {
+                const cardNo = Number(card.dataset.dgCard);
+                applyCardBoxStyles(card, { ...layout.me?.defaults, ...(layout.me?.items?.[cardNo] || {}) });
+            });
+            if (pmsSection && layout.pms) {
+                pmsSection.querySelectorAll("[data-pms-card]").forEach((card) => {
+                    const cardNo = Number(card.dataset.pmsCard);
+                    applyCardBoxStyles(card, { ...layout.pms?.defaults, ...(layout.pms?.items?.[cardNo] || {}) });
+                });
+            }
+        }
+
+        function applyVisualTuning(config) {
+            const cards = document.querySelectorAll("[data-dg-card]");
+            cards.forEach((card) => {
+                const image = card.querySelector(".dg-engine-image");
+                if (!image) return;
+                const cardNo = Number(card.dataset.dgCard);
+                const visualCfg = { ...(config?.defaults || {}), ...(config?.items?.[cardNo] || {}) };
+                image.style.setProperty("--image-scale", `${visualCfg.imageScale ?? 1}`);
+                image.style.setProperty("--image-shift-x", visualCfg.imageShiftX || "0px");
+                image.style.setProperty("--image-shift-y", visualCfg.imageShiftY || "0px");
+                image.style.setProperty("--image-x", visualCfg.imageX || "0px");
+                image.style.setProperty("--image-y", visualCfg.imageY || "0px");
+            });
         }
 
         function updateClock() {

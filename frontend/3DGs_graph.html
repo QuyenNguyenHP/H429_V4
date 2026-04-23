@@ -104,6 +104,19 @@
                     <h1 class="text-4xl font-extrabold tracking-tight text-blue-700 leading-none">LOAD GRAPH</h1>
                 </div>
             </div>
+            <div id="graph-shared-trend-controls" class="header-box flex flex-wrap items-end gap-3 px-4 py-3">
+                <div class="trend-time-field">
+                    <label for="from-utc" class="text-sm font-bold text-slate-700">From</label>
+                    <input id="from-utc" class="trend-input" type="datetime-local" lang="en-GB" step="60">
+                </div>
+                <div class="trend-time-field">
+                    <label for="to-utc" class="text-sm font-bold text-slate-700">To</label>
+                    <input id="to-utc" class="trend-input" type="datetime-local" lang="en-GB" step="60">
+                </div>
+                <button id="prev-24h-btn" class="trend-btn" type="button">Prev 24h</button>
+                <button id="next-24h-btn" class="trend-btn" type="button">Next 24h</button>
+                <button id="apply-btn" class="trend-btn" type="button">Apply</button>
+            </div>
             <div class="header-box min-w-[220px] h-10 flex items-center px-3 py-1">
                 <div class="w-full">
                     <div class="text-[10px] font-extrabold border-b border-gray-100 mb-0.5 text-center text-gray-600 leading-none">DATE & TIME</div>
@@ -116,33 +129,12 @@
         <div class="trend-panel">
             <!-- Filter/action row: time range, DG selection, and reload controls -->
             <div class="flex flex-wrap items-end gap-4">
-                <div class="trend-time-group">
-                    <div class="trend-time-field">
-                        <label for="from-utc" class="text-sm font-bold text-slate-700">From</label>
-                        <input id="from-utc" class="trend-input" type="datetime-local" lang="en-GB" step="60">
-                    </div>
-                    <div class="trend-time-field">
-                        <label for="to-utc" class="text-sm font-bold text-slate-700">To</label>
-                        <input id="to-utc" class="trend-input" type="datetime-local" lang="en-GB" step="60">
-                    </div>
-                </div>
                 <div class="trend-check-group">
                     <span class="text-sm font-bold text-slate-700">DG Selection</span>
                     <div class="trend-check-row">
                         <label class="trend-check trend-check-dg1"><input type="checkbox" name="dg-name" value="DG#1" checked><span class="trend-check-box"></span><span class="trend-check-label">DG#1</span></label>
                         <label class="trend-check trend-check-dg2"><input type="checkbox" name="dg-name" value="DG#2" checked><span class="trend-check-box"></span><span class="trend-check-label">DG#2</span></label>
                         <label class="trend-check trend-check-dg3"><input type="checkbox" name="dg-name" value="DG#3" checked><span class="trend-check-box"></span><span class="trend-check-label">DG#3</span></label>
-                    </div>
-                </div>
-                <div class="trend-control-cluster">
-                    <div class="trend-mode-switch">
-                        <button id="mode-load-btn" class="trend-mode-btn is-active" type="button">LOAD</button>
-                        <button id="mode-pms-btn" class="trend-mode-btn" type="button">PMS</button>
-                    </div>
-                    <div class="trend-action-row">
-                        <button id="prev-24h-btn" class="trend-btn" type="button">Prev 24h</button>
-                        <button id="next-24h-btn" class="trend-btn" type="button">Next 24h</button>
-                        <button id="apply-btn" class="trend-btn" type="button">Apply</button>
                     </div>
                 </div>
             </div>

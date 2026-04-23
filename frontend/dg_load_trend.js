@@ -810,7 +810,7 @@
     }
 
     function bindEvents() {
-        DOM.apply.addEventListener("click", loadTrend);
+        DOM.apply?.addEventListener("click", loadTrend);
         if (DOM.modeLoad) {
             DOM.modeLoad.addEventListener("click", () => {
                 if (state.chartMode === "load") return;
@@ -827,9 +827,9 @@
                 loadTrend();
             });
         }
-        DOM.prev.addEventListener("click", () => shiftRange(-CONFIG.rangeMs));
-        DOM.next.addEventListener("click", () => shiftRange(CONFIG.rangeMs));
-        DOM.home.addEventListener("click", () => { window.location.href = "./index.html"; });
+        DOM.prev?.addEventListener("click", () => shiftRange(-CONFIG.rangeMs));
+        DOM.next?.addEventListener("click", () => shiftRange(CONFIG.rangeMs));
+        DOM.home?.addEventListener("click", () => { window.location.href = "./index.html"; });
         DOM.dgCheckboxes.forEach((input) => {
             input.addEventListener("change", () => {
                 loadTrend();

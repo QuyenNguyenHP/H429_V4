@@ -71,21 +71,21 @@ body {
     background-size: 18px 18px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 16px;
+    padding: 0;
     color: var(--text-main);
     transition: background-color 0.2s ease, color 0.2s ease;
+    overflow: hidden;
 }
 
 html,
 body {
     width: 100%;
+    height: 100%;
     max-width: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-    touch-action: auto;
-    overscroll-behavior-y: auto;
+    overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: none;
     -webkit-text-size-adjust: 100%;
-    -webkit-overflow-scrolling: touch;
 }
 
 *,
@@ -309,6 +309,15 @@ canvas {
     color: var(--text-main);
 }
 
+#me-analog-section .digital-table th,
+#me-analog-section .digital-table td {
+    height: 36px;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .digital-table th:nth-child(2),
 .digital-table td:nth-child(2) {
     text-align: center;
@@ -469,23 +478,25 @@ canvas {
 }
 
 .main-container {
-    width: min(1400px, calc(100vw - 32px));
-    max-width: 1500px;
-    min-height: auto;
-    margin: 0 auto;
+    width: 1920px;
+    height: 1080px;
+    min-width: 1920px;
+    min-height: 1080px;
+    margin: 0;
     background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-2) 100%);
     border: 1px solid #94a3b8;
-    border-radius: 18px;
-    padding: 16px;
+    border-radius: 0;
+    padding: 18px 22px 14px 94px;
     box-shadow: var(--shadow-strong);
     position: relative;
-    overflow: visible;
+    overflow: hidden;
     box-sizing: border-box;
-    touch-action: auto;
+    transform-origin: top left;
+    touch-action: none;
 }
 
 .has-global-nav {
-    padding-left: 118px;
+    padding-left: 96px;
     transition: padding-left 0.22s ease;
 }
 
@@ -495,19 +506,19 @@ canvas {
 
 .global-nav-shell {
     position: fixed;
-    left: 12px;
-    top: 12px;
-    bottom: 12px;
+    left: 0;
+    top: 14px;
+    bottom: 14px;
     z-index: 80;
-    width: 92px;
+    width: 74px;
     background: linear-gradient(180deg, var(--surface-1) 0%, var(--surface-2) 100%);
-    border: 1px solid #94a3b8;
-    border-radius: 18px;
-    box-shadow: var(--shadow-strong);
-    padding: 12px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 0 20px 20px 0;
+    box-shadow: 6px 12px 22px rgba(148, 163, 184, 0.18);
+    padding: 10px 8px 12px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     transition: width 0.22s ease, transform 0.22s ease;
 }
 
@@ -535,11 +546,11 @@ canvas {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 54px;
+    min-height: 70px;
     background: var(--surface-strong);
     border: 1px solid #cbd5e1;
-    border-radius: 12px;
-    padding: 6px;
+    border-radius: 14px;
+    padding: 8px;
 }
 
 .global-nav-brand img {
@@ -554,7 +565,7 @@ canvas {
     align-items: center;
     justify-content: center;
     width: 100%;
-    height: 38px;
+    height: 40px;
     background: var(--surface-strong);
     color: var(--title-accent);
     border: 1px solid #94a3b8;
@@ -570,7 +581,7 @@ canvas {
     justify-content: center;
     gap: 8px;
     width: 100%;
-    min-height: 38px;
+    min-height: 40px;
     margin-top: auto;
     background: var(--surface-strong);
     color: var(--text-main);
@@ -589,27 +600,28 @@ canvas {
 .global-nav-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    overflow: auto;
-    padding-right: 2px;
-    -webkit-overflow-scrolling: touch;
+    gap: 7px;
+    overflow: hidden;
+    padding-right: 0;
 }
 
 .global-nav-link {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    min-height: 38px;
-    padding: 8px 10px;
+    min-height: 52px;
+    padding: 7px 6px;
     background: var(--surface-strong);
     border: 1px solid #cbd5e1;
-    border-radius: 10px;
+    border-radius: 12px;
     color: var(--text-main);
-    font-size: 0.72rem;
+    font-size: 0.62rem;
     font-weight: 700;
-    line-height: 1.15;
+    line-height: 1.05;
     text-decoration: none;
     transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    text-align: center;
+    justify-content: center;
 }
 
 .global-nav-link-short {
@@ -682,20 +694,21 @@ canvas {
 
 .dg-cards-stage {
     position: relative;
-    display: grid;
-    gap: 24px;
-    min-height: auto;
+    display: block;
+    height: 842px;
+    min-height: 842px;
+    margin-top: 6px;
 }
 
 .dashboard-group-card {
-    position: static;
+    position: absolute;
     display: grid;
     gap: 16px;
-    padding: 16px;
-    background: rgba(255, 255, 255, 0.48);
-    border: 1px solid #cbd5e1;
-    border-radius: 20px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 #dg-section,
@@ -711,11 +724,11 @@ canvas {
     grid-column: 1 / -1;
     color: var(--title-accent);
     font-weight: 800;
-    font-size: 1.7rem;
+    font-size: 1rem;
     border-bottom: 2px solid var(--title-accent);
     display: block;
-    padding-bottom: 6px;
-    margin-bottom: 4px;
+    padding-bottom: 7px;
+    margin-bottom: 0;
     line-height: 1.1;
 }
 
@@ -725,16 +738,20 @@ canvas {
 
 .dg-card {
     background: var(--surface-soft);
-    border: 1px solid #cbd5e1;
-    border-radius: 18px;
-    padding: 16px;
+    border: 1px solid #b7c6dd;
+    border-radius: 22px;
+    padding: 13px 13px 9px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: var(--shadow-soft);
+    box-shadow: 0 12px 24px rgba(148, 163, 184, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.dg-card-large {
+    min-height: 322px;
 }
 
 .dg-card:hover {
@@ -745,7 +762,7 @@ canvas {
 
 .dg-card-main {
     display: flex;
-    gap: 18px;
+    gap: 11px;
     align-items: stretch;
     flex: 1;
     min-height: 0;
@@ -754,14 +771,15 @@ canvas {
 .dg-engine-box {
     flex: 1 1 auto;
     height: 100%;
-    margin-bottom: 18px;
-    padding: 10px;
+    margin-bottom: 7px;
+    padding: 8px 8px 6px;
     background: linear-gradient(to bottom, var(--engine-panel-start), var(--engine-panel-end));
     border-radius: 16px;
 }
 
 .dg-engine-visual {
     overflow: hidden;
+    position: relative;
 }
 
 .dg-engine-image {
@@ -771,20 +789,24 @@ canvas {
     object-position: center center;
     transition: transform 0.25s ease-in-out;
     transform-origin: center center;
+    position: relative;
+    left: var(--image-x, 0);
+    top: var(--image-y, 0);
+    transform: translate(var(--image-shift-x, 0), var(--image-shift-y, 0)) scale(var(--image-scale, 1));
 }
 
 .dg-card:hover .dg-engine-image {
-    transform: scale(1.08);
+    transform: translate(var(--image-shift-x, 0), var(--image-shift-y, 0)) scale(calc(var(--image-scale, 1) * 1.04));
 }
 
 .dg-title {
     color: var(--title-accent);
     font-weight: 800;
-    font-size: 1.7rem;
+    font-size: 1.02rem;
     border-bottom: 2px solid var(--title-accent);
-    margin-bottom: 16px;
+    margin-bottom: 10px;
     display: block;
-    padding-bottom: 6px;
+    padding-bottom: 9px;
 }
 
 .vessel-title {
@@ -793,15 +815,15 @@ canvas {
 }
 
 .dg-status-column {
-    width: 170px;
+    width: 128px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: stretch;
-    gap: 14px;
+    gap: 8px;
     background: linear-gradient(to bottom, var(--engine-panel-start), var(--engine-panel-end));
     border: 1px solid #e5e7eb;
-    padding: 18px 10px;
+    padding: 10px 7px;
     border-radius: 16px;
 }
 
@@ -810,15 +832,15 @@ canvas {
     flex-direction: row;
     align-items: center;
     gap: 8px;
-    min-height: 42px;
-    padding: 6px 8px;
+    min-height: 36px;
+    padding: 5px 7px;
     background: var(--surface-muted);
     border: 1px solid #dbe3ee;
     border-radius: 8px;
 }
 
 .dg-status-label {
-    font-size: 0.74rem;
+    font-size: 0.57rem;
     letter-spacing: 0.04em;
     line-height: 1.1;
     text-align: left;
@@ -826,12 +848,13 @@ canvas {
 
 .pms-card {
     border-color: #9da2a8;
+    min-height: 242px;
 }
 
 .pms-card-title {
     color: var(--title-accent);
     font-weight: 800;
-    font-size: 1.35rem;
+    font-size: 0.98rem;
     line-height: 1;
     text-align: center;
     margin-top: 6px;
@@ -849,7 +872,7 @@ canvas {
     justify-content: space-between;
     align-items: center;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.78rem;
     color: var(--text-main);
     background: var(--surface-muted);
     border: 1px solid #e2e8f0;
@@ -861,7 +884,7 @@ canvas {
     min-width: 72px;
     text-align: right;
     font-family: 'Chivo Mono', monospace;
-    font-size: 0.95rem;
+    font-size: 0.78rem;
     color: var(--text-main);
     background: var(--surface-1);
     border: 1px solid #dbe3ee;
@@ -962,10 +985,74 @@ canvas {
 .serial-fail {
     color: #ef4444;
     font-weight: 700;
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
-    margin-top: 10px;
-    height: 1.2rem;
+    margin-top: 6px;
+    height: 1rem;
+}
+
+#header-stage {
+    min-height: 86px !important;
+    margin-bottom: 0 !important;
+    align-items: flex-start !important;
+    padding: 0 0 10px;
+    border-bottom: 1px solid #d8e1ef;
+}
+
+#logo-box {
+    width: 314px;
+    height: 76px;
+    padding: 6px 14px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+#vessel-box {
+    min-width: 540px;
+    min-height: 72px;
+    padding: 10px 30px;
+    border-radius: 26px;
+    box-shadow: 0 8px 18px rgba(148, 163, 184, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+#header-right {
+    align-items: flex-start !important;
+    gap: 16px !important;
+}
+
+#date-time-box {
+    min-width: 292px !important;
+    height: 56px !important;
+    border-radius: 26px;
+}
+
+#header-icons button:first-child,
+#header-icons button:last-child {
+    width: 56px !important;
+    height: 56px !important;
+}
+
+#system-status-bar {
+    position: absolute;
+    left: 94px;
+    right: 22px;
+    bottom: 30px;
+    margin-top: 0 !important;
+}
+
+body.page-locked-viewport {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    background: #edf2f7;
+}
+
+body.page-locked-viewport .global-nav-shell {
+    top: 14px;
+    left: 0;
+    bottom: 14px;
 }
 
 .me-selector option,
@@ -981,6 +1068,7 @@ canvas {
     align-items: flex-start;
     gap: 16px;
     margin-bottom: 24px;
+    flex-wrap: wrap;
 }
 
 .dashboard-header-main {
@@ -1003,16 +1091,59 @@ canvas {
     padding: 4px 12px;
 }
 
+#dashboard-shared-trend-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.trend-panel-title {
+    color: var(--title-accent);
+    letter-spacing: 0.04em;
+}
+
 .engine-dashboard {
     position: relative;
-    max-width: 1456px;
-    margin: 0 auto 16px;
-    min-height: 650px;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    margin: 0;
+    min-height: 0;
     border-radius: 1rem;
     overflow: hidden;
     border: 1px solid #d1d5db;
     background: linear-gradient(to bottom, var(--engine-bg-start), var(--engine-bg-end));
     touch-action: auto;
+}
+
+.dg-dashboard-scene {
+    position: relative;
+    height: 900px;
+    min-height: 0;
+    margin-top: 8px;
+}
+
+.dg-scene-section {
+    position: absolute;
+    overflow: hidden;
+}
+
+.trend-scene-panel {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.trend-chart-shell {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+}
+
+.trend-chart-shell canvas {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .engine-dashboard-bg {
@@ -1126,6 +1257,9 @@ canvas {
 
     .main-container {
         width: min(100%, calc(100vw - 20px));
+        min-width: 0;
+        height: auto;
+        min-height: 0;
         padding: 14px;
         border-radius: 16px;
     }
@@ -1149,6 +1283,27 @@ canvas {
         min-height: auto;
         display: grid;
         gap: 18px;
+        height: auto;
+        margin-top: 18px;
+    }
+
+    .dg-dashboard-scene {
+        height: auto;
+        min-height: 0;
+        display: grid;
+        gap: 18px;
+    }
+
+    .dg-scene-section {
+        position: static;
+        width: auto !important;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+
+    .trend-chart-shell {
+        height: auto;
+        min-height: 320px;
     }
 
     .dashboard-group-card {
@@ -1182,6 +1337,7 @@ canvas {
 @media (max-width: 980px) {
     body {
         padding: 10px;
+        overflow: auto;
     }
 
     .main-container {
@@ -1285,6 +1441,7 @@ canvas {
         flex-direction: column;
         gap: 12px;
         padding: 12px;
+        height: auto;
     }
 
     .engine-dashboard-bg {
