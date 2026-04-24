@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./app.css">
 </head>
-<body>
+<body class="dg-page me-page">
 
     <div class="main-container">
         <div class="dashboard-header">
@@ -253,30 +253,6 @@
             "T/C REVOLUTION": "val-tc-rev",
             "F.O. RACK": "val-fo-rack"
         };
-        const ME_SCENE_BASE = { width: 1920, height: 1080 };
-        const ME_DASHBOARD_SCENE = {
-            desktop: {
-                engineSection: { x: "10px", y: "30px", width: "750px", height: "480px" },
-                analogSection: { x: "800px", y: "30px", width: "900px", height: "480px" },
-                digitalSection: { x: "10px", y: "540px", width: "1700px", height: "400px" }
-            },
-            compact: {
-                engineSection: { mode: "static" },
-                analogSection: { mode: "static" },
-                digitalSection: { mode: "static" }
-            }
-        };
-        const ME_SECTION_FRAMES = {
-            desktop: {
-                analogWrap: { x: "0px", y: "0px", width: "100%", height: "100%" },
-                digitalWrap: { x: "0px", y: "0px", width: "100%", height: "100%" }
-            },
-            compact: {
-                analogWrap: { mode: "static", width: "100%" },
-                digitalWrap: { mode: "static", width: "100%" }
-            }
-        };
-
         // Manual layout control for all overlay boxes on the engine image.
         // Edit only this object when you want to move cylinders, metric panels,
         // or data tags without touching the HTML structure below.
@@ -398,73 +374,8 @@
             return Math.min(2.4, Math.max(0.58, rawScale));
         }
 
-        function applySceneBoxStyles(el, cfg = {}) {
-            if (!el) return;
-            if ((cfg.mode || "absolute") === "static") {
-                el.style.position = "static";
-                el.style.left = "";
-                el.style.top = "";
-                el.style.width = "";
-                el.style.height = "";
-                return;
-            }
-            el.style.position = "absolute";
-            el.style.left = cfg.x || "";
-            el.style.top = cfg.y || "";
-            el.style.width = cfg.width || "";
-            el.style.height = cfg.height || "";
-        }
-
-        function applyFrameStyles(el, cfg = {}) {
-            if (!el) return;
-            if ((cfg.mode || "absolute") === "static") {
-                el.style.position = "static";
-                el.style.left = "";
-                el.style.top = "";
-                el.style.width = cfg.width || "";
-                el.style.height = cfg.height || "";
-                return;
-            }
-            el.style.position = "absolute";
-            el.style.left = cfg.x || "";
-            el.style.top = cfg.y || "";
-            el.style.width = cfg.width || "";
-            el.style.height = cfg.height || "";
-        }
-
-        function buildMeSceneLayout() {
-            const width = window.innerWidth || document.documentElement.clientWidth || 0;
-            const isCompact = width <= 1280;
-            return {
-                scene: isCompact ? ME_DASHBOARD_SCENE.compact : ME_DASHBOARD_SCENE.desktop,
-                frames: isCompact ? ME_SECTION_FRAMES.compact : ME_SECTION_FRAMES.desktop
-            };
-        }
-
-        function lockViewportFrame() {
-            const mainContainer = document.querySelector(".main-container");
-            const viewportWidth = window.innerWidth || document.documentElement.clientWidth || ME_SCENE_BASE.width;
-            const viewportHeight = window.innerHeight || document.documentElement.clientHeight || ME_SCENE_BASE.height;
-            const desktopScale = Math.min(viewportWidth / ME_SCENE_BASE.width, viewportHeight / ME_SCENE_BASE.height);
-            const scale = viewportWidth <= 1280 ? 1 : desktopScale;
-            document.body.classList.toggle("page-locked-viewport", viewportWidth > 1280);
-            if (!mainContainer) return;
-            if (viewportWidth <= 1280) {
-                mainContainer.style.transform = "";
-                mainContainer.style.margin = "0 auto";
-                return;
-            }
-            mainContainer.style.transform = `scale(${scale})`;
-            mainContainer.style.margin = "0";
-        }
-
-        function applyMeSceneLayout(layout = buildMeSceneLayout()) {
-            lockViewportFrame();
-            applySceneBoxStyles(getById("me-engine-section"), layout.scene.engineSection);
-            applySceneBoxStyles(getById("me-analog-section"), layout.scene.analogSection);
-            applySceneBoxStyles(getById("me-digital-section"), layout.scene.digitalSection);
-            applyFrameStyles(getById("me-analog-wrap"), layout.frames.analogWrap);
-            applyFrameStyles(getById("me-digital-wrap"), layout.frames.digitalWrap);
+        function applyMeSceneLayout() {
+            // Scene layout is handled by responsive CSS grid for ME_dashboard.html.
         }
 
         function applyUILayout() {

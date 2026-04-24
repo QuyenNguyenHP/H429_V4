@@ -92,15 +92,15 @@
         }
     </style>
 </head>
-<body>
+<body class="dg-page graph-page">
     <div class="main-container">
         <!-- Top header: logo/title on the left, live clock on the right -->
-        <div class="flex justify-between items-start mb-6 gap-4">
-            <div class="flex items-center gap-4">
+        <div class="dashboard-header">
+            <div class="dashboard-header-main">
                 <div class="header-clickable">
                     <img id="go-home-logo" src="./Asset/DRUMS_LOGO.png" alt="DRUMS logo" class="h-14 w-auto cursor-pointer">
                 </div>
-                <div>
+                <div class="dashboard-header-title">
                     <h1 class="text-4xl font-extrabold tracking-tight text-blue-700 leading-none">LOAD GRAPH</h1>
                 </div>
             </div>
@@ -117,7 +117,7 @@
                 <button id="next-24h-btn" class="trend-btn" type="button">Next 24h</button>
                 <button id="apply-btn" class="trend-btn" type="button">Apply</button>
             </div>
-            <div class="header-box min-w-[220px] h-10 flex items-center px-3 py-1">
+            <div class="header-box dashboard-time-box">
                 <div class="w-full">
                     <div class="text-[10px] font-extrabold border-b border-gray-100 mb-0.5 text-center text-gray-600 leading-none">DATE & TIME</div>
                     <div class="text-base font-bold text-center tracking-tight leading-none" id="current-datetime">--/--/-- &nbsp;&nbsp; --:--:--</div>
@@ -125,8 +125,8 @@
             </div>
         </div>
 
-        <div class="trend-section-stack">
-        <div class="trend-panel">
+        <div id="graph-scene-stage" class="trend-section-stack">
+        <div class="trend-panel trend-panel-main">
             <!-- Filter/action row: time range, DG selection, and reload controls -->
             <div class="flex flex-wrap items-end gap-4">
                 <div class="trend-check-group">
@@ -169,7 +169,7 @@
             </div>
         </div>
 
-        <div class="trend-panel">
+        <div class="trend-panel trend-panel-bottom">
             <!-- Bottom row: DG running hours and PMS live in a separate section -->
             <div class="trend-chart-grid">
                 <!-- Running hours summary chart -->
