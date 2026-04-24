@@ -1917,7 +1917,8 @@ body.dg-page .dashboard-time-box {
 
 body.dg-page #dg-scene-stage {
     display: grid;
-    grid-template-columns: minmax(0, 1.06fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.18fr) minmax(0, 1.1fr);
+    grid-template-rows: minmax(0, 1.12fr) minmax(0, 0.88fr);
     grid-template-areas:
         "engine trend-top"
         "trend-left trend-right";
