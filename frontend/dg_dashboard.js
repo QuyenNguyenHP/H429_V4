@@ -1,0 +1,1554 @@
+// Backend label -> frontend element id map.
+const DG_OPTIONS = ["DG#1", "DG#2", "DG#3", "ME-PORT", "ME-STBD"];
+const dgParam = new URLSearchParams(window.location.search).get("dg");
+const {
+    getById,
+    normalizeDgName,
+    filterByTarget,
+    setText,
+    isOnValue,
+    fetchWithTimeout,
+    resolveApiOrigin,
+    createOverlayLayoutController,
+    updateTimestampHeader: setTimestampHeader,
+    bindHomeNavigation,
+    bindChartViewportControls
+} = window.DashboardShared;
+const SNAPSHOT_API_BASE = `${resolveApiOrigin()}/api/check_all_status_lable/snapshot`;
+const ENGINE_GRAPH_API_BASE = `${resolveApiOrigin()}/api/engine_graph`;
+function normalizeDgParam(param) {
+    if (param == null) return "DG#1";
+    const raw = String(param).trim().toUpperCase();
+    if (raw === "1" || raw === "DG1" || raw === "DG#1") return "DG#1";
+    if (raw === "2" || raw === "DG2" || raw === "DG#2") return "DG#2";
+    if (raw === "3" || raw === "DG3" || raw === "DG#3") return "DG#3";
+    if (raw.replace(/\s+/g, "-") === "ME-PORT") return "ME-PORT";
+    if (raw.replace(/\s+/g, "-") === "ME-STBD") return "ME-STBD";
+    return "DG#1";
+}
+const TARGET_DG_NAME = normalizeDgParam(dgParam);
+
+function updatePageTitle() {
+    const el = getById("page-title");
+    if (!el) return;
+    el.textContent = `${TARGET_DG_NAME} Dashboard`;
+}
+
+const TREND_ALLOWED_DGS = new Set(["DG#1", "DG#2", "DG#3"]);
+const DATA_MAPPING = {
+    "ENGINE SPEED": "val-engine-speed",
+    "RUNNING HOUR": "val-running-hour",
+    "LOAD": "val-load",
+    "STARTING AIR PRESSURE": "val-starting-air",
+    "EXHAUST GAS TEMPERATURE T/C OUTLET": "val-ex-tc-out",
+    "EXHAUST GAS TEMPERATURE T/C INLET 1": "val-ex-tc-in1",
+    "EXHAUST GAS TEMPERATURE T/C INLET 2": "val-ex-tc-in2",
+    "LUB OIL PRESSURE": "val-lo-inlet-p",
+    "FUEL OIL PRESSURE ENGINE INLET": "val-fo-inlet",
+    "L.T. WATER PRESSURE ENGINE INLET": "val-lt-cw-inlet",
+    "H.T. WATER PRESSURE ENGINE INLET": "val-ht-cw-inlet",
+    "H.T. WATER TEMPERATURE ENGINE OUTLET": "val-ht-cw-outlet-t",
+    "LUB OIL TEMPERATURE ENGINE INLET": "val-lo-inlet-t"
+};
+
+const DIGITAL_FIXED_POINTS = [
+    { addr: 0x11, label: "ENGINE RUN", unit: "On/Off" },
+    { addr: 0x12, label: "READY TO START", unit: "On/Off" },
+    { addr: 0x1B, label: "PRIMING PUMP RUN", unit: "On/Off" },
+    { addr: 0x01, label: "LUB OIL FILTER DIFFERENTIAL PRESSURE HIGH", unit: "On/Off" },
+    { addr: 0x02, label: "CONTROL AIR PRESSURE LOW", unit: "On/Off" },
+    { addr: 0x03, label: "FUEL OIL PRESSURE LOW", unit: "On/Off" },
+    { addr: 0x04, label: "LUB OIL PRESSURE LOW", unit: "On/Off" },
+    { addr: 0x05, label: "H.T. WATER PRESSURE LOW", unit: "On/Off" },
+    { addr: 0x06, label: "L.T. WATER PRESSURE LOW", unit: "On/Off" },
+    { addr: 0x07, label: "FUEL OIL DRAIN LEVEL HIGH", unit: "On/Off" },
+    { addr: 0x08, label: "H.T. WATER TEMPERATURE HIGH", unit: "On/Off" },
+    { addr: 0x09, label: "T/C LUB OIL PRESSURE LOW", unit: "On/Off" },
+    { addr: 0x0A, label: "FUEL OIL FILTER DIFFERENTIAL PRESSURE HIGH", unit: "On/Off" },
+    { addr: 0x0B, label: "STARTING AIR PRESSURE LOW", unit: "On/Off" },
+    { addr: 0x0C, label: "FUEL OIL LEAK TANK LEVEL HIGH", unit: "On/Off" },
+    { addr: 0x0D, label: "LUB OIL SUMP TANK LEVEL LOW", unit: "On/Off" },
+    { addr: 0x0E, label: "LUB OIL SUMP TANK LEVEL HIGH", unit: "On/Off" },
+    { addr: 0x0F, label: "OIL MIST PRE-ALARM", unit: "On/Off" },
+    { addr: 0x10, label: "OIL MIST DETECTOR TROUBLE", unit: "On/Off" },
+    { addr: 0x13, label: "OVER SPEED (STOP)", unit: "On/Off" },
+    { addr: 0x14, label: "H.T. WATER TEMPERATURE HIGH (STOP)", unit: "On/Off" },
+    { addr: 0x15, label: "LUB OIL PRESSURE LOW (STOP)", unit: "On/Off" },
+    { addr: 0x16, label: "OIL MIST HIGH DENSITY ALARM (STOP)", unit: "On/Off" },
+    { addr: 0x17, label: "EMERGENCY STOP (REMOTE/LOCAL)", unit: "On/Off" },
+    { addr: 0x18, label: "START FAILURE", unit: "On/Off" },
+    { addr: 0x19, label: "PRIMING PUMP TERMAL FAILURE", unit: "On/Off" },
+    { addr: 0x1A, label: "PRIMING LUB OIL PRESSURE LOW", unit: "On/Off" },
+    { addr: 0x21, label: "SYSTEM FAILURE", unit: "On/Off" },
+    { addr: 0x22, label: "CONTROL MODULE FAILURE", unit: "On/Off" },
+    { addr: 0x23, label: "SAFTY MODULE FAILURE", unit: "On/Off" },
+    { addr: 0x24, label: "LINK TO ENGINE CONDITION DISPLAY FAILURE", unit: "On/Off" },
+    { addr: 0x25, label: "LINK TO REMOTE I/O 1 FAILURE", unit: "On/Off" },
+    { addr: 0x26, label: "LINK TO REMOTE I/O 2 FAILURE", unit: "On/Off" },
+    { addr: 0x27, label: "LINK TO LCD GAGE BOARD FAILURE", unit: "On/Off" },
+    { addr: 0x31, label: "No.1CYL. EXH. GAS TEMP. DEVIATION ALARM", unit: "On/Off" },
+    { addr: 0x32, label: "No.2CYL. EXH. GAS TEMP. DEVIATION ALARM", unit: "On/Off" },
+    { addr: 0x33, label: "No.3CYL. EXH. GAS TEMP. DEVIATION ALARM", unit: "On/Off" },
+    { addr: 0x34, label: "No.4CYL. EXH. GAS TEMP. DEVIATION ALARM", unit: "On/Off" },
+    { addr: 0x35, label: "No.5CYL. EXH. GAS TEMP. DEVIATION ALARM", unit: "On/Off" },
+    { addr: 0x36, label: "No.6CYL. EXH. GAS TEMP. DEVIATION ALARM", unit: "On/Off" },
+    { addr: 0x39, label: "EXH. GAS TEMP. DEVIATION ALARM(COMMON)", unit: "On/Off" },
+    { addr: 0x3B, label: "EMERGENCY STOP SWITCH OF EXT. (DISCONNECTION)", unit: "On/Off" },
+    { addr: 0x3C, label: "EMERGENCY STOP SWITCH ON ECD (DISCONNECTION)", unit: "On/Off" },
+    { addr: 0x3D, label: "H.T. WATER TEMP. HIGH SWITCH (DISCONNECTION)", unit: "On/Off" },
+    { addr: 0x3E, label: "LUB OIL PRESS. LOW SWITCH (DISCONNECTION)", unit: "On/Off" },
+    { addr: 0x3F, label: "OILMIST DETECTOR HIGH-ALARM (DISCONNECTION)", unit: "On/Off" },
+    { addr: 0x40, label: "EMERGENCY STOP SOLENOID (DISCONNECTION)", unit: "On/Off" },
+    { addr: 0x41, label: "FUEL OIL TEMP. ENGINE INLET SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x42, label: "BOOST AIR TEMP. SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x43, label: "LUB OIL TEMP. ENGINE INLET SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x44, label: "H.T. WATER TEMP. ENGINE OUTLET SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x45, label: "H.T. WATER TEMP. ENGINE INLET SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x46, label: "No.1CYL. EXH. GAS TEMP. SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x47, label: "No.2CYL. EXH. GAS TEMP. SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x48, label: "No.3CYL. EXH. GAS TEMP. SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x49, label: "No.4CYL. EXH. GAS TEMP. SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x4A, label: "No.5CYL. EXH. GAS TEMP. SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x4B, label: "No.6CYL. EXH. GAS TEMP. SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x4E, label: "EXH. GAS TEMP. T/C INLET 1 SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x4F, label: "EXH. GAS TEMP. T/C INLET 2 SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x50, label: "EXH. GAS TEMP. T/C OUTLET SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x51, label: "H.T. WATER PRESS. INLET SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x52, label: "BOOST AIR PRESS. SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x53, label: "L.T. WATER PRESS. INLET SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x54, label: "STARTING AIR PRESS SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x55, label: "FO PRESS INLET SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x56, label: "CONTROL AIR PRESS SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x57, label: "LO PRESS T/C INLET SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x58, label: "LUB OIL FILTER DIFF. PRESS. SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x59, label: "LUB OIL PRESSURE SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x5A, label: "ALL SPEED PICKUP SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x5B, label: "LOAD INPUT FAILURE", unit: "On/Off" },
+    { addr: 0x71, label: "LUB OIL TEMP. ENGINE OUTLET SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x72, label: "L.T. WATER TEMP. ENGINE INLET SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x73, label: "L.T. WATER TEMP. ENGINE OUTLET SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x81, label: "T/C SPEED SENSOR FAILURE", unit: "On/Off" },
+    { addr: 0x29, label: "No.1 ALARM REPOSE SIGNAL(#14)", unit: "On/Off" },
+    { addr: 0x2A, label: "No.2 ALARM REPOSE SIGNAL(#14T)", unit: "On/Off" },
+    { addr: 0x2B, label: "No.3 ALARM REPOSE SIGNAL(EXH. GAS)", unit: "On/Off" },
+    { addr: 0x2C, label: "No.4 ALARM REPOSE SIGNAL(PRIMING)", unit: "On/Off" },
+    { addr: 0x2D, label: "No.5 ALARM REPOSE SIGNAL(STARTING)", unit: "On/Off" },
+    { addr: 0x2E, label: "No.6 ALARM REPOSE SIGNAL(FILTER DIFF. PRESS.)", unit: "On/Off" }
+];
+const DIGITAL_ALWAYS_VISIBLE_LABELS = new Set([
+    "ENGINE RUN",
+    "READY TO START",
+    "PRIMING PUMP RUN",
+    "NO.1 ALARM REPOSE SIGNAL(#14)",
+    "NO.2 ALARM REPOSE SIGNAL(#14T)",
+    "NO.3 ALARM REPOSE SIGNAL(EXH. GAS)",
+    "NO.4 ALARM REPOSE SIGNAL(PRIMING)",
+    "NO.5 ALARM REPOSE SIGNAL(STARTING)",
+    "NO.6 ALARM REPOSE SIGNAL(FILTER DIFF. PRESS.)"
+]);
+
+const isME = () => TARGET_DG_NAME === "ME-PORT" || TARGET_DG_NAME === "ME-STBD";
+const normLabel = (value) => String(value || "").trim().toUpperCase();
+const getTargetMachinePayload = (payload) => {
+    if (!Array.isArray(payload)) return null;
+    return payload.find((item) => normalizeDgName(item?.dg_name) === TARGET_DG_NAME) || null;
+};
+
+const UI_LAYOUT = {
+    baseWidth: 1150,
+    cylinders: [
+        { x: '38.4%', y: '20%', scale: 0.9 },
+        { x: '47%', y: '20%', scale: 0.9 },
+        { x: '55.6%', y: '20%', scale: 0.9 },
+        { x: '64.5%', y: '20%', scale: 0.9 },
+        { x: '73.2%', y: '20%', scale: 0.9 },
+        { x: '82%', y: '20%', scale: 0.9 }
+    ],
+    panels: {
+        engineSpeed: { x: '12%', y: '50%', scale: 1, anchor: 'left' },
+        runningHour: { x: '35%', y: '75%', scale: 1, anchor: 'left' },
+        load: { x: '63%', y: '75%', scale: 1, anchor: 'left' }
+    },
+    tags: {
+        'starting-air': { x: '35%', y: '30%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+        'ex-tc-out': { x: '35%', y: '38%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+        'ex-tc-in1': { x: '35%', y: '46%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+        'ex-tc-in2': { x: '35%', y: '54%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+        'lo-inlet-p': { x: '35%', y: '62%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+        'fo-inlet': { x: '63%', y: '30%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+        'lt-cw-inlet': { x: '63%', y: '38%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+        'ht-cw-inlet': { x: '63%', y: '46%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+        'ht-cw-outlet-t': { x: '63%', y: '54%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+        'lo-inlet-t': { x: '63%', y: '62%', scale: 1, labelWidth: '200px', valueWidth: '60px' }
+    }
+};
+function applyDashboardSceneLayout() {
+    // Scene layout is handled by responsive CSS grid for dg_dashboard.html.
+}
+
+const overlayLayout = createOverlayLayoutController({
+    layout: UI_LAYOUT,
+    applySceneLayout: applyDashboardSceneLayout,
+    panelBindings: [
+        { elementId: "panel-engine-speed", panelKey: "engineSpeed" },
+        { elementId: "panel-running-hour", panelKey: "runningHour" },
+        { elementId: "panel-load", panelKey: "load" },
+    ],
+    afterRefresh: () => updateUI(latestAnalogRows),
+});
+
+const refreshOverlayLayout = () => overlayLayout.refresh();
+const scheduleOverlayRefresh = () => overlayLayout.scheduleRefresh();
+const scheduleStabilizedLayoutRefresh = () => overlayLayout.scheduleStabilizedRefresh();
+const bindOverlayResizeObserver = () => overlayLayout.bindResizeObserver();
+
+function clearStatusStyle(el) {
+    if (!el) return;
+    el.classList.remove('status-warning', 'status-critical');
+}
+
+function applyStatusStyle(el, status) {
+    if (!el) return;
+    clearStatusStyle(el);
+    const normalized = String(status || "").trim().toLowerCase();
+    if (normalized === "warning" || normalized === "warming") {
+        el.classList.add('status-warning');
+        return;
+    }
+    if (normalized === "critical" || normalized === "critial") {
+        el.classList.add('status-critical');
+    }
+}
+
+function getCylinderValueElementId(label) {
+    const normalized = String(label || "")
+        .toUpperCase()
+        .replace(/\s+/g, ' ')
+        .trim();
+    const match = normalized.match(/(?:^|[\s/-])NO\.\s*(\d+)\s*CYL\./i);
+    return match ? `val-cyl-${match[1]}` : null;
+}
+
+function updateUI(analogRows) {
+    if (!analogRows || analogRows.length === 0) return;
+
+    analogRows.forEach(item => {
+        if (item.value == null || item.label == null) return;
+        const cylId = getCylinderValueElementId(item.label);
+        if (cylId) {
+            const el = getById(cylId);
+            if (el) {
+                const next = String(Math.round(item.value));
+                setText(el, next);
+                applyStatusStyle(el, item.status);
+            }
+        }
+        // Update mapped scalar values.
+        else {
+            const elementId = DATA_MAPPING[item.label];
+            if (elementId) {
+                const el = getById(elementId);
+                if (el) {
+                    if (item.label === "RUNNING HOUR") {
+                        const next = String(Math.round((Number(item.value) || 0) * 10));
+                        setText(el, next);
+                        applyStatusStyle(el, item.status);
+                        return;
+                    }
+                    const isPressure = item.label.includes("PRESSURE") || item.label.includes("INLET (MPa)");
+                    const next = isPressure ? item.value.toFixed(2) : String(Math.round(item.value));
+                    setText(el, next);
+                    applyStatusStyle(el, item.status);
+                }
+            }
+        }
+    });
+
+    const statusMsg = getById('status-msg');
+    if (statusMsg) statusMsg.style.opacity = '0';
+}
+
+function getEngineIdleImagePath() {
+    return "Asset/engine.png";
+}
+
+let lastEngineRunningState = false;
+
+function updateEngineBackgroundImage(isEngineRunning) {
+    lastEngineRunningState = Boolean(isEngineRunning);
+    const engineBackgroundImage = getById("engine-background-image");
+    if (!engineBackgroundImage) return;
+    engineBackgroundImage.src = lastEngineRunningState ? "Asset/engine_running_kiosk.png" : getEngineIdleImagePath();
+}
+
+function updateHeaderLights(digitalRows) {
+    const rows = Array.isArray(digitalRows) ? digitalRows : [];
+    const readyRow = rows.find(item => normLabel(item.label) === "READY TO START");
+    const runRow = rows.find(item => normLabel(item.label) === "ENGINE RUN");
+    const isEngineRunning = isOnValue(runRow?.value);
+
+    const readyLight = getById("light-ready");
+    const runLight = getById("light-run");
+
+    if (readyLight) readyLight.classList.toggle("active", isOnValue(readyRow?.value));
+    if (runLight) runLight.classList.toggle("active", isEngineRunning);
+    updateEngineBackgroundImage(isEngineRunning);
+}
+
+function updateAlarmLight(machineData) {
+    const alarmLight = getById("light-alarm");
+    if (!alarmLight) return;
+    const analogRows = Array.isArray(machineData?.analog) ? machineData.analog : [];
+    const digitalRows = Array.isArray(machineData?.digital) ? machineData.digital : [];
+    const analogCritical = analogRows.some((item) => String(item?.status || "").trim().toLowerCase() === "critical");
+    const digitalAlarm = digitalRows.some((item) => String(item?.status || "").trim().toLowerCase() === "alarm");
+    alarmLight.classList.toggle("active", analogCritical || digitalAlarm);
+}
+
+function updateEngineAlarmIndicator(machineData) {
+    const indicator = getById("engine-alarm-indicator");
+    if (!indicator) return;
+    const analogRows = Array.isArray(machineData?.analog) ? machineData.analog : [];
+    const digitalRows = Array.isArray(machineData?.digital) ? machineData.digital : [];
+    const analogCritical = analogRows.some((item) => String(item?.status || "").trim().toLowerCase() === "critical");
+    const digitalAlarm = digitalRows.some((item) => String(item?.status || "").trim().toLowerCase() === "alarm");
+    indicator.classList.toggle("active", analogCritical || digitalAlarm);
+}
+
+function updateDigitalTable(digitalRows) {
+    const leftTbody = getById("digital-value-tbody-left");
+    const middleTbody = getById("digital-value-tbody-middle");
+    const rightTbody = getById("digital-value-tbody-right");
+    if (!leftTbody || !middleTbody || !rightTbody) return;
+    leftTbody.innerHTML = "";
+    middleTbody.innerHTML = "";
+    rightTbody.innerHTML = "";
+    const rows = Array.isArray(digitalRows) ? digitalRows : [];
+    const rowByLabel = new Map();
+    rows.forEach(item => {
+        const key = normLabel(item.label);
+        if (!key) return;
+        rowByLabel.set(key, item);
+    });
+
+    const alwaysVisiblePoints = DIGITAL_FIXED_POINTS.filter((point) =>
+        DIGITAL_ALWAYS_VISIBLE_LABELS.has(normLabel(point.label))
+    );
+    const alarmOnlyPoints = DIGITAL_FIXED_POINTS.filter((point) => {
+        const item = rowByLabel.get(normLabel(point.label));
+        const displayStatus = String(item?.status || "").trim();
+        if (DIGITAL_ALWAYS_VISIBLE_LABELS.has(normLabel(point.label))) return false;
+        return displayStatus.toUpperCase() === "ALARM";
+    });
+    const visiblePoints = [...alwaysVisiblePoints, ...alarmOnlyPoints];
+    const rowsPerColumn = Math.ceil(visiblePoints.length / 3);
+    const leftPoints = visiblePoints.slice(0, rowsPerColumn);
+    const middlePoints = visiblePoints.slice(rowsPerColumn, rowsPerColumn * 2);
+    const rightPoints = visiblePoints.slice(rowsPerColumn * 2);
+
+    function renderPoints(points, tbody) {
+        points.forEach(point => {
+            const tr = document.createElement("tr");
+            const item = rowByLabel.get(normLabel(point.label));
+            const displayStatus = String(item?.status || "").trim();
+
+            const labelTd = document.createElement("td");
+            labelTd.textContent = point.label;
+            tr.appendChild(labelTd);
+
+            const valueTd = document.createElement("td");
+            valueTd.textContent = displayStatus;
+            const displayUpper = displayStatus.toUpperCase();
+            if (displayUpper === "ALARM") {
+                valueTd.classList.add("digital-on");
+            } else if (displayUpper === "RUNNING") {
+                valueTd.classList.add("digital-status-on");
+            } else if (displayUpper === "READY") {
+                valueTd.classList.add("digital-status-on");
+            } else if (displayUpper === "REPOSE") {
+                valueTd.classList.add("digital-status-repose");
+            } else if (displayUpper === "OFF" || displayUpper === "NOT READY" || displayUpper === "STOP") {
+                valueTd.classList.add("status-warning");
+            }
+            tr.appendChild(valueTd);
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    renderPoints(leftPoints, leftTbody);
+    renderPoints(middlePoints, middleTbody);
+    renderPoints(rightPoints, rightTbody);
+}
+
+function applyMachineSnapshot(machineData, timestampValue) {
+    const analogRows = Array.isArray(machineData?.analog) ? machineData.analog : [];
+    const digitalRows = Array.isArray(machineData?.digital) ? machineData.digital : [];
+    latestAnalogRows = analogRows;
+
+    updateUI(analogRows);
+    updateDigitalTable(digitalRows);
+    updateHeaderLights(digitalRows);
+    updateAlarmLight(machineData);
+    updateEngineAlarmIndicator(machineData);
+    setTimestampHeader("current-datetime", timestampValue);
+}
+
+function formatSnapshotHeaderTimestamp(value) {
+    const parsedMs = trendParseApiTimestamp(value);
+    if (Number.isFinite(parsedMs)) {
+        const parts = trendGetDateTimeParts(new Date(parsedMs), trendState.timeZone);
+        return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}:${parts.second}`;
+    }
+    return String(value || "").trim().replace(/\s+[A-Za-z_\/+-]+$/, "");
+}
+
+function clearSelectedTrendPoint() {
+    trendState.selectedPointMs = NaN;
+    if (trendState.chart) trendState.chart.update("none");
+}
+
+async function restoreLiveMode(shouldReload = true) {
+    dashboardState.mode = "live";
+    dashboardState.snapshotTimestamp = "";
+    clearSelectedTrendPoint();
+    if (shouldReload) {
+        await fetchData();
+    }
+}
+
+async function loadSnapshotAt(timestampMs) {
+    if (!Number.isFinite(timestampMs)) return;
+
+    trendSetStatus(`Loading ${TARGET_DG_NAME} snapshot...`);
+    trendSetLoading(true);
+
+    try {
+        const params = new URLSearchParams({
+            dg_name: TARGET_DG_NAME,
+            timestamp: new Date(timestampMs).toISOString(),
+        });
+        const response = await fetchWithTimeout(
+            `${SNAPSHOT_API_BASE}?${params.toString()}`,
+            TREND_CONFIG.requestTimeoutMs,
+            { cache: "no-store" }
+        );
+        if (!response.ok) throw new Error(`Snapshot API error: ${response.status}`);
+
+        const payload = await response.json();
+        const resolvedMs = trendParseApiTimestamp(payload?.snapshot_timestamp);
+        dashboardState.mode = "snapshot";
+        dashboardState.snapshotTimestamp = String(payload?.snapshot_timestamp || "").trim();
+        trendState.selectedPointMs = Number.isFinite(resolvedMs) ? resolvedMs : timestampMs;
+        const snapshotLabel = formatSnapshotHeaderTimestamp(
+            Number.isFinite(trendState.selectedPointMs)
+                ? new Date(trendState.selectedPointMs).toISOString()
+                : dashboardState.snapshotTimestamp
+        );
+        applyMachineSnapshot(payload, snapshotLabel);
+        if (trendState.chart) trendState.chart.update("none");
+        trendSetStatus(`Showing ${TARGET_DG_NAME} snapshot at ${snapshotLabel}. Press Esc to return to live.`);
+        consecutiveFailures = 0;
+    } catch (error) {
+        console.error("Embedded snapshot fetch error:", error);
+        trendSetStatus(`Failed to load ${TARGET_DG_NAME} snapshot.`, true);
+    } finally {
+        trendSetLoading(false);
+    }
+}
+
+let isFetching = false;
+let consecutiveFailures = 0;
+const POLL_INTERVAL_MS = 5000;
+const FETCH_TIMEOUT_MS = 60000;
+let latestAnalogRows = [];
+const dashboardState = {
+    mode: "live",
+    snapshotTimestamp: "",
+};
+
+const TREND_DOM = {
+    section: document.getElementById("embedded-trend-section"),
+    from: document.getElementById("header-trend-from"),
+    to: document.getElementById("header-trend-to"),
+    status: document.getElementById("embedded-trend-status"),
+    loading: document.getElementById("embedded-trend-loading"),
+    chartCanvas: document.getElementById("embedded-load-trend-chart"),
+    zoomIn: null,
+    zoomOut: null,
+    apply: document.getElementById("header-trend-apply"),
+    prev: document.getElementById("header-trend-prev"),
+    next: document.getElementById("header-trend-next"),
+    modeLoad: null,
+    modeCylinder: null,
+    modeTc: null
+};
+function getMirrorTrendDom(prefix) {
+    return {
+        section: document.getElementById(`embedded-trend-section-${prefix}`),
+        from: null,
+        to: null,
+        status: document.getElementById(`embedded-trend-status-${prefix}`),
+        loading: document.getElementById(`embedded-trend-loading-${prefix}`),
+        chartCanvas: document.getElementById(`embedded-load-trend-chart-${prefix}`),
+        apply: null,
+        prev: null,
+        next: null,
+        modeLoad: null,
+        modeCylinder: null,
+        modeTc: null,
+        chart: null
+    };
+}
+const TREND_MIRROR_PANELS = [
+    getMirrorTrendDom("bl"),
+    getMirrorTrendDom("br")
+];
+const FIXED_TREND_PANELS = [
+    { dom: TREND_DOM, mode: "load" },
+    { dom: TREND_MIRROR_PANELS[0], mode: "tc" },
+    { dom: TREND_MIRROR_PANELS[1], mode: "cylinder" }
+];
+const TREND_CONFIG = {
+    rangeMs: 10 * 60 * 60 * 1000,
+    maxGapMs: 15 * 60 * 1000,
+    minZoomRangeMs: 5 * 60 * 1000,
+    requestTimeoutMs: 60000,
+    requestMaxPoints: 300,
+    seriesStyle: {
+        "DG#1": { borderColor: "#1d4ed8", backgroundColor: "rgba(29, 78, 216, 0.18)" },
+        "DG#2": { borderColor: "#16a34a", backgroundColor: "rgba(22, 163, 74, 0.18)" },
+        "DG#3": { borderColor: "#b91c1c", backgroundColor: "rgba(185, 28, 28, 0.18)" }
+    },
+    loadDetailSeriesStyle: {
+        "LOAD": { borderColor: "#2563eb", backgroundColor: "rgba(37, 99, 235, 0.18)", yAxisID: "y" },
+        "LUB OIL PRESSURE": { borderColor: "#f59e0b", backgroundColor: "rgba(245, 158, 11, 0.18)", yAxisID: "y1" },
+        "FUEL OIL PRESSURE ENGINE INLET": { borderColor: "#ef4444", backgroundColor: "rgba(239, 68, 68, 0.18)", yAxisID: "y1" }
+    },
+    exhaustSeriesStyle: {
+        "No.1CYL. EXHAUST GAS TEMPERATURE": { borderColor: "#1d4ed8", backgroundColor: "rgba(29, 78, 216, 0.18)" },
+        "No.2CYL. EXHAUST GAS TEMPERATURE": { borderColor: "#16a34a", backgroundColor: "rgba(22, 163, 74, 0.18)" },
+        "No.3CYL. EXHAUST GAS TEMPERATURE": { borderColor: "#b91c1c", backgroundColor: "rgba(185, 28, 28, 0.18)" },
+        "No.4CYL. EXHAUST GAS TEMPERATURE": { borderColor: "#d97706", backgroundColor: "rgba(217, 119, 6, 0.18)" },
+        "No.5CYL. EXHAUST GAS TEMPERATURE": { borderColor: "#7c3aed", backgroundColor: "rgba(124, 58, 237, 0.18)" },
+        "No.6CYL. EXHAUST GAS TEMPERATURE": { borderColor: "#0891b2", backgroundColor: "rgba(8, 145, 178, 0.18)" }
+    },
+    tcSeriesStyle: {
+        "EXHAUST GAS TEMPERATURE T/C OUTLET": { borderColor: "#dc2626", backgroundColor: "rgba(220, 38, 38, 0.18)" },
+        "EXHAUST GAS TEMPERATURE T/C INLET 1": { borderColor: "#2563eb", backgroundColor: "rgba(37, 99, 235, 0.18)" },
+        "EXHAUST GAS TEMPERATURE T/C INLET 2": { borderColor: "#059669", backgroundColor: "rgba(5, 150, 105, 0.18)" }
+    }
+};
+const TREND_MODE_META = {
+    load: { yMin: 0, yMax: 750, stepSize: 50, yTitle: "Load (KwE)" },
+    cylinder: { yMin: 0, yMax: 700, stepSize: 50, yTitle: "Cylinder Exhaust Temp (deg C)" },
+    tc: { yMin: 0, yMax: 700, stepSize: 50, yTitle: "T/C Exhaust Temp (deg C)" }
+};
+const trendState = {
+    chart: null,
+    range: { fromMs: NaN, toMs: NaN },
+    timeZone: "__browser__",
+    activeRequestId: 0,
+    selectedPointMs: NaN,
+    mode: "load"
+};
+
+function trendPad(value) {
+    return String(value).padStart(2, "0");
+}
+
+function trendIsBrowserTimeZone(value) {
+    return value === "__browser__";
+}
+
+function trendGetBrowserTimeZoneName() {
+    try {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone || "Local";
+    } catch (error) {
+        return "Local";
+    }
+}
+
+function trendGetSelectedTimeZoneLabel() {
+    return trendIsBrowserTimeZone(trendState.timeZone) ? trendGetBrowserTimeZoneName() : trendState.timeZone;
+}
+
+function trendGetDateTimeParts(date, timeZone) {
+    if (trendIsBrowserTimeZone(timeZone)) {
+        return {
+            year: String(date.getFullYear()),
+            month: trendPad(date.getMonth() + 1),
+            day: trendPad(date.getDate()),
+            hour: trendPad(date.getHours()),
+            minute: trendPad(date.getMinutes()),
+            second: trendPad(date.getSeconds())
+        };
+    }
+
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23"
+    });
+    const parts = formatter.formatToParts(date);
+    return Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
+}
+
+function trendFormatDateForInput(date, timeZone) {
+    const parts = trendGetDateTimeParts(date, timeZone);
+    return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+}
+
+function trendGetTimeZoneOffsetMs(date, timeZone) {
+    if (timeZone === "UTC") return 0;
+    const parts = trendGetDateTimeParts(date, timeZone);
+    const utcMs = Date.UTC(
+        Number(parts.year),
+        Number(parts.month) - 1,
+        Number(parts.day),
+        Number(parts.hour),
+        Number(parts.minute),
+        Number(parts.second)
+    );
+    return utcMs - date.getTime();
+}
+
+function trendParseInputValueForTimeZone(value, timeZone) {
+    const raw = String(value || "").trim();
+    const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+    if (!match) return null;
+
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const hour = Number(match[4]);
+    const minute = Number(match[5]);
+
+    if (trendIsBrowserTimeZone(timeZone)) {
+        return new Date(year, month - 1, day, hour, minute, 0, 0);
+    }
+
+    const naiveUtcMs = Date.UTC(year, month - 1, day, hour, minute, 0, 0);
+    if (timeZone === "UTC") return new Date(naiveUtcMs);
+
+    let candidateMs = naiveUtcMs;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+        const offsetMs = trendGetTimeZoneOffsetMs(new Date(candidateMs), timeZone);
+        const resolvedMs = naiveUtcMs - offsetMs;
+        if (Math.abs(resolvedMs - candidateMs) < 1000) {
+            candidateMs = resolvedMs;
+            break;
+        }
+        candidateMs = resolvedMs;
+    }
+    return new Date(candidateMs);
+}
+
+function trendParseApiTimestamp(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return NaN;
+    const normalized = raw.includes("T") ? raw : raw.replace(" ", "T");
+    return Date.parse(/[zZ]$|[+\-]\d{2}:\d{2}$/.test(normalized) ? normalized : `${normalized}Z`);
+}
+
+function trendFormatTimeLabel(value, includeDate) {
+    const parts = trendGetDateTimeParts(new Date(Number(value)), trendState.timeZone);
+    const hours = Number(parts.hour);
+    const minutes = parts.minute;
+    const time = `${hours % 12 || 12}:${minutes} ${hours >= 12 ? "PM" : "AM"}`;
+    return includeDate ? `${parts.day}/${parts.month} ${time}` : time;
+}
+
+function trendFormatTooltipTime(value) {
+    const parts = trendGetDateTimeParts(new Date(Number(value)), trendState.timeZone);
+    return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}:${parts.second} ${trendGetSelectedTimeZoneLabel()}`;
+}
+
+function trendIsSelectedPoint(pointX) {
+    return Number.isFinite(trendState.selectedPointMs) && Math.abs(Number(pointX) - trendState.selectedPointMs) < 1000;
+}
+
+function trendSetStatus(message, isError = false) {
+    if (!TREND_DOM.status) return;
+    TREND_DOM.status.textContent = String(message || "").trim();
+    TREND_DOM.status.classList.toggle("text-red-400", !!isError);
+    TREND_DOM.status.classList.toggle("text-slate-600", !isError);
+    TREND_MIRROR_PANELS.forEach((panel) => {
+        if (!panel.status) return;
+        panel.status.textContent = TREND_DOM.status.textContent;
+        panel.status.classList.toggle("text-red-400", !!isError);
+        panel.status.classList.toggle("text-slate-600", !isError);
+    });
+}
+
+function trendSetLoading(isLoading) {
+    if (!TREND_DOM.loading) return;
+    TREND_DOM.loading.classList.toggle("active", !!isLoading);
+    TREND_MIRROR_PANELS.forEach((panel) => {
+        if (!panel.loading) return;
+        panel.loading.classList.toggle("active", !!isLoading);
+    });
+}
+
+function trendGetCylinderDisplayLabel(label) {
+    const match = String(label || "").match(/No\.(\d+)/i);
+    return match ? `CYL ${match[1]}` : String(label || "").trim();
+}
+
+function trendGetTcDisplayLabel(label) {
+    const normalized = String(label || "").trim().toUpperCase();
+    if (normalized === "EXHAUST GAS TEMPERATURE T/C OUTLET") return "EX Gas T/C OUT";
+    if (normalized === "EXHAUST GAS TEMPERATURE T/C INLET 1") return "EX Gas T/C IN1";
+    if (normalized === "EXHAUST GAS TEMPERATURE T/C INLET 2") return "EX Gas T/C IN2";
+    return String(label || "").trim();
+}
+
+function trendUpdateModeButtons() {
+    return;
+}
+
+function trendApplyModeAxes() {
+    if (!trendState.chart) return;
+    const meta = TREND_MODE_META[trendState.mode] || TREND_MODE_META.load;
+    trendState.chart.options.scales.y.min = meta.yMin;
+    trendState.chart.options.scales.y.max = meta.yMax;
+    trendState.chart.options.scales.y.ticks.stepSize = meta.stepSize;
+    trendState.chart.options.scales.y.title.text = meta.yTitle;
+    const showSecondaryAxis = trendState.mode === "load";
+    trendState.chart.options.scales.y1.display = showSecondaryAxis;
+    trendState.chart.options.scales.y1.title.display = showSecondaryAxis;
+}
+
+async function trendLoadCurrentMode() {
+    await trendLoadAllPanels();
+}
+
+async function trendSetMode(mode) {
+    return;
+}
+
+function trendExtractLatestTimestampMs(payload, targetDgName) {
+    const candidates = [];
+    const pushTimestamp = (value) => {
+        const ms = trendParseApiTimestamp(value);
+        if (Number.isFinite(ms)) candidates.push(ms);
+    };
+    (Array.isArray(payload) ? payload : []).forEach((machine) => {
+        if (normalizeDgName(machine?.dg_name) !== targetDgName) return;
+        pushTimestamp(machine?.timestamp);
+        pushTimestamp(machine?.TimeStamp);
+        pushTimestamp(machine?.timeStamp);
+        pushTimestamp(machine?.time_stamp);
+        const analogRows = Array.isArray(machine?.analog) ? machine.analog : [];
+        const digitalRows = Array.isArray(machine?.digital) ? machine.digital : [];
+        analogRows.forEach((row) => pushTimestamp(row?.timestamp));
+        digitalRows.forEach((row) => pushTimestamp(row?.timestamp));
+    });
+    return candidates.length > 0 ? Math.max(...candidates) : NaN;
+}
+
+async function trendSyncDefaultRange() {
+    let maxTimestampMs = NaN;
+    try {
+        const snapshotParams = new URLSearchParams({ dg_name: TARGET_DG_NAME });
+        const snapshotResponse = await fetchWithTimeout(
+            `${SNAPSHOT_API_BASE}?${snapshotParams.toString()}`,
+            TREND_CONFIG.requestTimeoutMs,
+            { cache: "no-store" }
+        );
+        if (snapshotResponse.ok) {
+            const snapshotPayload = await snapshotResponse.json();
+            maxTimestampMs = trendParseApiTimestamp(snapshotPayload?.snapshot_timestamp);
+        }
+        if (!Number.isFinite(maxTimestampMs)) {
+            const response = await fetchWithTimeout(`${API_BASE}/all`, TREND_CONFIG.requestTimeoutMs, { cache: "no-store" });
+            if (response.ok) {
+                const payload = await response.json();
+                maxTimestampMs = trendExtractLatestTimestampMs(payload, TARGET_DG_NAME);
+            }
+        }
+    } catch (_) {}
+    const anchorDate = Number.isFinite(maxTimestampMs) ? new Date(maxTimestampMs) : new Date();
+    TREND_DOM.from.value = trendFormatDateForInput(new Date(anchorDate.getTime() - TREND_CONFIG.rangeMs), trendState.timeZone);
+    TREND_DOM.to.value = trendFormatDateForInput(anchorDate, trendState.timeZone);
+    trendSyncMirrorInputs();
+}
+
+function trendSyncMirrorInputs() {
+    return;
+}
+
+function trendSyncMirrorCharts() {
+    return;
+}
+
+function trendUpdateInputsFromRange() {
+    if (!Number.isFinite(trendState.range.fromMs) || !Number.isFinite(trendState.range.toMs)) {
+        trendSyncDefaultRange();
+        return;
+    }
+    TREND_DOM.from.value = trendFormatDateForInput(new Date(trendState.range.fromMs), trendState.timeZone);
+    TREND_DOM.to.value = trendFormatDateForInput(new Date(trendState.range.toMs), trendState.timeZone);
+    trendSyncMirrorInputs();
+}
+
+function trendShiftRange(deltaMs) {
+    const from = trendParseInputValueForTimeZone(TREND_DOM.from.value, trendState.timeZone);
+    const to = trendParseInputValueForTimeZone(TREND_DOM.to.value, trendState.timeZone);
+    if (!from || !to) return;
+    TREND_DOM.from.value = trendFormatDateForInput(new Date(from.getTime() + deltaMs), trendState.timeZone);
+    TREND_DOM.to.value = trendFormatDateForInput(new Date(to.getTime() + deltaMs), trendState.timeZone);
+    trendSyncMirrorInputs();
+    trendLoadCurrentMode();
+}
+
+function trendNormalizeChartPoints(points, gapThresholdMs) {
+    const normalized = (Array.isArray(points) ? points : [])
+        .map((point) => {
+            const x = trendParseApiTimestamp(point.timestamp);
+            const y = Number(point.value);
+            return Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null;
+        })
+        .filter(Boolean);
+
+    return normalized.reduce((result, point, index) => {
+        const previous = normalized[index - 1];
+        if (previous && (point.x - previous.x) > gapThresholdMs) {
+            result.push({ x: point.x, y: null });
+        }
+        result.push(point);
+        return result;
+    }, []);
+}
+
+function trendCreateTooltipEl(chartInstance) {
+    const existing = chartInstance.canvas.parentNode.querySelector(".embedded-trend-tooltip");
+    if (existing) return existing;
+
+    const tooltipEl = document.createElement("div");
+    tooltipEl.className = "embedded-trend-tooltip";
+    Object.assign(tooltipEl.style, {
+        background: "rgba(255, 255, 255, 0.98)",
+        border: "1px solid #94a3b8",
+        borderRadius: "10px",
+        color: "#0f172a",
+        pointerEvents: "none",
+        position: "absolute",
+        transform: "translate(-50%, 0)",
+        transition: "all .08s ease",
+        padding: "8px 10px",
+        fontWeight: "700",
+        fontSize: "12px",
+        boxShadow: "0 10px 20px rgba(15, 23, 42, 0.18)",
+        whiteSpace: "nowrap",
+        zIndex: "20",
+        opacity: "0"
+    });
+    chartInstance.canvas.parentNode.style.position = "relative";
+    chartInstance.canvas.parentNode.appendChild(tooltipEl);
+    return tooltipEl;
+}
+
+function trendExternalTooltipHandler({ chart: chartInstance, tooltip }) {
+    const tooltipEl = trendCreateTooltipEl(chartInstance);
+    if (!tooltip || tooltip.opacity === 0) {
+        tooltipEl.style.opacity = "0";
+        return;
+    }
+
+    tooltipEl.innerHTML = `
+        <div style="font-size:11px;margin-bottom:6px;">${(tooltip.title || []).join(" ")}</div>
+        ${(tooltip.dataPoints || []).map((item) => `
+            <div style="display:flex;align-items:center;gap:8px;">
+                <span style="width:12px;height:12px;border-radius:2px;background:${item.dataset.borderColor};border:1px solid ${item.dataset.borderColor};display:inline-block;"></span>
+                <span>${item.dataset.label}: ${item.formattedValue} ${item.dataset.unit || "KwE"}</span>
+            </div>
+        `).join("")}
+    `;
+
+    const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = chartInstance.canvas;
+    const left = offsetLeft + tooltip.caretX;
+    const top = offsetTop + tooltip.caretY + 18;
+    tooltipEl.style.opacity = "1";
+    tooltipEl.style.left = `${Math.max(12, Math.min(left, offsetLeft + offsetWidth - 12))}px`;
+    tooltipEl.style.top = `${Math.min(top, offsetTop + offsetHeight - 12)}px`;
+}
+
+function trendCreateChartConfig() {
+    return {
+        type: "line",
+        data: { datasets: [] },
+        options: {
+            animation: false,
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "nearest", intersect: false },
+            plugins: {
+                decimation: {
+                    enabled: true,
+                    algorithm: "min-max",
+                    samples: 180
+                },
+                legend: {
+                    labels: { color: "#334155", font: { size: 13, weight: "700" } }
+                },
+                tooltip: {
+                    enabled: false,
+                    external: trendExternalTooltipHandler,
+                    callbacks: {
+                        title(items) {
+                            return items?.[0] ? trendFormatTooltipTime(items[0].parsed.x) : "";
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    type: "linear",
+                    ticks: {
+                        color: "#475569",
+                        maxTicksLimit: 10,
+                        callback(value) {
+                            return trendFormatTimeLabel(value, (trendState.range.toMs - trendState.range.fromMs) > TREND_CONFIG.rangeMs);
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: `Time (${trendGetSelectedTimeZoneLabel()})`,
+                        color: "#334155",
+                        font: { size: 14, style: "italic", weight: "700" }
+                    },
+                    grid: { color: "rgba(100, 116, 139, 0.14)" },
+                    border: { color: "rgba(100, 116, 139, 0.28)" }
+                },
+                y: {
+                    min: 0,
+                    max: 750,
+                    ticks: { color: "#475569", stepSize: 50 },
+                    title: {
+                        display: true,
+                        text: "Load (KwE)",
+                        color: "#334155",
+                        font: { size: 14, style: "italic", weight: "700" }
+                    },
+                    grid: { color: "rgba(100, 116, 139, 0.14)" },
+                    border: { color: "rgba(100, 116, 139, 0.28)" }
+                },
+                y1: {
+                    position: "right",
+                    min: 0,
+                    max: 1,
+                    display: false,
+                    ticks: { color: "#475569", stepSize: 0.1 },
+                    title: {
+                        display: false,
+                        text: "Pressure (MPa)",
+                        color: "#334155",
+                        font: { size: 14, style: "italic", weight: "700" }
+                    },
+                    grid: { drawOnChartArea: false },
+                    border: { color: "rgba(100, 116, 139, 0.28)" }
+                }
+            }
+        }
+    };
+}
+
+function trendCreateExhaustChartConfig() {
+    const config = trendCreateChartConfig();
+    config.options.scales.y.min = 0;
+    config.options.scales.y.max = 700;
+    config.options.scales.y.ticks.stepSize = 50;
+    config.options.scales.y.title.text = "Exhaust Temp (deg C)";
+    return config;
+}
+
+function trendBuildChart() {
+    if (typeof Chart === "undefined") return;
+    FIXED_TREND_PANELS.forEach((panel) => {
+        if (!panel.dom.chartCanvas) return;
+        panel.dom.chart = new Chart(panel.dom.chartCanvas.getContext("2d"), trendCreateChartConfig());
+    });
+    trendState.chart = TREND_DOM.chart;
+}
+
+function trendBindPanAndZoom() {
+    return;
+}
+
+function trendApplyChartData(payload) {
+    if (!trendState.chart) return 0;
+    trendState.range = {
+        fromMs: trendParseApiTimestamp(payload?.from),
+        toMs: trendParseApiTimestamp(payload?.to)
+    };
+
+    const bucketGapMs = Number(payload?.bucket_seconds) > 0 ? Number(payload.bucket_seconds) * 2000 : 0;
+    const gapThresholdMs = Math.max(TREND_CONFIG.maxGapMs, bucketGapMs);
+
+    trendApplyModeAxes();
+    trendState.chart.options.scales.x.title.text = `Time (${trendGetSelectedTimeZoneLabel()})`;
+    trendState.chart.options.scales.x.min = Number.isFinite(trendState.range.fromMs) ? trendState.range.fromMs : undefined;
+    trendState.chart.options.scales.x.max = Number.isFinite(trendState.range.toMs) ? trendState.range.toMs : undefined;
+    let totalVisiblePoints = 0;
+    trendState.chart.data.datasets = (Array.isArray(payload?.series) ? payload.series : []).flatMap((seriesItem) => {
+        const seriesLabel = String(seriesItem?.label || "");
+        const style = TREND_CONFIG.loadDetailSeriesStyle[seriesLabel];
+        if (!style) return [];
+        const data = trendNormalizeChartPoints(seriesItem?.points, gapThresholdMs);
+        const validPoints = data.filter((point) => point && typeof point.y === "number");
+        if (validPoints.length === 0) return [];
+        totalVisiblePoints += validPoints.length;
+        const displayLabel =
+            seriesLabel === "LOAD" ? "LOAD" :
+            seriesLabel === "LUB OIL PRESSURE" ? "L.O INLET" :
+            seriesLabel === "FUEL OIL PRESSURE ENGINE INLET" ? "F.O INLET" :
+            seriesLabel;
+        const dataset = trendCreateSelectableMultiSeriesDataset(
+            displayLabel,
+            seriesItem?.unit || (style.yAxisID === "y1" ? "MPa" : "KwE"),
+            data,
+            style,
+            validPoints
+        );
+        dataset.yAxisID = style.yAxisID;
+        dataset.borderWidth = style.yAxisID === "y1" ? 2 : 2.5;
+        return [dataset];
+    });
+    trendState.chart.update("none");
+    trendSyncMirrorCharts();
+    return totalVisiblePoints;
+}
+
+function trendApplyExhaustChartData(payload) {
+    if (!trendState.chart) return 0;
+    trendState.range = {
+        fromMs: trendParseApiTimestamp(payload?.from),
+        toMs: trendParseApiTimestamp(payload?.to)
+    };
+
+    const bucketGapMs = Number(payload?.bucket_seconds) > 0 ? Number(payload.bucket_seconds) * 2000 : 0;
+    const gapThresholdMs = Math.max(TREND_CONFIG.maxGapMs, bucketGapMs);
+    let totalVisiblePoints = 0;
+
+    trendApplyModeAxes();
+    trendState.chart.options.scales.x.title.text = `Time (${trendGetSelectedTimeZoneLabel()})`;
+    trendState.chart.options.scales.x.min = Number.isFinite(trendState.range.fromMs) ? trendState.range.fromMs : undefined;
+    trendState.chart.options.scales.x.max = Number.isFinite(trendState.range.toMs) ? trendState.range.toMs : undefined;
+    trendState.chart.data.datasets = (Array.isArray(payload?.series) ? payload.series : []).flatMap((seriesItem) => {
+        const style = TREND_CONFIG.exhaustSeriesStyle[seriesItem.label] || TREND_CONFIG.exhaustSeriesStyle["No.1CYL. EXHAUST GAS TEMPERATURE"];
+        const data = trendNormalizeChartPoints(seriesItem?.points, gapThresholdMs);
+        const validPoints = data.filter((point) => point && typeof point.y === "number");
+        if (validPoints.length === 0) return [];
+        totalVisiblePoints += validPoints.length;
+        return [trendCreateSelectableMultiSeriesDataset(
+            trendGetCylinderDisplayLabel(seriesItem.label),
+            seriesItem?.unit || "deg C",
+            data,
+            style,
+            validPoints
+        )];
+    });
+    trendState.chart.update("none");
+    trendSyncMirrorCharts();
+    return totalVisiblePoints;
+}
+
+function trendApplyTcExhChartData(payload) {
+    if (!trendState.chart) return 0;
+    trendState.range = {
+        fromMs: trendParseApiTimestamp(payload?.from),
+        toMs: trendParseApiTimestamp(payload?.to)
+    };
+
+    const bucketGapMs = Number(payload?.bucket_seconds) > 0 ? Number(payload.bucket_seconds) * 2000 : 0;
+    const gapThresholdMs = Math.max(TREND_CONFIG.maxGapMs, bucketGapMs);
+    let totalVisiblePoints = 0;
+
+    trendApplyModeAxes();
+    trendState.chart.options.scales.x.title.text = `Time (${trendGetSelectedTimeZoneLabel()})`;
+    trendState.chart.options.scales.x.min = Number.isFinite(trendState.range.fromMs) ? trendState.range.fromMs : undefined;
+    trendState.chart.options.scales.x.max = Number.isFinite(trendState.range.toMs) ? trendState.range.toMs : undefined;
+    trendState.chart.data.datasets = (Array.isArray(payload?.series) ? payload.series : []).flatMap((seriesItem) => {
+        const style = TREND_CONFIG.tcSeriesStyle[seriesItem.label];
+        if (!style) return [];
+        const data = trendNormalizeChartPoints(seriesItem?.points, gapThresholdMs);
+        const validPoints = data.filter((point) => point && typeof point.y === "number");
+        if (validPoints.length === 0) return [];
+        totalVisiblePoints += validPoints.length;
+        return [trendCreateSelectableMultiSeriesDataset(
+            trendGetTcDisplayLabel(seriesItem.label),
+            seriesItem?.unit || "deg C",
+            data,
+            style,
+            validPoints
+        )];
+    });
+    trendState.chart.update("none");
+    trendSyncMirrorCharts();
+    return totalVisiblePoints;
+}
+
+function trendApplyPayloadToChart(chart, payload, mode) {
+    if (!chart) return 0;
+    const localRange = {
+        fromMs: trendParseApiTimestamp(payload?.from),
+        toMs: trendParseApiTimestamp(payload?.to)
+    };
+    trendState.range = localRange;
+    const bucketGapMs = Number(payload?.bucket_seconds) > 0 ? Number(payload.bucket_seconds) * 2000 : 0;
+    const gapThresholdMs = Math.max(TREND_CONFIG.maxGapMs, bucketGapMs);
+    const meta = TREND_MODE_META[mode] || TREND_MODE_META.load;
+    chart.options.scales.x.title.text = `Time (${trendGetSelectedTimeZoneLabel()})`;
+    chart.options.scales.x.min = Number.isFinite(localRange.fromMs) ? localRange.fromMs : undefined;
+    chart.options.scales.x.max = Number.isFinite(localRange.toMs) ? localRange.toMs : undefined;
+    chart.options.scales.y.min = meta.yMin;
+    chart.options.scales.y.max = meta.yMax;
+    chart.options.scales.y.ticks.stepSize = meta.stepSize;
+    chart.options.scales.y.title.text = meta.yTitle;
+    chart.options.scales.y1.display = mode === "load";
+    chart.options.scales.y1.title.display = mode === "load";
+
+    let totalVisiblePoints = 0;
+    if (mode === "load") {
+        chart.data.datasets = (Array.isArray(payload?.series) ? payload.series : []).flatMap((seriesItem) => {
+            const seriesLabel = String(seriesItem?.label || "");
+            const style = TREND_CONFIG.loadDetailSeriesStyle[seriesLabel];
+            if (!style) return [];
+            const data = trendNormalizeChartPoints(seriesItem?.points, gapThresholdMs);
+            const validPoints = data.filter((point) => point && typeof point.y === "number");
+            if (validPoints.length === 0) return [];
+            totalVisiblePoints += validPoints.length;
+            const displayLabel =
+                seriesLabel === "LOAD" ? "LOAD" :
+                seriesLabel === "LUB OIL PRESSURE" ? "L.O INLET" :
+                seriesLabel === "FUEL OIL PRESSURE ENGINE INLET" ? "F.O INLET" :
+                seriesLabel;
+            const dataset = trendCreateSelectableMultiSeriesDataset(
+                displayLabel,
+                seriesItem?.unit || (style.yAxisID === "y1" ? "MPa" : "KwE"),
+                data,
+                style,
+                validPoints
+            );
+            dataset.yAxisID = style.yAxisID;
+            dataset.borderWidth = style.yAxisID === "y1" ? 2 : 2.5;
+            return [dataset];
+        });
+    } else if (mode === "tc") {
+        chart.data.datasets = (Array.isArray(payload?.series) ? payload.series : []).flatMap((seriesItem) => {
+            const style = TREND_CONFIG.tcSeriesStyle[seriesItem.label];
+            if (!style) return [];
+            const data = trendNormalizeChartPoints(seriesItem?.points, gapThresholdMs);
+            const validPoints = data.filter((point) => point && typeof point.y === "number");
+            if (validPoints.length === 0) return [];
+            totalVisiblePoints += validPoints.length;
+            return [trendCreateSelectableMultiSeriesDataset(
+                trendGetTcDisplayLabel(seriesItem.label),
+                seriesItem?.unit || "deg C",
+                data,
+                style,
+                validPoints
+            )];
+        });
+    } else {
+        chart.data.datasets = (Array.isArray(payload?.series) ? payload.series : []).flatMap((seriesItem) => {
+            const style = TREND_CONFIG.exhaustSeriesStyle[seriesItem.label] || TREND_CONFIG.exhaustSeriesStyle["No.1CYL. EXHAUST GAS TEMPERATURE"];
+            const data = trendNormalizeChartPoints(seriesItem?.points, gapThresholdMs);
+            const validPoints = data.filter((point) => point && typeof point.y === "number");
+            if (validPoints.length === 0) return [];
+            totalVisiblePoints += validPoints.length;
+            return [trendCreateSelectableMultiSeriesDataset(
+                trendGetCylinderDisplayLabel(seriesItem.label),
+                seriesItem?.unit || "deg C",
+                data,
+                style,
+                validPoints
+            )];
+        });
+    }
+
+    chart.update("none");
+    return totalVisiblePoints;
+}
+
+function trendPayloadLooksLikeTcExh(payload) {
+    return (Array.isArray(payload?.series) ? payload.series : []).some((seriesItem) =>
+        Object.prototype.hasOwnProperty.call(TREND_CONFIG.tcSeriesStyle, String(seriesItem?.label || ""))
+    );
+}
+
+function trendCreateSelectableMultiSeriesDataset(displayLabel, unit, data, style, validPoints) {
+    const basePointRadius = validPoints.length <= 2 ? 4 : 1.5;
+    return {
+        label: displayLabel,
+        unit,
+        data,
+        parsing: false,
+        normalized: true,
+        borderColor: Number.isFinite(trendState.selectedPointMs)
+            ? "rgba(148, 163, 184, 0.8)"
+            : style.borderColor,
+        backgroundColor: Number.isFinite(trendState.selectedPointMs)
+            ? "rgba(148, 163, 184, 0.18)"
+            : style.backgroundColor,
+        pointBackgroundColor(context) {
+            const pointX = Number(context?.raw?.x);
+            return trendIsSelectedPoint(pointX) || !Number.isFinite(trendState.selectedPointMs)
+                ? style.borderColor
+                : "rgba(148, 163, 184, 0.75)";
+        },
+        pointBorderColor(context) {
+            const pointX = Number(context?.raw?.x);
+            return trendIsSelectedPoint(pointX) || !Number.isFinite(trendState.selectedPointMs)
+                ? style.borderColor
+                : "rgba(100, 116, 139, 0.9)";
+        },
+        pointRadius(context) {
+            const pointX = Number(context?.raw?.x);
+            const isSelected = trendIsSelectedPoint(pointX);
+            const defaultRadius = context?.raw?.y === 0 ? Math.max(basePointRadius, 2.5) : basePointRadius;
+            return isSelected ? Math.max(defaultRadius, 5) : defaultRadius;
+        },
+        pointBorderWidth(context) {
+            const pointX = Number(context?.raw?.x);
+            return trendIsSelectedPoint(pointX) ? 2 : 1;
+        },
+        pointHoverRadius: 4,
+        pointHitRadius: 10,
+        borderWidth: 2.2,
+        segment: {
+            borderColor(context) {
+                if (!Number.isFinite(trendState.selectedPointMs)) return style.borderColor;
+                const startX = Number(context?.p0?.parsed?.x);
+                const endX = Number(context?.p1?.parsed?.x);
+                return trendIsSelectedPoint(startX) || trendIsSelectedPoint(endX)
+                    ? style.borderColor
+                    : "rgba(148, 163, 184, 0.8)";
+            }
+        },
+        tension: 0.15,
+        fill: false,
+        clip: false,
+        showLine: true,
+        spanGaps: false
+    };
+}
+
+function trendGetParams() {
+    const from = trendParseInputValueForTimeZone(TREND_DOM.from.value, trendState.timeZone);
+    const to = trendParseInputValueForTimeZone(TREND_DOM.to.value, trendState.timeZone);
+
+    if (!from || !to) return { error: "Please choose both From and To time." };
+    if (from >= to) return { error: "'From' must be earlier than 'To'." };
+
+    const params = new URLSearchParams({
+        from: from.toISOString(),
+        to: to.toISOString(),
+        max_points: String(TREND_CONFIG.requestMaxPoints)
+    });
+    params.append("dg_names", TARGET_DG_NAME);
+    return { params };
+}
+
+async function trendFetchJson(url) {
+    const response = await fetchWithTimeout(
+        url,
+        TREND_CONFIG.requestTimeoutMs,
+        { cache: "no-store" }
+    );
+    if (!response.ok) throw new Error(`Trend API error: ${response.status}`);
+    return response.json();
+}
+
+async function trendLoad() {
+    const { params, error } = trendGetParams();
+    if (error) {
+        trendSetStatus(error, true);
+        return;
+    }
+
+    params.set("graph_type", "load_detail");
+    const requestId = ++trendState.activeRequestId;
+    trendSetStatus(`Loading ${TARGET_DG_NAME} load trend...`);
+    trendSetLoading(true);
+
+    try {
+        const payload = await trendFetchJson(`${ENGINE_GRAPH_API_BASE}?${params.toString()}`);
+        if (requestId !== trendState.activeRequestId) return;
+        const totalVisiblePoints = trendApplyChartData(payload);
+        trendSetStatus(
+            totalVisiblePoints > 0
+                ? `${TARGET_DG_NAME} trend loaded successfully.`
+                : `No ${TARGET_DG_NAME} trend data in the selected time range.`,
+            totalVisiblePoints === 0
+        );
+    } catch (error) {
+        console.error("Embedded trend fetch error:", error);
+        trendSetStatus(
+            error?.message || `Failed to load ${TARGET_DG_NAME} trend data.`,
+            true
+        );
+    } finally {
+        if (requestId === trendState.activeRequestId) trendSetLoading(false);
+    }
+}
+
+async function trendLoadExhaust() {
+    const { params, error } = trendGetParams();
+    if (error) {
+        trendSetStatus(error, true);
+        return;
+    }
+
+    params.delete("dg_names");
+    params.set("dg_name", TARGET_DG_NAME);
+    params.set("graph_type", "cylinder_exh");
+    const requestId = ++trendState.activeRequestId;
+    trendSetStatus(`Loading ${TARGET_DG_NAME} cylinder exhaust trend...`);
+    trendSetLoading(true);
+
+    try {
+        const payload = await trendFetchJson(`${ENGINE_GRAPH_API_BASE}?${params.toString()}`);
+        if (requestId !== trendState.activeRequestId) return;
+        const totalVisiblePoints = trendApplyExhaustChartData(payload);
+        trendSetStatus(
+            totalVisiblePoints > 0
+                ? `${TARGET_DG_NAME} cylinder exhaust trend loaded successfully.`
+                : `No ${TARGET_DG_NAME} cylinder exhaust trend data in the selected time range.`,
+            totalVisiblePoints === 0
+        );
+    } catch (error) {
+        console.error("Embedded exhaust trend fetch error:", error);
+        trendSetStatus(
+            error?.message || `Failed to load ${TARGET_DG_NAME} cylinder exhaust trend data.`,
+            true
+        );
+    } finally {
+        if (requestId === trendState.activeRequestId) trendSetLoading(false);
+    }
+}
+
+async function trendLoadTcExh() {
+    const { params, error } = trendGetParams();
+    if (error) {
+        trendSetStatus(error, true);
+        return;
+    }
+
+    params.delete("dg_names");
+    params.set("dg_name", TARGET_DG_NAME);
+    params.set("graph_type", "tc_exh");
+    const requestId = ++trendState.activeRequestId;
+    trendSetStatus(`Loading ${TARGET_DG_NAME} T/C exhaust trend...`);
+    trendSetLoading(true);
+
+    try {
+        const payload = await trendFetchJson(`${ENGINE_GRAPH_API_BASE}?${params.toString()}`);
+        if (requestId !== trendState.activeRequestId) return;
+        if (!trendPayloadLooksLikeTcExh(payload)) {
+            throw new Error("T/C exhaust trend is not available from the running backend. Restart backend to load the new trend API.");
+        }
+        const totalVisiblePoints = trendApplyTcExhChartData(payload);
+        trendSetStatus(
+            totalVisiblePoints > 0
+                ? `${TARGET_DG_NAME} T/C exhaust trend loaded successfully.`
+                : `No ${TARGET_DG_NAME} T/C exhaust trend data in the selected time range.`,
+            totalVisiblePoints === 0
+        );
+    } catch (error) {
+        console.error("T/C exhaust trend fetch error:", error);
+        trendSetStatus(
+            error?.message || `Failed to load ${TARGET_DG_NAME} T/C exhaust trend data.`,
+            true
+        );
+    } finally {
+        if (requestId === trendState.activeRequestId) trendSetLoading(false);
+    }
+}
+
+async function trendLoadPanel(panelConfig) {
+    const { params, error } = trendGetParams();
+    if (error) {
+        if (panelConfig.dom.status) panelConfig.dom.status.textContent = error;
+        return;
+    }
+
+    const paramsCopy = new URLSearchParams(params.toString());
+    let loadingMessage = "";
+    if (panelConfig.mode === "load") {
+        paramsCopy.set("graph_type", "load_detail");
+        loadingMessage = `Loading ${TARGET_DG_NAME} load trend...`;
+    } else if (panelConfig.mode === "tc") {
+        paramsCopy.delete("dg_names");
+        paramsCopy.set("dg_name", TARGET_DG_NAME);
+        paramsCopy.set("graph_type", "tc_exh");
+        loadingMessage = `Loading ${TARGET_DG_NAME} T/C exhaust trend...`;
+    } else {
+        paramsCopy.delete("dg_names");
+        paramsCopy.set("dg_name", TARGET_DG_NAME);
+        paramsCopy.set("graph_type", "cylinder_exh");
+        loadingMessage = `Loading ${TARGET_DG_NAME} cylinder exhaust trend...`;
+    }
+
+    if (panelConfig.dom.status) {
+        panelConfig.dom.status.textContent = loadingMessage;
+        panelConfig.dom.status.classList.remove("text-red-400");
+        panelConfig.dom.status.classList.add("text-slate-600");
+    }
+    panelConfig.dom.loading?.classList.add("active");
+
+    try {
+        const payload = await trendFetchJson(`${ENGINE_GRAPH_API_BASE}?${paramsCopy.toString()}`);
+        if (panelConfig.mode === "tc" && !trendPayloadLooksLikeTcExh(payload)) {
+            throw new Error("T/C exhaust trend is not available from the running backend. Restart backend to load the new trend API.");
+        }
+        const totalVisiblePoints = trendApplyPayloadToChart(panelConfig.dom.chart, payload, panelConfig.mode);
+        if (panelConfig.dom.status) {
+            panelConfig.dom.status.textContent =
+                totalVisiblePoints > 0
+                    ? `${TARGET_DG_NAME} trend loaded successfully.`
+                    : `No ${TARGET_DG_NAME} trend data in the selected time range.`;
+            panelConfig.dom.status.classList.toggle("text-red-400", totalVisiblePoints === 0);
+            panelConfig.dom.status.classList.toggle("text-slate-600", totalVisiblePoints > 0);
+        }
+    } catch (error) {
+        console.error("Trend panel fetch error:", panelConfig.mode, error);
+        if (panelConfig.dom.status) {
+            panelConfig.dom.status.textContent = error?.message || `Failed to load ${TARGET_DG_NAME} trend data.`;
+            panelConfig.dom.status.classList.add("text-red-400");
+            panelConfig.dom.status.classList.remove("text-slate-600");
+        }
+    } finally {
+        panelConfig.dom.loading?.classList.remove("active");
+    }
+}
+
+async function trendLoadAllPanels() {
+    const requestId = ++trendState.activeRequestId;
+    await Promise.all(FIXED_TREND_PANELS.map(async (panelConfig) => {
+        if (requestId !== trendState.activeRequestId) return;
+        await trendLoadPanel(panelConfig);
+    }));
+}
+
+function trendBindEvents() {
+    TREND_DOM.apply?.addEventListener("click", async () => {
+        await restoreLiveMode(false);
+        trendLoadCurrentMode();
+    });
+    TREND_DOM.prev?.addEventListener("click", async () => {
+        await restoreLiveMode(false);
+        trendShiftRange(-TREND_CONFIG.rangeMs);
+    });
+    TREND_DOM.next?.addEventListener("click", async () => {
+        await restoreLiveMode(false);
+        trendShiftRange(TREND_CONFIG.rangeMs);
+    });
+    TREND_DOM.modeLoad?.addEventListener("click", () => trendSetMode("load"));
+    TREND_DOM.modeCylinder?.addEventListener("click", () => trendSetMode("cylinder"));
+    TREND_DOM.modeTc?.addEventListener("click", () => trendSetMode("tc"));
+    window.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape" || dashboardState.mode !== "snapshot") return;
+        restoreLiveMode(true);
+    });
+}
+
+async function initEmbeddedTrend() {
+    if (!TREND_ALLOWED_DGS.has(TARGET_DG_NAME)) {
+        if (TREND_DOM.section) TREND_DOM.section.style.display = "none";
+        TREND_MIRROR_PANELS.forEach((panel) => {
+            if (panel.section) panel.section.style.display = "none";
+        });
+        return;
+    }
+    if (!TREND_DOM.section || !TREND_DOM.chartCanvas || typeof Chart === "undefined") return;
+
+    await trendSyncDefaultRange();
+    trendBuildChart();
+    trendUpdateModeButtons();
+    trendBindPanAndZoom();
+    trendBindEvents();
+    trendSyncMirrorInputs();
+    await trendLoadCurrentMode();
+}
+
+async function fetchData() {
+    if (dashboardState.mode === "snapshot") return;
+    if (isFetching) return;
+    isFetching = true;
+    try {
+        const params = new URLSearchParams({ dg_name: TARGET_DG_NAME });
+        const response = await fetchWithTimeout(
+            `${SNAPSHOT_API_BASE}?${params.toString()}`,
+            FETCH_TIMEOUT_MS,
+            { cache: "no-store" }
+        );
+        if (!response.ok) throw new Error(`Snapshot API error: ${response.status}`);
+
+        const payload = await response.json();
+        dashboardState.snapshotTimestamp = String(payload?.snapshot_timestamp || "").trim();
+        applyMachineSnapshot(payload, formatSnapshotHeaderTimestamp(payload?.snapshot_timestamp));
+        consecutiveFailures = 0;
+    } catch (error) {
+        console.error("Fetch error:", error);
+        consecutiveFailures += 1;
+        if (consecutiveFailures >= 2) {
+            const statusMsg = getById('status-msg');
+            if (statusMsg) statusMsg.style.opacity = '1';
+        }
+        updateHeaderLights([]);
+        updateAlarmLight(null);
+        updateEngineAlarmIndicator(null);
+    } finally {
+        isFetching = false;
+    }
+}
+
+function bindLoadTrendNavigation() {
+    const goToTrend = () => {
+        window.location.href = `./3DGs_graph.html?dg=${encodeURIComponent(TARGET_DG_NAME)}`;
+    };
+    const loadPanel = getById("panel-load");
+    const loadValue = getById("val-load");
+    if (loadPanel) {
+        loadPanel.classList.add("header-clickable");
+        loadPanel.style.cursor = "pointer";
+        loadPanel.addEventListener("click", goToTrend);
+    }
+    if (loadValue) {
+        loadValue.style.cursor = "pointer";
+        loadValue.addEventListener("click", (event) => {
+            event.stopPropagation();
+            goToTrend();
+        });
+    }
+}
+
+window.onload = () => {
+    updatePageTitle();
+    bindHomeNavigation();
+    bindLoadTrendNavigation();
+    refreshOverlayLayout();
+    updateDigitalTable([]);
+    setTimestampHeader("current-datetime", "");
+    initEmbeddedTrend();
+    updateEngineBackgroundImage(false);
+    window.addEventListener("drums:themechange", () => updateEngineBackgroundImage(lastEngineRunningState));
+    bindOverlayResizeObserver();
+    window.addEventListener("resize", scheduleOverlayRefresh);
+    window.addEventListener("pageshow", scheduleStabilizedLayoutRefresh);
+    const engineBackgroundImage = getById("engine-background-image");
+    if (engineBackgroundImage) {
+        engineBackgroundImage.addEventListener("load", scheduleOverlayRefresh);
+    }
+    scheduleStabilizedLayoutRefresh();
+    fetchData();
+    
+    setInterval(fetchData, POLL_INTERVAL_MS);
+};

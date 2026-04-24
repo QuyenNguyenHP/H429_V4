@@ -139,6 +139,281 @@
         return "";
     }
 
+    function getEngineImageContentRect(options) {
+        const container = document.querySelector(options?.containerSelector || ".engine-container");
+        const image = getById(options?.imageId || "engine-background-image");
+        if (!container) return { left: 0, top: 0, width: 0, height: 0 };
+
+        const containerRect = container.getBoundingClientRect();
+        const imageRect = image?.getBoundingClientRect();
+        if (!imageRect?.width || !imageRect?.height) {
+            return { left: 0, top: 0, width: containerRect.width, height: containerRect.height };
+        }
+
+        const naturalWidth = Number(image?.naturalWidth) || imageRect.width;
+        const naturalHeight = Number(image?.naturalHeight) || imageRect.height;
+        const imageRatio = naturalWidth / naturalHeight;
+        const boxRatio = imageRect.width / imageRect.height;
+        let width = imageRect.width;
+        let height = imageRect.height;
+
+        if (boxRatio > imageRatio) {
+            height = imageRect.height;
+            width = height * imageRatio;
+        } else {
+            width = imageRect.width;
+            height = width / imageRatio;
+        }
+
+        return {
+            left: imageRect.left - containerRect.left + ((imageRect.width - width) / 2),
+            top: imageRect.top - containerRect.top + ((imageRect.height - height) / 2),
+            width,
+            height,
+        };
+    }
+
+    function resolveOverlayCoord(value, imageRect, axis) {
+        if (value == null) return value;
+        const raw = String(value).trim();
+        const offset = axis === "x" ? imageRect.left : imageRect.top;
+        const length = axis === "x" ? imageRect.width : imageRect.height;
+        if (raw.endsWith("%")) return `${offset + (length * parseFloat(raw) / 100)}px`;
+        const numericValue = parseFloat(raw);
+        return Number.isFinite(numericValue) ? `${offset + numericValue}px` : value;
+    }
+
+    function withImageOverlayPosition(cfg, imageRect) {
+        return {
+            ...cfg,
+            x: cfg?.x ? resolveOverlayCoord(cfg.x, imageRect, "x") : cfg?.x,
+            y: cfg?.y ? resolveOverlayCoord(cfg.y, imageRect, "y") : cfg?.y,
+        };
+    }
+
+    function normalizeCylinderLayout(cylinders, fallbackCount) {
+        if (Array.isArray(cylinders) && cylinders.length) {
+            return cylinders.map((cfg, index) => ({ number: index + 1, cfg: cfg || {} }));
+        }
+        if (cylinders && typeof cylinders === "object") {
+            return Object.keys(cylinders)
+                .sort((a, b) => Number(a) - Number(b))
+                .map((key) => ({ number: key, cfg: cylinders[key] || {} }));
+        }
+        return Array.from({ length: fallbackCount || 6 }, (_, index) => ({
+            number: index + 1,
+            cfg: { x: `${40.5 + (index * 7.5)}%`, y: "20%", scale: 1 },
+        }));
+    }
+
+    function createOverlayLayoutController(config) {
+        const layout = config?.layout || {};
+        const containerSelector = config?.containerSelector || ".engine-container";
+        const imageId = config?.imageId || "engine-background-image";
+        const cylinderContainerId = config?.cylinderContainerId || "cylinders-container";
+        const cylinderTemplateId = config?.cylinderTemplateId || "cyl-temp-template";
+        let resizeObserver = null;
+        let refreshFrame = 0;
+        let stabilizedTimers = [];
+
+        function getImageRect() {
+            return getEngineImageContentRect({ containerSelector, imageId });
+        }
+
+        function getOverlayScale() {
+            const baseWidth = Number(layout.baseWidth) || 1456;
+            const imageRect = getImageRect();
+            const visibleWidth =
+                imageRect.width ||
+                document.querySelector(containerSelector)?.getBoundingClientRect().width ||
+                baseWidth;
+            const rawScale = visibleWidth / baseWidth;
+            return Math.min(2.4, Math.max(0.58, rawScale));
+        }
+
+        function apply() {
+            config?.applySceneLayout?.();
+            const overlayScale = getOverlayScale();
+            const imageRect = getImageRect();
+            const container = document.querySelector(containerSelector);
+            if (container) container.style.setProperty("--overlay-scale", overlayScale.toFixed(3));
+
+            (config?.panelBindings || []).forEach((binding) => {
+                const panelCfg = layout.panels?.[binding.panelKey];
+                if (!panelCfg) return;
+                const scale = Number(panelCfg.scale ?? 1);
+                applyLayoutToElement(getById(binding.elementId), {
+                    ...withImageOverlayPosition(panelCfg, imageRect),
+                    translateYCenter: binding.translateYCenter !== false,
+                    scale: (Number.isNaN(scale) ? 1 : scale) * overlayScale,
+                });
+            });
+
+            document.querySelectorAll(config?.tagSelector || ".data-tag").forEach((tag) => {
+                const key = tag.getAttribute("data-tag-key");
+                const cfg = layout.tags?.[key];
+                if (!cfg) return;
+                if (cfg.x) tag.style.setProperty("--x", resolveOverlayCoord(cfg.x, imageRect, "x"));
+                if (cfg.y) tag.style.setProperty("--y", resolveOverlayCoord(cfg.y, imageRect, "y"));
+                const scale = cfg.scale == null ? 1 : Number(cfg.scale);
+                const scaledValue = (Number.isNaN(scale) ? 1 : scale) * overlayScale;
+                tag.style.transform = `scale(${scaledValue})`;
+                tag.style.transformOrigin = "top left";
+                const label = tag.querySelector(".label-box");
+                const value = tag.querySelector(".digital-value");
+                if (label && cfg.labelWidth) label.style.minWidth = `${Math.round(parseFloat(cfg.labelWidth) * overlayScale)}px`;
+                if (value && cfg.valueWidth) value.style.minWidth = `${Math.round(parseFloat(cfg.valueWidth) * overlayScale)}px`;
+            });
+        }
+
+        function initCylinders() {
+            const container = getById(cylinderContainerId);
+            const template = getById(cylinderTemplateId);
+            if (!container || !template) return;
+            container.innerHTML = "";
+            const imageRect = getImageRect();
+            const overlayScale = getOverlayScale();
+
+            normalizeCylinderLayout(layout.cylinders, config?.fallbackCylinderCount || 6).forEach(({ number, cfg }) => {
+                const clone = template.content.cloneNode(true);
+                const numberEl = clone.querySelector(".cyl-num");
+                const valueEl = clone.querySelector(".cyl-val");
+                const item = clone.querySelector(".cyl-item");
+                if (numberEl) numberEl.textContent = number;
+                if (valueEl) valueEl.id = `val-cyl-${number}`;
+                if (item) {
+                    const scale = cfg.scale == null ? 1 : Number(cfg.scale);
+                    item.style.setProperty("--x", resolveOverlayCoord(cfg.x || "50%", imageRect, "x"));
+                    item.style.setProperty("--y", resolveOverlayCoord(cfg.y || "20%", imageRect, "y"));
+                    item.style.transform = `translate(-50%, -50%) scale(${(Number.isNaN(scale) ? 1 : scale) * overlayScale})`;
+                }
+                container.appendChild(clone);
+            });
+        }
+
+        function refresh() {
+            apply();
+            initCylinders();
+            config?.afterRefresh?.();
+        }
+
+        function scheduleRefresh() {
+            if (refreshFrame) return;
+            refreshFrame = global.requestAnimationFrame(() => {
+                refreshFrame = 0;
+                refresh();
+            });
+        }
+
+        function scheduleStabilizedRefresh(delays) {
+            stabilizedTimers.forEach((timerId) => global.clearTimeout(timerId));
+            stabilizedTimers = (delays || [350, 1200]).map((delay) => global.setTimeout(scheduleRefresh, delay));
+        }
+
+        function bindResizeObserver() {
+            if (resizeObserver) {
+                resizeObserver.disconnect();
+                resizeObserver = null;
+            }
+            if (typeof ResizeObserver !== "function") return;
+            const targets = [
+                document.querySelector(containerSelector),
+                getById(imageId),
+            ].filter(Boolean);
+            if (targets.length === 0) return;
+            resizeObserver = new ResizeObserver(scheduleRefresh);
+            targets.forEach((target) => resizeObserver.observe(target));
+        }
+
+        return {
+            apply,
+            initCylinders,
+            refresh,
+            scheduleRefresh,
+            scheduleStabilizedRefresh,
+            bindResizeObserver,
+            getImageRect,
+            getOverlayScale,
+        };
+    }
+
+    function stripTrailingTimeZone(value) {
+        return String(value || "").trim().replace(/\s+[A-Za-z_\/+-]+$/, "");
+    }
+
+    function updateTimestampHeader(elementId, timestampValue, fallbackValue) {
+        const el = getById(elementId || "current-datetime");
+        if (!el) return;
+        el.textContent = stripTrailingTimeZone(timestampValue) || fallbackValue || "--:--:--";
+    }
+
+    function pad2(value) {
+        return String(value).padStart(2, "0");
+    }
+
+    function getLocalDateTimeParts(date) {
+        return {
+            year: String(date.getFullYear()),
+            month: pad2(date.getMonth() + 1),
+            day: pad2(date.getDate()),
+            hour: pad2(date.getHours()),
+            minute: pad2(date.getMinutes()),
+            second: pad2(date.getSeconds()),
+        };
+    }
+
+    function parseApiTimestamp(value) {
+        const raw = String(value || "").trim();
+        if (!raw) return NaN;
+        const normalized = raw.includes("T") ? raw : raw.replace(" ", "T");
+        return Date.parse(/[zZ]$|[+\-]\d{2}:\d{2}$/.test(normalized) ? normalized : `${normalized}Z`);
+    }
+
+    function formatTimestampDisplay(timestampPayload, fallbackValue) {
+        const datePart = String(timestampPayload?.date || "").trim();
+        const timePart = String(timestampPayload?.time || "").trim();
+        const combined = datePart && timePart
+            ? `${datePart} ${timePart}`
+            : String(timestampPayload?.timestamp || fallbackValue || "").trim();
+        const parsedMs = parseApiTimestamp(combined);
+        if (Number.isFinite(parsedMs)) {
+            const parts = getLocalDateTimeParts(new Date(parsedMs));
+            return `${parts.day}/${parts.month}/${parts.year} ${parts.hour}:${parts.minute}:${parts.second}`;
+        }
+        return stripTrailingTimeZone(combined);
+    }
+
+    function extractMachineTimestamp(machineData, payload) {
+        const directValue =
+            machineData?.TimeStamp ??
+            machineData?.timestamp ??
+            machineData?.timeStamp ??
+            machineData?.time_stamp ??
+            payload?.TimeStamp ??
+            payload?.timestamp ??
+            payload?.timeStamp ??
+            payload?.time_stamp;
+        if (directValue != null && String(directValue).trim() !== "") return directValue;
+
+        const analogRows = Array.isArray(machineData?.analog) ? machineData.analog : [];
+        const tsRow = analogRows.find((item) => {
+            const label = String(item?.label || "").trim().toUpperCase();
+            return label === "TIMESTAMP" || label === "TIME STAMP" || label === "DATE & TIME";
+        });
+        if (tsRow?.value != null && String(tsRow.value).trim() !== "") return tsRow.value;
+
+        const digitalRows = Array.isArray(machineData?.digital) ? machineData.digital : [];
+        const point = analogRows.find((item) => item?.timestamp) || digitalRows.find((item) => item?.timestamp);
+        if (point?.timestamp != null && String(point.timestamp).trim() !== "") return point.timestamp;
+        return "";
+    }
+
+    function bindHomeNavigation(elementId, href) {
+        const target = href || "./index.html";
+        const logo = getById(elementId || "drums-logo-link");
+        if (logo) logo.addEventListener("click", () => { global.location.href = target; });
+    }
+
     function bindChartViewportControls(config) {
         const chartCanvas = config?.chartCanvas;
         if (!chartCanvas) return () => {};
@@ -402,6 +677,14 @@
         applyLayoutToElement,
         fetchWithTimeout,
         resolveApiOrigin,
+        getEngineImageContentRect,
+        resolveOverlayCoord,
+        createOverlayLayoutController,
+        updateTimestampHeader,
+        parseApiTimestamp,
+        formatTimestampDisplay,
+        extractMachineTimestamp,
+        bindHomeNavigation,
         bindChartViewportControls,
         createGlobalNav,
         applyTheme,

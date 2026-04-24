@@ -7,7 +7,8 @@ Frontend la tap cac trang HTML/CSS/JS tinh cho dashboard H429.
 ### `index.html`
 
 - Trang tong quan toan he thong
-- Hien thi `DG#1`, `DG#2`, `DG#3`, `ME-PORT`, `ME-STBD`, va 3 card `PMS`
+- Hien thi `DG#1`, `DG#2`, `DG#3`, `ME-PORT`, `ME-STBD`
+- HTML chi giu khung trang; card may duoc render tu `INDEX_DG_CONFIG` trong `index.js`
 - Layout trang chu da chuyen sang autosize theo noi dung
 - Man hinh nho se tu xuong cot de tranh chong layout
 
@@ -19,6 +20,7 @@ API dung:
 ### `dg_dashboard.html`
 
 - Dashboard chi tiet cho DG
+- HTML chi giu layout; logic nam trong `dg_dashboard.js`
 - Route:
   - `dg_dashboard.html?dg=1`
   - `dg_dashboard.html?dg=2`
@@ -38,7 +40,7 @@ Overlay tren anh engine hien tai:
 Hanh vi moi:
 
 - overlay tu scale theo kich thuoc hien thi thuc te cua anh engine
-- dung `ResizeObserver` bam vao `engine-container` va `engine-background-image`
+- dung helper chung `createOverlayLayoutController` trong `dashboard_shared.js`
 - dark mode da doi nen vung engine sang tong toi
 - cylinder tag trong dark mode da bo nen trang va doi chu sang tong sang
 - embedded trend mac dinh mo theo `MaxTimestamp - 10h` den `MaxTimestamp`
@@ -52,6 +54,7 @@ API dung:
 ### `ME_dashboard.html`
 
 - Dashboard chi tiet cho main engine
+- HTML chi giu layout; logic nam trong `me_dashboard.js`
 - Route:
   - `ME_dashboard.html?dg=ME-PORT`
   - `ME_dashboard.html?dg=ME-STBD`
@@ -63,7 +66,7 @@ API dung:
 Hanh vi moi:
 
 - overlay tren anh engine tu scale theo kich thuoc hien thi cua anh
-- dung `ResizeObserver` de refresh overlay khi anh engine thay doi kich thuoc
+- dung helper chung `createOverlayLayoutController` trong `dashboard_shared.js`
 - dark mode da doi nen vung engine sang tong toi
 - cylinder tag da dong bo mau voi dark theme
 
@@ -96,6 +99,7 @@ Tinh nang:
 Script chinh:
 
 - `dg_load_trend.js`
+- CSS rieng cua trang trend: `trend_graph.css`
 
 API dung:
 
@@ -121,8 +125,24 @@ API dung:
 - helper dung chung:
   - resolve backend origin
   - fetch with timeout
+  - controller overlay engine/cylinder/tag cho DG va ME
+  - dinh dang timestamp va dieu huong logo ve Home
   - pan / zoom / reset viewport cho chart
   - helper layout chung
+
+### Page scripts
+
+- `index.js`: config va render card trang chu, poll trang thai tong quan
+- `dg_dashboard.js`: mapping sensor DG, bang digital, embedded trend, snapshot
+- `me_dashboard.js`: mapping sensor ME, bang analog/digital, snapshot
+- `dg_load_trend.js`: trang trend 3 DG
+
+## Cach sua nhanh
+
+- Doi card trang chu: sua `INDEX_DG_CONFIG` trong `index.js`
+- Doi vi tri overlay DG/ME: sua `UI_LAYOUT` trong `dg_dashboard.js` hoac `me_dashboard.js`
+- Doi style dung chung: sua `app.css`
+- Doi style rieng trang trend: sua `trend_graph.css`
 
 ## Chay local
 

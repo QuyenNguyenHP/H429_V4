@@ -100,6 +100,16 @@ canvas {
     max-width: 100%;
 }
 
+#header-stage {
+    min-height: 50px;
+}
+
+.embedded-trend-canvas {
+    display: block;
+    width: 100% !important;
+    height: 340px !important;
+}
+
 .header-clickable {
     cursor: pointer;
     transition: transform 0.25s ease-in-out, box-shadow 0.25s ease-in-out;
