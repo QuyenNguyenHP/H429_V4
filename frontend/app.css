@@ -382,10 +382,24 @@ canvas {
     font-size: max(0.66rem, calc(1.1rem * var(--overlay-scale, 1)));
 }
 
+.engine-overlay-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.engine-overlay-panel {
+    position: absolute;
+    z-index: 10;
+    pointer-events: auto;
+}
+
 .cylinder-layer {
     position: absolute;
     inset: 0;
     z-index: 10;
+    pointer-events: none;
 }
 
 .cyl-item {
@@ -1452,6 +1466,16 @@ body.page-locked-viewport .global-nav-shell {
         order: 0;
     }
 
+    .engine-overlay-layer {
+        position: static;
+        inset: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        order: 1;
+        pointer-events: auto;
+    }
+
     .cylinder-layer,
     #panel-engine-speed,
     #panel-running-hour,
@@ -1468,6 +1492,7 @@ body.page-locked-viewport .global-nav-shell {
     }
 
     .cylinder-layer {
+        inset: auto;
         order: 1;
     }
 

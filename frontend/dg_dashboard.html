@@ -66,82 +66,84 @@
                     <img id="engine-background-image" src="Asset/engine_light_kiosk.png" alt="Engine Layout" class="engine-dashboard-image" decoding="async">
                 </div>
 
-            <!-- Cylinder Temperatures (Top) -->
-            <div class="cylinder-layer">
-                <template id="cyl-temp-template">
-                    <div class="cyl-item">
-                        <div class="cyl-label">No<span class="cyl-num">1</span> (°C)</div>
-                        <div class="digital-value text-green-600 cyl-val font-bold">---</div>
+            <div class="engine-overlay-layer">
+                <!-- Cylinder Temperatures (Top) -->
+                <div class="cylinder-layer">
+                    <template id="cyl-temp-template">
+                        <div class="cyl-item">
+                            <div class="cyl-label">No<span class="cyl-num">1</span> (°C)</div>
+                            <div class="digital-value text-green-600 cyl-val font-bold">---</div>
+                        </div>
+                    </template>
+                    <div id="cylinders-container"></div>
+                </div>
+
+                <!-- Left Panel: Engine Speed -->
+                <div id="panel-engine-speed" class="engine-overlay-panel">
+                    <div class="metric-card">
+                        <div class="metric-label">ENGINE SPEED<br>(Min-1)</div>
+                        <div class="metric-value" id="val-engine-speed">-----</div>
                     </div>
-                </template>
-                <div id="cylinders-container"></div>
-            </div>
-
-            <!-- Left Panel: Engine Speed -->
-            <div id="panel-engine-speed" class="absolute z-10" style="left: 6%; top: 48%; transform: translateY(-50%);">
-                <div class="metric-card">
-                    <div class="metric-label">ENGINE SPEED<br>(Min-1)</div>
-                    <div class="metric-value" id="val-engine-speed">-----</div>
                 </div>
-            </div>
 
-            <!-- Right Panel: Running Hour -->
-            <div id="panel-running-hour" class="absolute z-10" style="right: 2.5%; top: 45%; transform: translateY(-50%);">
-                <div class="metric-card">
-                    <div class="metric-label">RUNNING HOURS</div>
-                    <div class="metric-value" id="val-running-hour"*10>-----</div>
+                <!-- Right Panel: Running Hour -->
+                <div id="panel-running-hour" class="engine-overlay-panel">
+                    <div class="metric-card">
+                        <div class="metric-label">RUNNING HOURS</div>
+                        <div class="metric-value" id="val-running-hour"*10>-----</div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Right Panel: Load -->
-            <div id="panel-load" class="absolute z-10" style="right: 2.5%; top: 57%; transform: translateY(-50%);">
-                <div class="metric-card">
-                    <div class="metric-label">LOAD (KwE)</div>
-                    <div class="metric-value" id="val-load">-----</div>
+                <!-- Right Panel: Load -->
+                <div id="panel-load" class="engine-overlay-panel">
+                    <div class="metric-card">
+                        <div class="metric-label">LOAD (KwE)</div>
+                        <div class="metric-value" id="val-load">-----</div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Data Tags (moi o la 1 the doc lap, doi vi tri bang --x / --y) -->
-            <div class="data-tag" data-tag-key="starting-air">
-                <div class="label-box">STARTING AIR (MPa)</div>
-                <div class="digital-value" id="val-starting-air">--.--</div>
-            </div>
-            <div class="data-tag" data-tag-key="ex-tc-out">
-                <div class="label-box">EX Gas T/C OUT (°C)</div>
-                <div class="digital-value" id="val-ex-tc-out">-----</div>
-            </div>
-            <div class="data-tag" data-tag-key="ex-tc-in1">
-                <div class="label-box">EX Gas T/C IN1 (°C)</div>
-                <div class="digital-value" id="val-ex-tc-in1">-----</div>
-            </div>
-            <div class="data-tag" data-tag-key="ex-tc-in2">
-                <div class="label-box">EX Gas T/C IN2 (°C)</div>
-                <div class="digital-value" id="val-ex-tc-in2">-----</div>
-            </div>
-            <div class="data-tag" data-tag-key="lo-inlet-p">
-                <div class="label-box">L.O INLET (MPa)</div>
-                <div class="digital-value" id="val-lo-inlet-p">--.--</div>
-            </div>
+                <!-- Data Tags (moi o la 1 the doc lap, doi vi tri bang --x / --y) -->
+                <div class="data-tag" data-tag-key="starting-air">
+                    <div class="label-box">STARTING AIR (MPa)</div>
+                    <div class="digital-value" id="val-starting-air">--.--</div>
+                </div>
+                <div class="data-tag" data-tag-key="ex-tc-out">
+                    <div class="label-box">EX Gas T/C OUT (°C)</div>
+                    <div class="digital-value" id="val-ex-tc-out">-----</div>
+                </div>
+                <div class="data-tag" data-tag-key="ex-tc-in1">
+                    <div class="label-box">EX Gas T/C IN1 (°C)</div>
+                    <div class="digital-value" id="val-ex-tc-in1">-----</div>
+                </div>
+                <div class="data-tag" data-tag-key="ex-tc-in2">
+                    <div class="label-box">EX Gas T/C IN2 (°C)</div>
+                    <div class="digital-value" id="val-ex-tc-in2">-----</div>
+                </div>
+                <div class="data-tag" data-tag-key="lo-inlet-p">
+                    <div class="label-box">L.O INLET (MPa)</div>
+                    <div class="digital-value" id="val-lo-inlet-p">--.--</div>
+                </div>
 
-            <div class="data-tag" data-tag-key="fo-inlet">
-                <div class="label-box">F.O INLET (MPa)</div>
-                <div class="digital-value" id="val-fo-inlet">--.--</div>
-            </div>
-            <div class="data-tag" data-tag-key="lt-cw-inlet">
-                <div class="label-box">LT.CW INLET (MPa)</div>
-                <div class="digital-value" id="val-lt-cw-inlet">--.--</div>
-            </div>
-            <div class="data-tag" data-tag-key="ht-cw-inlet">
-                <div class="label-box">HT.CW INLET (MPa)</div>
-                <div class="digital-value" id="val-ht-cw-inlet">--.--</div>
-            </div>
-            <div class="data-tag" data-tag-key="ht-cw-outlet-t">
-                <div class="label-box">HT.CW OUTLET (°C)</div>
-                <div class="digital-value" id="val-ht-cw-outlet-t">-----</div>
-            </div>
-            <div class="data-tag" data-tag-key="lo-inlet-t">
-                <div class="label-box">L.O INLET (°C)</div>
-                <div class="digital-value" id="val-lo-inlet-t">-----</div>
+                <div class="data-tag" data-tag-key="fo-inlet">
+                    <div class="label-box">F.O INLET (MPa)</div>
+                    <div class="digital-value" id="val-fo-inlet">--.--</div>
+                </div>
+                <div class="data-tag" data-tag-key="lt-cw-inlet">
+                    <div class="label-box">LT.CW INLET (MPa)</div>
+                    <div class="digital-value" id="val-lt-cw-inlet">--.--</div>
+                </div>
+                <div class="data-tag" data-tag-key="ht-cw-inlet">
+                    <div class="label-box">HT.CW INLET (MPa)</div>
+                    <div class="digital-value" id="val-ht-cw-inlet">--.--</div>
+                </div>
+                <div class="data-tag" data-tag-key="ht-cw-outlet-t">
+                    <div class="label-box">HT.CW OUTLET (°C)</div>
+                    <div class="digital-value" id="val-ht-cw-outlet-t">-----</div>
+                </div>
+                <div class="data-tag" data-tag-key="lo-inlet-t">
+                    <div class="label-box">L.O INLET (°C)</div>
+                    <div class="digital-value" id="val-lo-inlet-t">-----</div>
+                </div>
             </div>
         </div>
         </section>
@@ -382,29 +384,29 @@
         const UI_LAYOUT = {
             baseWidth: 1000,
             cylinders: [
-                { x: '40.5%', y: '20%', scale: 0.8 },
-                { x: '48%', y: '20%', scale: 0.8 },
-                { x: '55.2%', y: '20%', scale: 0.8 },
-                { x: '62.3%', y: '20%', scale: 0.8 },
-                { x: '69.5%', y: '20%', scale: 0.8 },
-                { x: '76.7%', y: '20%', scale: 0.8 }
+                { x: '38.4%', y: '20%', scale: 0.9 },
+                { x: '47%', y: '20%', scale: 0.9 },
+                { x: '55.6%', y: '20%', scale: 0.9 },
+                { x: '64.5%', y: '20%', scale: 0.9 },
+                { x: '73.2%', y: '20%', scale: 0.9 },
+                { x: '82%', y: '20%', scale: 0.9 }
             ],
             panels: {
-                engineSpeed: { x: '18%', y: '50%', scale: 0.8, anchor: 'left' },
-                runningHour: { x: '59%', y: '78%', scale: 0.8, anchor: 'right' },
-                load: { x: '80%', y: '78%', scale: 0.8, anchor: 'right' }
+                engineSpeed: { x: '12%', y: '50%', scale: 1, anchor: 'left' },
+                runningHour: { x: '35%', y: '76%', scale: 1, anchor: 'left' },
+                load: { x: '62%', y: '76%', scale: 1, anchor: 'left' }
             },
             tags: {
-                'starting-air': { x: '39%', y: '30%', scale: 0.8, labelWidth: '200px', valueWidth: '60px' },
-                'ex-tc-out': { x: '39%', y: '38%', scale: 0.8, labelWidth: '200px', valueWidth: '60px' },
-                'ex-tc-in1': { x: '39%', y: '46%', scale: 0.8, labelWidth: '200px', valueWidth: '60px' },
-                'ex-tc-in2': { x: '39%', y: '54%', scale: 0.8, labelWidth: '200px', valueWidth: '60px' },
-                'lo-inlet-p': { x: '39%', y: '62%', scale: 0.8, labelWidth: '200px', valueWidth: '60px' },
-                'fo-inlet': { x: '60%', y: '30%', scale: 0.8, labelWidth: '200px', valueWidth: '60px' },
-                'lt-cw-inlet': { x: '60%', y: '38%', scale: 0.8, labelWidth: '200px', valueWidth: '60px' },
-                'ht-cw-inlet': { x: '60%', y: '46%', scale: 0.8, labelWidth: '200px', valueWidth: '60px' },
-                'ht-cw-outlet-t': { x: '60%', y: '54%', scale: 0.8, labelWidth: '200px', valueWidth: '60px' },
-                'lo-inlet-t': { x: '60%', y: '62%', scale: 0.8, labelWidth: '200px', valueWidth: '60px' }
+                'starting-air': { x: '37%', y: '30%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+                'ex-tc-out': { x: '37%', y: '38%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+                'ex-tc-in1': { x: '37%', y: '46%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+                'ex-tc-in2': { x: '37%', y: '54%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+                'lo-inlet-p': { x: '37%', y: '62%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+                'fo-inlet': { x: '63%', y: '30%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+                'lt-cw-inlet': { x: '63%', y: '38%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+                'ht-cw-inlet': { x: '63%', y: '46%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+                'ht-cw-outlet-t': { x: '63%', y: '54%', scale: 1, labelWidth: '200px', valueWidth: '60px' },
+                'lo-inlet-t': { x: '63%', y: '62%', scale: 1, labelWidth: '200px', valueWidth: '60px' }
             }
         };
         function applyDashboardSceneLayout() {
