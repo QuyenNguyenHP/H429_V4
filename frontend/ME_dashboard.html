@@ -38,7 +38,7 @@
                     class="engine-alarm-indicator"
                 >
                 <div class="engine-dashboard-bg">
-                    <img id="engine-background-image" src="Asset/Engine light mode.png" alt="Engine Layout" class="engine-dashboard-image">
+                    <img id="engine-background-image" src="Asset/engine_light_kiosk.png" alt="Engine Layout" class="engine-dashboard-image" decoding="async">
                 </div>
 
             <div class="cylinder-layer">
@@ -528,8 +528,8 @@
 
         function getEngineIdleImagePath() {
             return document.documentElement.getAttribute("data-theme") === "dark"
-                ? "Asset/Engine dark mode.png"
-                : "Asset/Engine light mode.png";
+                ? "Asset/engine_dark_kiosk.png"
+                : "Asset/engine_light_kiosk.png";
         }
 
         let lastEngineRunningState = false;
@@ -540,7 +540,7 @@
             lastEngineRunningState = Boolean(isEngineRunning);
             const engineBackgroundImage = getById("engine-background-image");
             if (!engineBackgroundImage) return;
-            engineBackgroundImage.src = lastEngineRunningState ? "Asset/Engine_Runing.gif" : getEngineIdleImagePath();
+            engineBackgroundImage.src = lastEngineRunningState ? "Asset/engine_running_kiosk.png" : getEngineIdleImagePath();
         }
 
         function resolveDisplayRows(rows) {
@@ -800,6 +800,15 @@
             });
         }
 
+        let stabilizedLayoutTimers = [];
+
+        function scheduleStabilizedLayoutRefresh() {
+            stabilizedLayoutTimers.forEach((timerId) => window.clearTimeout(timerId));
+            stabilizedLayoutTimers = [350, 1200].map((delay) => window.setTimeout(() => {
+                scheduleOverlayRefresh();
+            }, delay));
+        }
+
         function bindOverlayResizeObserver() {
             if (overlayResizeObserver) {
                 overlayResizeObserver.disconnect();
@@ -871,10 +880,12 @@
             window.addEventListener("drums:themechange", () => updateEngineBackgroundImage(lastEngineRunningState));
             bindOverlayResizeObserver();
             window.addEventListener("resize", scheduleOverlayRefresh);
+            window.addEventListener("pageshow", scheduleStabilizedLayoutRefresh);
             const engineBackgroundImage = getById("engine-background-image");
             if (engineBackgroundImage) {
                 engineBackgroundImage.addEventListener("load", scheduleOverlayRefresh);
             }
+            scheduleStabilizedLayoutRefresh();
             fetchData();
             setInterval(fetchData, POLL_INTERVAL_MS);
         };

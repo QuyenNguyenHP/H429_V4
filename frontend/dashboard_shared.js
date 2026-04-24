@@ -286,6 +286,7 @@
     }
 
     const GLOBAL_NAV_STATE_KEY = "drums:global-nav:collapsed";
+    const GLOBAL_NAV_AUTO_COLLAPSE_MS = 5000;
 
     function resolveActiveNavHref() {
         const pathname = (global.location?.pathname || "").toLowerCase();
@@ -344,17 +345,46 @@
 
         const toggle = shell.querySelector(".global-nav-toggle");
         const themeToggle = shell.querySelector("[data-theme-toggle]");
+        let autoCollapseTimer = 0;
+
+        function persistCollapsedState(collapsed) {
+            document.body.classList.toggle("global-nav-collapsed", collapsed);
+            try {
+                global.localStorage?.setItem(GLOBAL_NAV_STATE_KEY, collapsed ? "1" : "0");
+            } catch (_) {}
+        }
+
+        function clearAutoCollapseTimer() {
+            if (!autoCollapseTimer) return;
+            global.clearTimeout(autoCollapseTimer);
+            autoCollapseTimer = 0;
+        }
+
+        function collapseNav() {
+            shell.classList.add("is-collapsed");
+            persistCollapsedState(true);
+            clearAutoCollapseTimer();
+        }
+
+        function scheduleAutoCollapse() {
+            clearAutoCollapseTimer();
+            if (shell.classList.contains("is-collapsed")) return;
+            autoCollapseTimer = global.setTimeout(() => {
+                collapseNav();
+            }, GLOBAL_NAV_AUTO_COLLAPSE_MS);
+        }
+
         if (toggle) {
             toggle.addEventListener("click", () => {
                 const collapsed = shell.classList.toggle("is-collapsed");
-                document.body.classList.toggle("global-nav-collapsed", collapsed);
-                try {
-                    global.localStorage?.setItem(GLOBAL_NAV_STATE_KEY, collapsed ? "1" : "0");
-                } catch (_) {}
+                persistCollapsedState(collapsed);
+                if (collapsed) clearAutoCollapseTimer();
+                else scheduleAutoCollapse();
             });
         }
         if (themeToggle) themeToggle.addEventListener("click", toggleTheme);
         updateThemeToggleLabels(getTheme());
+        scheduleAutoCollapse();
     }
 
     if (document.readyState === "loading") {

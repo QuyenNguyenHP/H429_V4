@@ -1527,9 +1527,564 @@ body.page-locked-viewport .global-nav-shell {
         margin-left: 0;
     }
 
-    .embedded-trend-actions > *,
-    .embedded-trend-toolbar > * {
+.embedded-trend-actions > *,
+.embedded-trend-toolbar > * {
         width: 100%;
         min-width: 0 !important;
+    }
+}
+
+body.index-page {
+    --index-page-pad-x: clamp(18px, 2vw, 30px);
+    --index-page-pad-y: clamp(14px, 1.8vh, 22px);
+    --index-nav-clearance: clamp(52px, 4vw, 72px);
+}
+
+body.index-page.has-global-nav,
+body.index-page.has-global-nav.global-nav-collapsed {
+    padding-left: 0;
+}
+
+body.index-page .main-container {
+    width: 100%;
+    height: 100dvh;
+    min-width: 0;
+    min-height: 100dvh;
+    margin: 0;
+    padding: var(--index-page-pad-y) var(--index-page-pad-x) var(--index-page-pad-y) calc(var(--index-page-pad-x) + var(--index-nav-clearance));
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: clamp(12px, 1.6vh, 18px);
+    border-width: 0;
+    box-shadow: none;
+    overflow: hidden;
+}
+
+body.index-page #header-stage {
+    position: relative;
+    display: grid !important;
+    grid-template-columns: minmax(240px, 314px) minmax(280px, 1fr) auto;
+    align-items: start !important;
+    gap: clamp(12px, 1.4vw, 18px);
+    min-height: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0 0 clamp(10px, 1.2vh, 14px);
+}
+
+body.index-page #logo-box,
+body.index-page #vessel-box,
+body.index-page #header-right,
+body.index-page #system-status-bar {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+}
+
+body.index-page #logo-box {
+    width: clamp(220px, 20vw, 314px);
+    height: auto;
+    min-height: 72px;
+    padding: 4px 10px;
+    justify-self: start;
+    align-self: start;
+}
+
+body.index-page #vessel-box {
+    width: min(100%, 560px);
+    min-width: 0;
+    justify-self: center;
+    align-self: center;
+}
+
+body.index-page #header-right {
+    justify-self: end;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 12px !important;
+}
+
+body.index-page #date-time-box {
+    min-width: clamp(232px, 18vw, 292px) !important;
+}
+
+body.index-page #header-icons {
+    display: flex;
+    gap: 10px;
+}
+
+body.index-page #dg-cards-stage {
+    position: relative;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(12px, 1.8vh, 20px);
+    height: 100%;
+    min-height: 0;
+    margin-top: 0;
+}
+
+body.index-page .dashboard-group-card {
+    position: relative;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0;
+    gap: clamp(12px, 1.2vw, 18px);
+}
+
+body.index-page #me-section {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.index-page #dg-section {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+body.index-page .dg-card,
+body.index-page .dg-card-large {
+    width: auto !important;
+    min-height: 0 !important;
+    height: 100%;
+    padding: clamp(11px, 1.2vw, 14px);
+}
+
+body.index-page .dg-card-main {
+    gap: clamp(10px, 1vw, 14px);
+}
+
+body.index-page .dg-engine-box {
+    margin-bottom: 0;
+    min-height: 0;
+}
+
+body.index-page .dg-status-column {
+    width: clamp(108px, 8vw, 128px);
+}
+
+body.index-page .dg-title {
+    font-size: clamp(0.92rem, 1vw, 1.02rem);
+    margin-bottom: clamp(6px, 0.8vh, 10px);
+    padding-bottom: clamp(6px, 0.8vh, 9px);
+}
+
+body.index-page .dg-status-label {
+    font-size: clamp(0.62rem, 0.72vw, 0.74rem);
+}
+
+body.index-page .serial-fail {
+    min-height: 1.2em;
+}
+
+body.index-page #system-status-bar {
+    width: 100% !important;
+    margin-top: 0 !important;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px 18px;
+}
+
+body.index-page #system-status-bar > .flex {
+    flex-wrap: wrap;
+    gap: 8px 18px;
+}
+
+@media (max-width: 1500px) {
+    body.index-page {
+        --index-nav-clearance: 40px;
+    }
+
+    body.index-page #header-stage {
+        grid-template-columns: minmax(200px, 260px) minmax(220px, 1fr) auto;
+    }
+
+    body.index-page #dg-section {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1200px) {
+    body.index-page {
+        --index-nav-clearance: 0px;
+        overflow: auto;
+    }
+
+    body.index-page .main-container {
+        height: auto;
+        min-height: 100dvh;
+        grid-template-rows: auto auto auto;
+        overflow: visible;
+    }
+
+    body.index-page #header-stage {
+        grid-template-columns: 1fr;
+    }
+
+    body.index-page #logo-box,
+    body.index-page #vessel-box,
+    body.index-page #header-right {
+        justify-self: stretch;
+    }
+
+    body.index-page #logo-box {
+        width: clamp(220px, 40vw, 314px);
+    }
+
+    body.index-page #vessel-box {
+        width: 100%;
+    }
+
+    body.index-page #header-right {
+        justify-content: flex-start;
+    }
+
+    body.index-page #dg-cards-stage {
+        grid-template-rows: auto auto;
+        height: auto;
+    }
+
+    body.index-page #me-section,
+    body.index-page #dg-section {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.index-page .dg-card,
+    body.index-page .dg-card-large {
+        height: auto;
+        min-height: clamp(220px, 30vh, 300px) !important;
+    }
+}
+
+@media (max-height: 860px) {
+    body.index-page {
+        --index-page-pad-y: 10px;
+        --index-nav-clearance: clamp(32px, 3vw, 48px);
+    }
+
+    body.index-page .main-container {
+        gap: 10px;
+    }
+
+    body.index-page #header-stage {
+        gap: 10px;
+        padding-bottom: 8px;
+    }
+
+    body.index-page #logo-box {
+        min-height: 60px;
+    }
+
+    body.index-page #vessel-box {
+        min-height: 0;
+        padding: 8px 18px;
+    }
+
+    body.index-page #date-time-box {
+        height: 48px !important;
+    }
+
+    body.index-page #header-icons button:first-child,
+    body.index-page #header-icons button:last-child {
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    body.index-page #dg-cards-stage {
+        gap: 10px;
+    }
+
+    body.index-page .dashboard-group-card {
+        gap: 10px;
+    }
+
+    body.index-page .dg-card,
+    body.index-page .dg-card-large {
+        padding: 9px;
+    }
+
+    body.index-page .dg-title {
+        font-size: 0.88rem;
+        margin-bottom: 6px;
+        padding-bottom: 6px;
+    }
+
+    body.index-page .dg-status-column {
+        width: 102px;
+        padding: 8px 6px;
+        gap: 6px;
+    }
+
+    body.index-page .dg-status-item {
+        min-height: 32px;
+        padding: 4px 6px;
+    }
+
+    body.index-page .dg-status-label {
+        font-size: 0.58rem;
+    }
+
+    body.index-page .status-light {
+        width: 22px;
+        height: 22px;
+    }
+
+    body.index-page #system-status-bar {
+        font-size: 0.62rem;
+        gap: 6px 12px;
+    }
+}
+
+@media (max-width: 820px) {
+    body.index-page {
+        overflow: auto;
+    }
+
+    body.index-page .main-container {
+        min-height: auto;
+    }
+
+    body.index-page #me-section,
+    body.index-page #dg-section {
+        grid-template-columns: 1fr;
+    }
+
+    body.index-page #header-right,
+    body.index-page #header-icons {
+        width: 100%;
+    }
+}
+
+body.dg-page.has-global-nav,
+body.dg-page.has-global-nav.global-nav-collapsed {
+    padding-left: 0;
+}
+
+body.dg-page {
+    overflow: hidden;
+}
+
+body.dg-page .main-container {
+    width: 100%;
+    min-width: 0;
+    min-height: 100dvh;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    padding: clamp(14px, 1.8vh, 20px) clamp(16px, 1.8vw, 24px);
+    border-width: 0;
+    box-shadow: none;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: clamp(12px, 1.5vh, 18px);
+    overflow: hidden;
+}
+
+body.dg-page .dashboard-header {
+    display: grid;
+    grid-template-columns: minmax(260px, auto) minmax(360px, 1fr) minmax(220px, auto);
+    align-items: start;
+    gap: 14px;
+    margin-bottom: 0;
+}
+
+body.dg-page .dashboard-header-main {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+body.dg-page .dashboard-header-title {
+    margin-left: 0;
+}
+
+body.dg-page #dashboard-shared-trend-controls {
+    min-width: 0;
+    justify-self: stretch;
+}
+
+body.dg-page .dashboard-time-box {
+    width: 100%;
+    min-width: 0;
+    justify-self: end;
+}
+
+body.dg-page #dg-scene-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1.06fr) minmax(0, 1fr);
+    grid-template-areas:
+        "engine trend-top"
+        "trend-left trend-right";
+    gap: clamp(12px, 1.6vh, 18px);
+    min-height: 0;
+    height: 100%;
+    margin-top: 0;
+}
+
+body.dg-page #engine-scene-section { grid-area: engine; }
+body.dg-page #trend-top-right-section { grid-area: trend-top; }
+body.dg-page #trend-bottom-left-section { grid-area: trend-left; }
+body.dg-page #trend-bottom-right-section { grid-area: trend-right; }
+
+body.dg-page .dg-scene-section {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    width: auto !important;
+    height: 100% !important;
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.dg-page .engine-dashboard {
+    min-height: 0;
+    height: 100%;
+}
+
+body.dg-page .trend-scene-panel {
+    min-height: 0;
+    height: 100%;
+}
+
+body.dg-page .trend-chart-shell {
+    min-height: 0;
+}
+
+body.dg-page .trend-chart-shell canvas {
+    height: 100% !important;
+}
+
+body.dg-page #dg-digital-table-section {
+    margin-top: 0 !important;
+    max-height: clamp(120px, 18dvh, 220px);
+    overflow: auto;
+}
+
+@media (max-width: 1500px) {
+    body.dg-page .dashboard-header {
+        grid-template-columns: minmax(240px, auto) minmax(320px, 1fr) minmax(200px, auto);
+    }
+
+    body.dg-page #dashboard-shared-trend-controls {
+        gap: 10px;
+    }
+
+    body.dg-page #header-trend-from,
+    body.dg-page #header-trend-to {
+        min-width: 180px !important;
+    }
+}
+
+@media (max-width: 1280px) {
+    body.dg-page {
+        overflow: hidden;
+    }
+
+    body.dg-page .main-container {
+        min-height: 100dvh;
+        height: 100dvh;
+        max-height: 100dvh;
+    }
+
+    body.dg-page .dashboard-header {
+        grid-template-columns: 1fr;
+    }
+
+    body.dg-page .dashboard-time-box {
+        justify-self: stretch;
+    }
+
+    body.dg-page #dg-scene-stage {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "engine"
+            "trend-top"
+            "trend-left"
+            "trend-right";
+        min-height: 0;
+        height: 100%;
+    }
+
+    body.dg-page .engine-dashboard {
+        min-height: 0;
+    }
+}
+
+@media (max-height: 860px) and (min-width: 1281px) {
+    body.dg-page .main-container {
+        padding: 12px 16px;
+        gap: 10px;
+    }
+
+    body.dg-page .dashboard-header {
+        gap: 10px;
+    }
+
+    body.dg-page #dashboard-shared-trend-controls {
+        padding: 10px 12px;
+    }
+
+    body.dg-page #header-trend-from,
+    body.dg-page #header-trend-to {
+        min-width: 160px !important;
+        height: 36px !important;
+    }
+
+    body.dg-page #header-trend-prev,
+    body.dg-page #header-trend-next,
+    body.dg-page #header-trend-apply {
+        height: 36px !important;
+        padding: 6px 12px !important;
+    }
+
+    body.dg-page #dg-scene-stage {
+        gap: 10px;
+    }
+
+    body.dg-page .engine-dashboard {
+        min-height: 0;
+    }
+
+    body.dg-page .trend-scene-panel {
+        min-height: 0;
+    }
+
+    body.dg-page .trend-chart-shell {
+        min-height: 0;
+    }
+
+    body.dg-page .digital-table {
+        font-size: 0.76rem;
+    }
+}
+
+@media (max-width: 820px) {
+    body.dg-page {
+        overflow: hidden;
+    }
+
+    body.dg-page #dashboard-shared-trend-controls {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    body.dg-page #header-trend-from,
+    body.dg-page #header-trend-to,
+    body.dg-page #header-trend-prev,
+    body.dg-page #header-trend-next,
+    body.dg-page #header-trend-apply {
+        width: 100%;
+        min-width: 0 !important;
+    }
+
+    body.dg-page .engine-dashboard {
+        min-height: 0;
+    }
+
+    body.dg-page .digital-columns {
+        grid-template-columns: 1fr;
     }
 }

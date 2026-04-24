@@ -34,7 +34,7 @@ Chromium kiosk
 
 ```bash
 sudo apt update
-sudo apt install -y python3 python3-venv python3-pip apache2 chromium unclutter
+sudo apt install -y python3 python3-venv python3-pip apache2 chromium unclutter curl
 ```
 
 Ghi chú:
@@ -233,20 +233,41 @@ Nội dung:
 
 ```bash
 #!/usr/bin/env bash
-sleep 8
-/usr/bin/chromium \
+set -eu
+
+WEB_URL="http://127.0.0.1/"
+API_HEALTH_URL="http://127.0.0.1:8888/api/check_all_status_lable/index"
+PROFILE_DIR="/home/drums/.config/chromium-h429-kiosk"
+
+until curl -fsS "$WEB_URL" >/dev/null; do
+  sleep 1
+done
+
+until curl -fsS "$API_HEALTH_URL" >/dev/null; do
+  sleep 1
+done
+
+sleep 3
+mkdir -p "$PROFILE_DIR"
+
+exec /usr/bin/chromium \
   --start-fullscreen \
   --kiosk \
   --touch-events=enabled \
-  --force-device-scale-factor=1 \
   --disable-pinch \
   --overscroll-history-navigation=0 \
   --no-first-run \
   --noerrdialogs \
   --disable-infobars \
-  --incognito \
-  http://127.0.0.1/
+  --user-data-dir="$PROFILE_DIR" \
+  "$WEB_URL"
 ```
+
+Ghi chú:
+
+- Không dùng `--incognito` để Chromium giữ profile/cache ổn định hơn giữa các lần boot
+- Bỏ `--force-device-scale-factor=1` vì flag này có thể làm một số màn hình kiosk bị scale sai
+- Script sẽ chỉ mở Chromium khi cả Apache và API backend đã sẵn sàng
 
 Cấp quyền chạy:
 
@@ -351,7 +372,7 @@ Nội dung:
 [Desktop Entry]
 Type=Application
 Name=H429 Kiosk
-Exec=bash -lc "sleep 8; /usr/bin/chromium --start-fullscreen --kiosk --touch-events=enabled --force-device-scale-factor=1 --disable-pinch --overscroll-history-navigation=0 --no-first-run --noerrdialogs --disable-infobars --incognito http://127.0.0.1/"
+Exec=bash -lc "until curl -fsS http://127.0.0.1/ >/dev/null; do sleep 1; done; until curl -fsS http://127.0.0.1:8888/api/check_all_status_lable/index >/dev/null; do sleep 1; done; sleep 3; mkdir -p /home/drums/.config/chromium-h429-kiosk; exec /usr/bin/chromium --start-fullscreen --kiosk --touch-events=enabled --disable-pinch --overscroll-history-navigation=0 --no-first-run --noerrdialogs --disable-infobars --user-data-dir=/home/drums/.config/chromium-h429-kiosk http://127.0.0.1/"
 Terminal=false
 X-GNOME-Autostart-enabled=true
 ```

@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="./app.css">
     <link rel="stylesheet" href="./trend_controls_standard.css">
 </head>
-<body>
+<body class="dg-page">
 
     <!-- Header Section -->
     <div class="main-container">
@@ -63,7 +63,7 @@
                 
                 <!-- Background Engine Image (New File) -->
                 <div class="engine-dashboard-bg">
-                    <img id="engine-background-image" src="Asset/Engine light mode.png" alt="Engine Layout" class="engine-dashboard-image">
+                    <img id="engine-background-image" src="Asset/engine_light_kiosk.png" alt="Engine Layout" class="engine-dashboard-image" decoding="async">
                 </div>
 
             <!-- Cylinder Temperatures (Top) -->
@@ -407,67 +407,8 @@
                 'lo-inlet-t': { x: '60%', y: '62%', scale: 1.2, labelWidth: '200px', valueWidth: '60px' }
             }
         };
-        const DG_SCENE_BASE = { width: 1920, height: 1080 };
-        const DG_DASHBOARD_SCENE = {
-            desktop: {
-                engineSection: { x: "150px", y: "112px", width: "800px", height: "450px" },
-                trendTopRight: { x: "1060px", y: "112px", width: "800px", height: "450px" },
-                trendBottomLeft: { x: "150px", y: "600px", width: "800px", height: "450px" },
-                trendBottomRight: { x: "1060px", y: "600px", width: "800px", height: "450px" }
-            },
-            compact: {
-                engineSection: { mode: "static" },
-                trendTopRight: { mode: "static" },
-                trendBottomLeft: { mode: "static" },
-                trendBottomRight: { mode: "static" }
-            }
-        };
-
-        function applySceneBoxStyles(el, cfg = {}) {
-            if (!el) return;
-            if ((cfg.mode || "absolute") === "static") {
-                el.style.position = "static";
-                el.style.left = "";
-                el.style.top = "";
-                el.style.width = "";
-                el.style.height = "";
-                return;
-            }
-            el.style.position = "absolute";
-            el.style.left = cfg.x || "";
-            el.style.top = cfg.y || "";
-            el.style.width = cfg.width || "";
-            el.style.height = cfg.height || "";
-        }
-
-        function buildDashboardSceneLayout() {
-            const width = window.innerWidth || document.documentElement.clientWidth || 0;
-            return width <= 1280 ? DG_DASHBOARD_SCENE.compact : DG_DASHBOARD_SCENE.desktop;
-        }
-
-        function lockViewportFrame() {
-            const mainContainer = document.querySelector(".main-container");
-            const viewportWidth = window.innerWidth || document.documentElement.clientWidth || DG_SCENE_BASE.width;
-            const viewportHeight = window.innerHeight || document.documentElement.clientHeight || DG_SCENE_BASE.height;
-            const desktopScale = Math.min(viewportWidth / DG_SCENE_BASE.width, viewportHeight / DG_SCENE_BASE.height);
-            const scale = viewportWidth <= 1280 ? 1 : desktopScale;
-            document.body.classList.toggle("page-locked-viewport", viewportWidth > 1280);
-            if (!mainContainer) return;
-            if (viewportWidth <= 1280) {
-                mainContainer.style.transform = "";
-                mainContainer.style.margin = "0 auto";
-                return;
-            }
-            mainContainer.style.transform = `scale(${scale})`;
-            mainContainer.style.margin = "0";
-        }
-
-        function applyDashboardSceneLayout(layout = buildDashboardSceneLayout()) {
-            lockViewportFrame();
-            applySceneBoxStyles(document.getElementById("engine-scene-section"), layout.engineSection);
-            applySceneBoxStyles(document.getElementById("trend-top-right-section"), layout.trendTopRight);
-            applySceneBoxStyles(document.getElementById("trend-bottom-left-section"), layout.trendBottomLeft);
-            applySceneBoxStyles(document.getElementById("trend-bottom-right-section"), layout.trendBottomRight);
+        function applyDashboardSceneLayout() {
+            // Scene layout is handled by responsive CSS grid for dg_dashboard.html.
         }
 
         function getOverlayScale() {
@@ -619,8 +560,8 @@
 
         function getEngineIdleImagePath() {
             return document.documentElement.getAttribute("data-theme") === "dark"
-                ? "Asset/Engine dark mode.png"
-                : "Asset/Engine light mode.png";
+                ? "Asset/engine_dark_kiosk.png"
+                : "Asset/engine_light_kiosk.png";
         }
 
         let lastEngineRunningState = false;
@@ -631,7 +572,7 @@
             lastEngineRunningState = Boolean(isEngineRunning);
             const engineBackgroundImage = getById("engine-background-image");
             if (!engineBackgroundImage) return;
-            engineBackgroundImage.src = lastEngineRunningState ? "Asset/Engine_Runing.gif" : getEngineIdleImagePath();
+            engineBackgroundImage.src = lastEngineRunningState ? "Asset/engine_running_kiosk.png" : getEngineIdleImagePath();
         }
 
         function updateHeaderLights(digitalRows) {
@@ -1904,6 +1845,15 @@
             });
         }
 
+        let stabilizedLayoutTimers = [];
+
+        function scheduleStabilizedLayoutRefresh() {
+            stabilizedLayoutTimers.forEach((timerId) => window.clearTimeout(timerId));
+            stabilizedLayoutTimers = [350, 1200].map((delay) => window.setTimeout(() => {
+                scheduleOverlayRefresh();
+            }, delay));
+        }
+
         function bindOverlayResizeObserver() {
             if (overlayResizeObserver) {
                 overlayResizeObserver.disconnect();
@@ -1939,10 +1889,12 @@
             window.addEventListener("drums:themechange", () => updateEngineBackgroundImage(lastEngineRunningState));
             bindOverlayResizeObserver();
             window.addEventListener("resize", scheduleOverlayRefresh);
+            window.addEventListener("pageshow", scheduleStabilizedLayoutRefresh);
             const engineBackgroundImage = getById("engine-background-image");
             if (engineBackgroundImage) {
                 engineBackgroundImage.addEventListener("load", scheduleOverlayRefresh);
             }
+            scheduleStabilizedLayoutRefresh();
             fetchData();
             
             setInterval(fetchData, POLL_INTERVAL_MS);
