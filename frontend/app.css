@@ -1176,7 +1176,9 @@ body.page-locked-viewport .global-nav-shell {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    opacity: 0.9;
+    transform: scale(1.2);
+    transform-origin: center center;
+    opacity: 1;
     pointer-events: none;
 }
 

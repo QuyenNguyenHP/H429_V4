@@ -63,7 +63,7 @@
                 
                 <!-- Background Engine Image (New File) -->
                 <div class="engine-dashboard-bg">
-                    <img id="engine-background-image" src="Asset/engine_light_kiosk.png" alt="Engine Layout" class="engine-dashboard-image" decoding="async">
+                    <img id="engine-background-image" src="Asset/engine.png" alt="Engine Layout" class="engine-dashboard-image" decoding="async">
                 </div>
 
             <div class="engine-overlay-layer">
@@ -382,7 +382,7 @@
         };
 
         const UI_LAYOUT = {
-            baseWidth: 1000,
+            baseWidth: 1150,
             cylinders: [
                 { x: '38.4%', y: '20%', scale: 0.9 },
                 { x: '47%', y: '20%', scale: 0.9 },
@@ -413,14 +413,62 @@
             // Scene layout is handled by responsive CSS grid for dg_dashboard.html.
         }
 
-        function getOverlayScale() {
+        function getEngineImageContentRect() {
             const container = document.querySelector('.engine-container');
             const image = document.getElementById('engine-background-image');
-            if (!container) return 1;
-            const baseWidth = Number(UI_LAYOUT.baseWidth) || 1456;
+            if (!container) return { left: 0, top: 0, width: 0, height: 0 };
+
             const containerRect = container.getBoundingClientRect();
             const imageRect = image?.getBoundingClientRect();
-            const visibleWidth = imageRect?.width && imageRect.width > 0 ? imageRect.width : containerRect.width;
+            if (!imageRect?.width || !imageRect?.height) {
+                return { left: 0, top: 0, width: containerRect.width, height: containerRect.height };
+            }
+
+            const naturalWidth = Number(image?.naturalWidth) || imageRect.width;
+            const naturalHeight = Number(image?.naturalHeight) || imageRect.height;
+            const imageRatio = naturalWidth / naturalHeight;
+            const boxRatio = imageRect.width / imageRect.height;
+            let width = imageRect.width;
+            let height = imageRect.height;
+
+            if (boxRatio > imageRatio) {
+                height = imageRect.height;
+                width = height * imageRatio;
+            } else {
+                width = imageRect.width;
+                height = width / imageRatio;
+            }
+
+            return {
+                left: imageRect.left - containerRect.left + ((imageRect.width - width) / 2),
+                top: imageRect.top - containerRect.top + ((imageRect.height - height) / 2),
+                width,
+                height
+            };
+        }
+
+        function resolveOverlayCoord(value, imageRect, axis) {
+            if (value == null) return value;
+            const raw = String(value).trim();
+            const offset = axis === 'x' ? imageRect.left : imageRect.top;
+            const length = axis === 'x' ? imageRect.width : imageRect.height;
+            if (raw.endsWith('%')) return `${offset + (length * parseFloat(raw) / 100)}px`;
+            const numericValue = parseFloat(raw);
+            return Number.isFinite(numericValue) ? `${offset + numericValue}px` : value;
+        }
+
+        function withImageOverlayPosition(cfg, imageRect) {
+            return {
+                ...cfg,
+                x: cfg?.x ? resolveOverlayCoord(cfg.x, imageRect, 'x') : cfg?.x,
+                y: cfg?.y ? resolveOverlayCoord(cfg.y, imageRect, 'y') : cfg?.y
+            };
+        }
+
+        function getOverlayScale() {
+            const baseWidth = Number(UI_LAYOUT.baseWidth) || 1456;
+            const imageRect = getEngineImageContentRect();
+            const visibleWidth = imageRect.width || document.querySelector('.engine-container')?.getBoundingClientRect().width || baseWidth;
             const rawScale = visibleWidth / baseWidth;
             return Math.min(2.4, Math.max(0.58, rawScale));
         }
@@ -428,22 +476,23 @@
         function applyUILayout() {
             applyDashboardSceneLayout();
             const overlayScale = getOverlayScale();
+            const imageRect = getEngineImageContentRect();
             const container = document.querySelector('.engine-container');
             if (container) {
                 container.style.setProperty('--overlay-scale', overlayScale.toFixed(3));
             }
             applyLayoutToElement(document.getElementById('panel-engine-speed'), {
-                ...UI_LAYOUT.panels.engineSpeed,
+                ...withImageOverlayPosition(UI_LAYOUT.panels.engineSpeed, imageRect),
                 translateYCenter: true,
                 scale: (Number(UI_LAYOUT.panels.engineSpeed.scale ?? 1) || 1) * overlayScale
             });
             applyLayoutToElement(document.getElementById('panel-running-hour'), {
-                ...UI_LAYOUT.panels.runningHour,
+                ...withImageOverlayPosition(UI_LAYOUT.panels.runningHour, imageRect),
                 translateYCenter: true,
                 scale: (Number(UI_LAYOUT.panels.runningHour.scale ?? 1) || 1) * overlayScale
             });
             applyLayoutToElement(document.getElementById('panel-load'), {
-                ...UI_LAYOUT.panels.load,
+                ...withImageOverlayPosition(UI_LAYOUT.panels.load, imageRect),
                 translateYCenter: true,
                 scale: (Number(UI_LAYOUT.panels.load.scale ?? 1) || 1) * overlayScale
             });
@@ -452,8 +501,8 @@
                 const key = tag.getAttribute('data-tag-key');
                 const cfg = UI_LAYOUT.tags[key];
                 if (!cfg) return;
-                if (cfg.x) tag.style.setProperty('--x', cfg.x);
-                if (cfg.y) tag.style.setProperty('--y', cfg.y);
+                if (cfg.x) tag.style.setProperty('--x', resolveOverlayCoord(cfg.x, imageRect, 'x'));
+                if (cfg.y) tag.style.setProperty('--y', resolveOverlayCoord(cfg.y, imageRect, 'y'));
                 const scale = cfg.scale == null ? 1 : Number(cfg.scale);
                 const scaledValue = (Number.isNaN(scale) ? 1 : scale) * overlayScale;
                 tag.style.transform = `scale(${scaledValue})`;
@@ -476,6 +525,7 @@
                     y: '20%',
                     scale: 1.0
                 }));
+            const imageRect = getEngineImageContentRect();
 
             cylinders.forEach((cfg, index) => {
                 const clone = template.content.cloneNode(true);
@@ -487,8 +537,8 @@
                 const y = cfg?.y || '20%';
                 const scale = cfg?.scale == null ? 1 : Number(cfg.scale);
                 const overlayScale = getOverlayScale();
-                item.style.setProperty('--x', x);
-                item.style.setProperty('--y', y);
+                item.style.setProperty('--x', resolveOverlayCoord(x, imageRect, 'x'));
+                item.style.setProperty('--y', resolveOverlayCoord(y, imageRect, 'y'));
                 item.style.transform = `translate(-50%, -50%) scale(${(Number.isNaN(scale) ? 1 : scale) * overlayScale})`;
                 container.appendChild(clone);
             });
@@ -561,9 +611,7 @@
         }
 
         function getEngineIdleImagePath() {
-            return document.documentElement.getAttribute("data-theme") === "dark"
-                ? "Asset/engine_dark_kiosk.png"
-                : "Asset/engine_light_kiosk.png";
+            return "Asset/engine.png";
         }
 
         let lastEngineRunningState = false;
